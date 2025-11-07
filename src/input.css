@@ -1,0 +1,29 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* suas utilidades customizadas */
+@layer utilities {
+  .hyphens-auto {
+    hyphens: auto;
+  }
+}
+@layer utilities {
+  /* quadrado fixo 96x96, nunca estica */
+  .thumb-24 {
+    width: 6rem !important;
+    height: 6rem !important;
+    max-width: 6rem !important;
+    max-height: 6rem !important;
+    display: inline-block !important;
+    flex: 0 0 6rem !important; /* se estiver dentro de flex */
+  }
+
+  /* imagem dentro do quadrado */
+  .thumb-img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    border-radius: 0.375rem; /* opcional, arredondar a thumb */
+  }
+}
