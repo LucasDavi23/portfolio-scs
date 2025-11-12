@@ -10,6 +10,10 @@ import {
   sanitizeUrl,
   imgProxyUrl,
   extractDriveId,
+  loadThumbWithRetries,
+  FALLBACK_IMG,
+  smartAutoRecover,
+  markHasPhoto,
 } from '../feedbackHelpers.js';
 
 // Módulo do mural de feedbacks (Hero SCS + Shopee, ML, Google)
@@ -379,7 +383,7 @@ import {
   }
 
   // ---------- CARDS FIXOS (preenche in-place) ----------
-  function fillCardFixed(root, item) {
+  async function fillCardFixed(root, item) {
     const lista = root.querySelector('[data-c-list]');
     if (!lista) return;
 
@@ -436,63 +440,87 @@ import {
       console.warn('[foto_url inválido no item]', { item });
     }
 
-    // --- THUMB ROBUSTA + LOG ---
-    const btnThumb = lista.querySelector('.thumb-container');
-    const img = btnThumb?.querySelector('img');
+    /* ------------------------------------------------------------
+     * Thumb do card: carregar imagem via proxy + preparar modal
+     * ------------------------------------------------------------
+     * 🇧🇷 1) Encontra os nós (botão/área clicável e <img>)
+     *     2) Reseta estado visual/atributos
+     *     3) Decide URLs (thumb/full) com pickImagePair()
+     *     4) Carrega imagem com retries curtos
+     *     5) Inicia auto-recover em background
+     *
+     * 🇺🇸 1) Find nodes (click area and <img>)
+     *     2) Reset visual/attrs
+     *     3) Decide URLs (thumb/full) with pickImagePair()
+     *     4) Load image with short retries
+     *     5) Start background auto-recover
+     */
+    {
+      const btnThumbEl = lista.querySelector('.thumb-container'); // área clicável (abre modal)
+      const imgEl = btnThumbEl?.querySelector('img'); // a imagem em si
 
-    if (!btnThumb || !img) {
-      console.warn('[thumb] nós não encontrados', { btnThumb: !!btnThumb, img: !!img, root });
-    } else {
-      const { thumbUrl, fullUrl } = pickImagePair(item); // continua gerando .../exec?action=img&id=...
-      const proxyUrl = thumbUrl || fullUrl || '';
-
-      btnThumb.classList.add('hidden');
-      btnThumb.classList.remove('js-open-modal');
-      img.onload = img.onerror = null;
-      img.removeAttribute('data-full');
-      btnThumb.removeAttribute('data-full');
-
-      if (!proxyUrl) {
-        img.removeAttribute('src');
-        console.log('[thumb] sem URL válida – ficará oculto');
+      if (!btnThumbEl || !imgEl) {
+        console.warn('[thumb] nós não encontrados', { btnThumb: !!btnThumbEl, img: !!imgEl, root });
       } else {
-        // força novo ciclo
-        img.removeAttribute('src');
-        img.referrerPolicy = 'no-referrer';
-        img.decoding = 'async';
-        img.setAttribute('loading', 'eager');
+        // 1) URLs normalizadas (proxy p/ Drive; http normal como está)
+        const { thumbUrl, fullUrl } = pickImagePair(item); // o que a thumb vai tentar carregar
 
-        // ⚠️ Agora buscamos a dataURL como TEXTO
-        const bust = (proxyUrl.includes('?') ? '&' : '?') + 'cb=' + (Date.now() % 1e7);
-        fetch(proxyUrl + bust)
-          .then((r) => r.text())
-          .then((dataUrl) => {
-            if (!/^data:image\//i.test(dataUrl))
-              throw new Error('proxy não retornou dataURL de imagem');
-            img.onload = () => {
-              btnThumb.classList.remove('hidden');
-              btnThumb.classList.add('js-open-modal');
-              const big = fullUrl || thumbUrl;
-              if (big) {
-                // Para o modal, reaproveite o mesmo proxy
-                img.setAttribute('data-full', big);
-                btnThumb.setAttribute('data-full', big);
-              }
-            };
-            img.onerror = () => {
-              console.warn('[thumb] erro renderizando dataURL');
-              btnThumb.classList.add('hidden');
-              btnThumb.classList.remove('js-open-modal');
-              img.removeAttribute('src');
-            };
-            img.src = dataUrl;
-          })
-          .catch((err) => {
-            console.warn('[thumb] fetch proxy falhou', err);
-            btnThumb.classList.add('hidden');
-            btnThumb.classList.remove('js-open-modal');
-            img.removeAttribute('src');
-          });
+        // 2) “primeira” URL a tentar na thumb + URL grande pro modal
+        //    let usado aqui porque você pode ajustar o fallback de escolha em cenários diferentes
+        let proxyUrl = thumbUrl || fullUrl || ''; // o que a thumb vai tentar carregar
+        const bigUrl = thumbUrl || fullUrl || ''; // o que o modal vai abrir (preferir "full")
+
+        //garantindo o root card
+        const rootCard = root || lista.closest('section[data-feedback-card]'); // se já tem 'root', use-o
+        // 0) estado inicial: assume SEM foto
+        markHasPhoto(rootCard, false);
+
+        // 3) Reset de estado visual e atributos
+        btnThumbEl.classList.add('hidden'); // começa escondido até carregar
+        btnThumbEl.classList.remove('js-open-modal');
+        imgEl.onload = imgEl.onerror = null;
+        imgEl.removeAttribute('data-full');
+        btnThumbEl.removeAttribute('data-full');
+        imgEl.removeAttribute('src');
+        imgEl.referrerPolicy = 'no-referrer'; // ajuda em cenários de Cores/origem
+        imgEl.decoding = 'async';
+        imgEl.setAttribute('loadign', 'eager');
+
+        if (!proxyUrl) {
+          console.log('[thumb] sem URL válida – ficará oculto');
+          // opcional: imgEl.src = FALLBACK_IMG;
+          markHasPhoto(rootCard, false);
+        } else {
+          try {
+            // 4) Retries curtos antes do fallback (não travam o card)
+            // let aqui pra você poder calibrar rápido (ex.: 2 em dev, 3 em prod)
+            let maxAttempts = 2;
+
+            await loadThumbWithRetries(imgEl, btnThumbEl, proxyUrl, bigUrl, maxAttempts);
+
+            // --> AQUI: se carregou, o botão NÃO estará "hidden"
+            const ok = !btnThumbEl.classList.contains('hidden');
+            markHasPhoto(rootCard, ok);
+
+            // 5) Com a thumb visível, configurar dados p/ modal
+            // (o loadThumbWithRetries já remove a classe "hidden" quando carrega)
+            if (bigUrl) {
+              imgEl.setAttribute('data-full', bigUrl);
+              btnThumbEl.setAttribute('data-full', bigUrl);
+              btnThumbEl.classList.add('js-open-modal'); // marca que abre o modal
+              btnThumbEl.setAttribute('role', 'button'); // acessibilidade
+              btnThumbEl.setAttribute('tabindex', '0'); // focável via teclado
+            }
+            // 6) Auto-recover em background (se o proxy “acordar”, a imagem troca sozinha)
+            smartAutoRecover(imgEl, proxyUrl, 60000, 10000); // total 60s, tenta a cada 10s
+          } catch (err) {
+            console.warn('[thumb] falhou até após retries, fallback + auto-recover', err);
+            imgEl.src = FALLBACK_IMG;
+            btnThumbEl.classList.remove('js-open-modal');
+            smartAutoRecover(imgEl, proxyUrl, 60000, 10000); // total 60s, tenta a cada 10s
+            markHasPhoto(rootCard, false);
+          }
+        }
       }
     }
 

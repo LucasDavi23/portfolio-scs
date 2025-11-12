@@ -305,7 +305,7 @@ export function isLikely1x1(dataUrl) {
  * - Falls back to FALLBACK_IMG (/assets/img/no-photo.png) if all fails.
  */
 
-export async function applyImageWithFallback(imgEl, btnThumb, proxyUrl, fullUrl) {
+export async function applyImageWithFallback(imgEl, btnThumbEl, proxyUrl, fullUrl) {
   try {
     // 🔹 1) Buscar a imagem no proxy via fetchDataURL()
     // Retorna um texto Base64 tipo "data:image/png;base64,AAAA..."
@@ -382,7 +382,7 @@ export async function loadThumbWithRetries(imgEl, btnThumbEl, proxyUrl, fullUrl,
       return;
     } catch (err) {
       // ⚠️ 6) Se falhar, o código vem parar aqui (no catch)
-      console.warn(`[loadThumbWithRetries] falaha na tentativa ${attempt}:`, err);
+      console.warn(`[loadThumbWithRetries] falha na tentativa ${attempt}:`, err);
 
       // 🔹 7) Se ainda há tentativas restantes, espera meio segundo antes de tentar de novo
       if (attempt < maxAttempts) {
@@ -449,4 +449,12 @@ export function smartAutoRecover(imgEl, proxyUrl, totalMs = 60000, everyMs = 100
 
   // inicia a primeira tentativa com um pequeno atraso
   setTimeout(tryReload, everyMs);
+}
+
+// Helper novo pelo que parece ele esconde a foto
+export function markHasPhoto(rootCard, hasPhoto) {
+  // marca a foto onde tem a raiz "raiz, tem"
+  if (!rootCard) return;
+  rootCard.classList.toggle('has-photo', !!hasPhoto);
+  rootCard.classList.toggle('no-phot', !hasPhoto);
 }

@@ -2,7 +2,7 @@
 <html lang="pt-BR">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>SCS Molduras — Portfólio</title>
 
     <!-- Fonts -->
@@ -14,7 +14,7 @@
     />
 
     <!-- Tailwind compilado -->
-    <link rel="stylesheet" href="dist/styles.css" />
+    <!-- <link rel="stylesheet" href="dist/styles.css" /> -->
 
     <style>
       .pattern {
@@ -154,8 +154,8 @@
       /* add id="siteHeader" no seu <header> */
 
       /* ===========================
-   FEEDBACK – UTILITÁRIOS
-   =========================== */
+      FEEDBACK – UTILITÁRIOS
+      =========================== */
 
       /* Clamp de linhas */
       .clamp-1,
@@ -180,10 +180,16 @@
       }
 
       /* ==========================================
-   0) BASE (comum a todos os cards) + CTA
-   ========================================== */
+      0) BASE (comum a todos os cards) + CTA
+      ========================================== */
       [data-feedback-card] {
-        display: flex; /* permite alinhar CTA no rodapé */
+        display: block; /* permite alinhar CTA no rodapé */
+        flex: none; /* impede que o card cresça além do conteúdo */
+      }
+
+      /* CTA no rodapé do card (só funciona se flex estiver ativo em outros layouts) */
+      [data-feedback-card][data-variant='media'] {
+        display: flex; /* modo “media” continua flex */
         flex-direction: column;
       }
 
@@ -207,9 +213,9 @@
       }
 
       /* ======================================================
-   1) LAYOUT PADRÃO (não-media: Shopee / Mercado Livre)
-   — Miniatura lateral
-   ====================================================== */
+      1) LAYOUT PADRÃO (não-media: Shopee / Mercado Livre)
+      — Miniatura lateral
+      ====================================================== */
       [data-feedback-card]:not([data-variant='media']) [data-c-list] {
         display: flex;
         align-items: flex-start;
@@ -228,9 +234,9 @@
       }
 
       /* ==========================================
-   2) VARIANTE "media" (SCS)
-   topo (autor+data) → texto → linha → foto
-   ========================================== */
+      2) VARIANTE "media" (SCS)
+      topo (autor+data) → texto → linha → foto
+      ========================================== */
 
       /* 2.0 — KNOBS (tamanhos fáceis de ajustar) */
       :root {
@@ -383,8 +389,8 @@
       }
 
       /* ==========================================
-   3) BADGES & RATING
-   ========================================== */
+      3) BADGES & RATING
+      ========================================== */
 
       /* Chips de plataforma (SCS, Shopee, etc.) — APENAS o badge */
       [data-feedback-card] header > span.inline-flex.rounded-full {
@@ -412,16 +418,16 @@
       }
 
       /* ==========================================
-   4) UTILIDADES & OPCIONAIS
-   ========================================== */
+      4) UTILIDADES & OPCIONAIS
+      ========================================== */
       /* Ex.: .photo-sep.light { border-top:1px solid rgba(0,0,0,.05); } */
 
       /* Fallback sem :has() (opcional)
-section[data-feedback-card][data-variant="media"]:not(.has-photo) .photo-sep,
-section[data-feedback-card][data-variant="media"]:not(.has-photo) .photo-wrap{
-  display:none !important;
-}
-*/
+      section[data-feedback-card][data-variant="media"]:not(.has-photo) .photo-sep,
+      section[data-feedback-card][data-variant="media"]:not(.has-photo) .photo-wrap{
+        display:none !important;
+      }
+      */
 
       /* 2.8 – CHIP SCS (fora do cinza) – opcional */
       .scs-chip {
@@ -429,10 +435,10 @@ section[data-feedback-card][data-variant="media"]:not(.has-photo) .photo-wrap{
       }
 
       /* DEBUG (opcional)
-section[data-feedback-card][data-variant="media"] article[data-c-list] > .media-row{
-  outline:2px dashed magenta;
-}
-*/
+      section[data-feedback-card][data-variant="media"] article[data-c-list] > .media-row{
+        outline:2px dashed magenta;
+      }
+      */
 
       /* ==========================================================
    === FEEDBACK: compacto com qualidade (preserva tipografia)
@@ -470,7 +476,7 @@ section[data-feedback-card][data-variant="media"] article[data-c-list] > .media-
 
       /* Espaços verticais globais da seção (sem tocar no conteúdo dos cards) */
       #feedback > .mx-auto.max-w-screen-2xl {
-        padding-block: 1.5rem !important; /* antes ~3rem */
+        padding-block: 3rem !important; /* antes ~3rem */
       }
       #feedback .rounded-2xl > div {
         padding-block: 1rem !important; /* antes ~1.5rem */
@@ -499,6 +505,96 @@ section[data-feedback-card][data-variant="media"] article[data-c-list] > .media-
           margin-top: 8px;
         } /* aproxima resumo dos cards */
       }
+
+      /* --------------------------------------------------
+   Notebook scale (faixas 1280–1440 e 1441–1600)
+   Sem width fixo. Zoom (preferencial) + fallback scale.
+-------------------------------------------------- */
+
+      :root {
+        --nb-scale-1: 0.86; /* 1280–1440 */
+        --nb-scale-2: 0.89; /* 1441–1600 */
+      }
+
+      /* Alvos (ajuste a lista se quiser incluir/retirar seções) */
+      .nb-target > .mx-auto {
+        transform-origin: top center;
+        transition: transform 0.2s ease;
+      }
+
+      /* 1280–1440 */
+      @media (min-width: 1280px) and (max-width: 1440px) {
+        /* Chrome/Edge: usa zoom (melhor, recalcula layout) */
+        @supports (zoom: 0.86) {
+          #sobre > .mx-auto,
+          #producao > .mx-auto,
+          #contato > .mx-auto {
+            zoom: var(--nb-scale-1);
+            transform: none;
+          }
+        }
+        /* Firefox: fallback em scale */
+        @supports not (zoom: 0.86) {
+          #sobre > .mx-auto,
+          #producao > .mx-auto,
+          #contato > .mx-auto {
+            transform: scale(var(--nb-scale-1));
+          }
+        }
+      }
+
+      /* 1441–1600 */
+      @media (min-width: 1441px) and (max-width: 1600px) {
+        @supports (zoom: 0.89) {
+          #sobre > .mx-auto,
+          #producao > .mx-auto,
+          #contato > .mx-auto,
+          #carrousel > .mx-auto {
+            zoom: var(--nb-scale-2);
+            transform: none;
+          }
+        }
+        @supports not (zoom: 0.89) {
+          #sobre > .mx-auto,
+          #producao > .mx-auto,
+          #contato > .mx-auto #carrousel > .mx-auto {
+            transform: scale(var(--nb-scale-2));
+          }
+        }
+      }
+
+      /* ≥ 1601px: normal */
+      @media (min-width: 1601px) {
+        #sobre > .mx-auto,
+        #producao > .mx-auto,
+        #contato > .mx-auto,
+        #carrousel > .mx-auto {
+          zoom: 1;
+          transform: none;
+        }
+      }
+
+      /* Opcional: leve respiro ao usar fallback scale (só quando NÃO há zoom) */
+      @supports not (zoom: 1) {
+        #sobre,
+        #producao,
+        #contato {
+          padding-top: 2rem;
+          padding-bottom: 2rem;
+        }
+      }
+
+      /* Scroll snapping (como já testamos) */
+      html {
+        scroll-behavior: smooth;
+      }
+      main {
+        scroll-snap-type: y proximity;
+      }
+      section {
+        scroll-snap-align: start;
+        scroll-margin-top: 88px;
+      } /* ajuste ao seu header */
     </style>
   </head>
 
@@ -761,7 +857,7 @@ section[data-feedback-card][data-variant="media"] article[data-c-list] > .media-
       <div class="mx-auto max-w-screen-2xl px-4 py-16 sm:px-6 lg:px-8">
         <div class="grid grid-cols-1 lg:min-h-[68vh] lg:grid-cols-2">
           <!-- Imagem à esquerda -->
-          <div class="relative z-10 lg:py-16">
+          <div class="relative z-10 lg:py-12">
             <div class="relative h-auto lg:h-full">
               <!-- FUNDO + OVERLAY: agora SEM "hidden", e atrás com -z-10 -->
               <img
@@ -1667,11 +1763,11 @@ section[data-feedback-card][data-variant="media"] article[data-c-list] > .media-
         </header>
       </div>
 
-      <!-- Bloco branco com os cards -->
+      <!-- Bloco branco com os cards das avaliações de notas -->
       <div class="mx-auto max-w-screen-2xl px-4 py-3 sm:px-6 lg:px-8 -mt-2">
         <div class="rounded-2xl overflow-hidden ring-1 ring-black/10 shadow-lg bg-white">
           <div class="px-5 sm:px-8 py-6 sm:py-7">
-            <!-- RESUMO (SCS) + CTA -->
+            <!-- RESUMO (SCS) + CTA avaliação de notas -->
             <div class="mt-5 grid grid-cols-1 md:grid-cols-3 gap-4 feedback-topo">
               <!-- Barras -->
               <div class="rounded-xl border border-gray-200 p-4 sm:p-5">
@@ -1772,7 +1868,7 @@ section[data-feedback-card][data-variant="media"] article[data-c-list] > .media-
             </div>
 
             <!-- GRID 4 CARDS (SCS + Shopee + ML + Google) -->
-            <div class="mt-4 md:mt-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+            <div class="mt-4 md:mt-5 grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
               <!-- SCS -->
               <div class="p-1">
                 <section
@@ -1805,7 +1901,7 @@ section[data-feedback-card][data-variant="media"] article[data-c-list] > .media-
                       <!-- TEXTO -->
                       <div class="text-wrap">
                         <p
-                          class="text-gray-800 leading-5 break-words hyphens-auto line-clamp-6 sm:line-clamp-5 lg:line-clamp-4"
+                          class="text-gray-800 leading-5 break-words hyphens-auto line-clamp-none"
                           data-c-texto
                         ></p>
                       </div>
@@ -1880,7 +1976,7 @@ section[data-feedback-card][data-variant="media"] article[data-c-list] > .media-
                       <!-- TEXTO -->
                       <div class="text-wrap">
                         <p
-                          class="text-gray-800 leading-5 break-words hyphens-auto line-clamp-6 sm:line-clamp-5 lg:line-clamp-4"
+                          class="text-gray-800 leading-5 break-words hyphens-auto line-clamp-none"
                           data-c-texto
                         ></p>
                       </div>
@@ -1955,7 +2051,7 @@ section[data-feedback-card][data-variant="media"] article[data-c-list] > .media-
                       <!-- TEXTO -->
                       <div class="text-wrap">
                         <p
-                          class="text-gray-800 leading-5 break-words hyphens-auto line-clamp-6 sm:line-clamp-5 lg:line-clamp-4"
+                          class="text-gray-800 leading-5 break-words hyphens-auto line-clamp-none"
                           data-c-texto
                         ></p>
                       </div>
@@ -2030,7 +2126,7 @@ section[data-feedback-card][data-variant="media"] article[data-c-list] > .media-
                       <!-- TEXTO -->
                       <div class="text-wrap">
                         <p
-                          class="text-gray-800 leading-5 break-words hyphens-auto line-clamp-6 sm:line-clamp-5 lg:line-clamp-4"
+                          class="text-gray-800 leading-5 break-words hyphens-auto line-clamp-none"
                           data-c-texto
                         ></p>
                       </div>
@@ -2505,5 +2601,6 @@ section[data-feedback-card][data-variant="media"] article[data-c-list] > .media-
     <script src="assets/js/feedback/feedbackCardModal/feedbackAvatar.js"></script>
 
     <script src="assets/js/base.js"></script>
+    <script type="module" src="/main.js"></script>
   </body>
 </html>
