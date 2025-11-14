@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" class="snap-y snap-mandatory scroll-smooth">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -18,14 +18,10 @@
 
     <style>
       .pattern {
-        background-image: none;
-        /* remove */
-        /* ou troque pelo fundo real */
-        /* background-image: url("assets/img/background/fundo.webp"); */
         background-size: cover;
         background-position: center;
         background-repeat: no-repeat;
-        height: 100vh;
+        /* remove completamente o height fixo */
       }
 
       .custom-font-1 {
@@ -150,8 +146,6 @@
         margin-left: 0.25rem;
         font-size: 0.75rem;
       }
-
-      /* add id="siteHeader" no seu <header> */
 
       /* ===========================
       FEEDBACK – UTILITÁRIOS
@@ -512,8 +506,8 @@
 -------------------------------------------------- */
 
       :root {
-        --nb-scale-1: 0.86; /* 1280–1440 */
-        --nb-scale-2: 0.89; /* 1441–1600 */
+        --nb-scale-1: 0.8; /* 1280–1440 */
+        --nb-scale-2: 0.86; /* 1441–1600 */
       }
 
       /* Alvos (ajuste a lista se quiser incluir/retirar seções) */
@@ -525,19 +519,25 @@
       /* 1280–1440 */
       @media (min-width: 1280px) and (max-width: 1440px) {
         /* Chrome/Edge: usa zoom (melhor, recalcula layout) */
-        @supports (zoom: 0.86) {
+        @supports (zoom: 0.8) {
           #sobre > .mx-auto,
           #producao > .mx-auto,
-          #contato > .mx-auto {
+          #contato > .mx-auto,
+          #pos-vendas > .mx-auto,
+          #galeria > .mx-auto,
+          #feedback > .mx-auto {
             zoom: var(--nb-scale-1);
             transform: none;
           }
         }
         /* Firefox: fallback em scale */
-        @supports not (zoom: 0.86) {
+        @supports not (zoom: 0.8) {
           #sobre > .mx-auto,
           #producao > .mx-auto,
-          #contato > .mx-auto {
+          #contato > .mx-auto,
+          #pos-vendas > .mx-auto,
+          #galeria > .mx-auto,
+          #feedback > .mx-auto {
             transform: scale(var(--nb-scale-1));
           }
         }
@@ -545,19 +545,24 @@
 
       /* 1441–1600 */
       @media (min-width: 1441px) and (max-width: 1600px) {
-        @supports (zoom: 0.89) {
+        @supports (zoom: 0.8) {
           #sobre > .mx-auto,
           #producao > .mx-auto,
           #contato > .mx-auto,
-          #carrousel > .mx-auto {
+          #pos-vendas > .mx-auto,
+          #galeria > .mx-auto,
+          #feedback > .mx-auto {
             zoom: var(--nb-scale-2);
             transform: none;
           }
         }
-        @supports not (zoom: 0.89) {
+        @supports not (zoom: 0.86) {
           #sobre > .mx-auto,
           #producao > .mx-auto,
-          #contato > .mx-auto #carrousel > .mx-auto {
+          #contato > .mx-auto,
+          #pos-vendas > .mx-auto,
+          #galeria > .mx-auto,
+          #feedback > .mx-auto {
             transform: scale(var(--nb-scale-2));
           }
         }
@@ -568,7 +573,9 @@
         #sobre > .mx-auto,
         #producao > .mx-auto,
         #contato > .mx-auto,
-        #carrousel > .mx-auto {
+        #pos-vendas > .mx-auto,
+        #galeria > .mx-auto,
+        #feedb > .mx-auto {
           zoom: 1;
           transform: none;
         }
@@ -578,23 +585,14 @@
       @supports not (zoom: 1) {
         #sobre,
         #producao,
-        #contato {
+        #contato,
+        #pos-vendas,
+        #galeria,
+        #feedback {
           padding-top: 2rem;
           padding-bottom: 2rem;
         }
       }
-
-      /* Scroll snapping (como já testamos) */
-      html {
-        scroll-behavior: smooth;
-      }
-      main {
-        scroll-snap-type: y proximity;
-      }
-      section {
-        scroll-snap-align: start;
-        scroll-margin-top: 88px;
-      } /* ajuste ao seu header */
     </style>
   </head>
 
@@ -797,10 +795,13 @@
       <div id="menu-backdrop" class="fixed inset-0 z-[60] bg-black/40 hidden"></div>
 
       <!-- Espaçador para compensar a nav fixa (altura ~64px) -->
-      <div class="h-16"></div>
+      <!-- <div class="h-16"></div> -->
+    </header>
 
+    <!-- MAIN: o contêiner que rola -->
+    <main id="snap">
       <!-- HERO -->
-      <section id="inicio" class="relative overflow-hidden scroll-mt-20">
+      <section id="inicio" class="relative overflow-hidden snap-start scroll-mt-20">
         <!-- fundo com molduras P&B -->
         <img
           src="assets/img/background/fundo-1600.webp"
@@ -849,1589 +850,1606 @@
           </p>
         </div>
       </section>
-    </header>
-    <!-- /Header -->
 
-    <!-- Sobre a empresa -->
-    <section id="sobre">
-      <div class="mx-auto max-w-screen-2xl px-4 py-16 sm:px-6 lg:px-8">
-        <div class="grid grid-cols-1 lg:min-h-[68vh] lg:grid-cols-2">
-          <!-- Imagem à esquerda -->
-          <div class="relative z-10 lg:py-12">
-            <div class="relative h-auto lg:h-full">
-              <!-- FUNDO + OVERLAY: agora SEM "hidden", e atrás com -z-10 -->
-              <img
-                alt="Sobre a SCS Molduras"
-                src="assets/img/background/sobre/Escritorio-Administrativo.webp"
-                class="absolute inset-0 w-full h-full object-cover brightness-90 contrast-110 -z-10 pointer-events-none"
-              />
-              <div
-                class="absolute inset-0 -z-10 pointer-events-none bg-gradient-to-r from-black/50 via-black/35 to-transparent lg:from-black/60 lg:via-black/40 lg:to-transparent backdrop-blur-[1.5px]"
-              ></div>
+      <!-- /Header -->
 
-              <!-- GRID -->
-              <!-- mobile: no fluxo; lg+: absoluto centralizado -->
-              <div
-                class="px-3 py-8 lg:py-0 lg:absolute lg:inset-0 lg:flex lg:items-center lg:justify-center"
-              >
+      <!-- Sobre a empresa -->
+      <section id="sobre" class="min-h-[calc(100svh-4rem)] snap-start scroll-mt-20">
+        <div class="mx-auto max-w-screen-2xl px-4 py-12 sm:px-6 lg:px-8">
+          <div class="grid grid-cols-1 gap-2 xl:min-h-[68vh] xl:grid-cols-2 xl:gap-8">
+            <!-- Imagem à esquerda -->
+            <div class="relative z-10 py-4 lg:py-2 xl:py-12">
+              <div class="relative h-auto xl:h-full">
+                <!-- FUNDO + OVERLAY: agora SEM "hidden", e atrás com -z-10 -->
+                <img
+                  alt="Sobre a SCS Molduras"
+                  src="assets/img/background/sobre/Escritorio-Administrativo.webp"
+                  class="absolute inset-0 w-full h-full object-cover brightness-90 contrast-110 -z-10 pointer-events-none"
+                />
                 <div
-                  class="grid grid-cols-2 gap-3 sm:gap-4 md:gap-5 w-full sm:w-[92%] md:w-[88%] lg:w-[86%] xl:w-[84%] max-w-[1080px] mx-auto z-10"
+                  class="absolute inset-0 -z-10 pointer-events-none bg-gradient-to-r from-black/50 via-black/35 to-transparent xl:from-black/60 xl:via-black/40 xl:to-transparent backdrop-blur-[1.5px]"
+                ></div>
+
+                <!-- GRID -->
+                <!-- mobile: no fluxo; lg+: absoluto centralizado -->
+                <div
+                  class="px-3 py-4 sm:py-6 xl:py-0 xl:absolute xl:inset-0 xl:flex xl:items-center xl:justify-center"
                 >
-                  <figure
-                    class="relative h-[140px] sm:h-[175px] md:h-[220px] lg:h-[260px] xl:h-[300px] rounded-xl overflow-hidden shadow-[0_10px_25px_-10px_rgba(0,0,0,0.35)] ring-1 ring-white/25 hover:ring-white/50 transition-all duration-200 cursor-zoom-in"
+                  <div
+                    class="grid grid-cols-2 gap-3 sm:gap-4 md:gap-5 w-full sm:w-[92%] md:w-[88%] lg:w-[86%] xl:w-[84%] max-w-[1080px] mx-auto z-10"
                   >
-                    <img
-                      src="assets/img/background/sobre/producao-1.webp"
-                      data-full="assets/img/background/sobre/producao-1.webp"
-                      class="absolute inset-0 w-full h-full object-cover js-open-modal"
-                      alt="Produção"
-                    />
-                  </figure>
-
-                  <figure
-                    class="relative h-[140px] sm:h-[175px] md:h-[220px] lg:h-[260px] xl:h-[300px] rounded-xl overflow-hidden shadow-[0_10px_25px_-10px_rgba(0,0,0,0.35)] ring-1 ring-white/25 hover:ring-white/50 transition-all duration-200 cursor-zoom-in"
-                  >
-                    <img
-                      src="assets/img/background/sobre/estoque.webp"
-                      data-full="assets/img/background/sobre/estoque.webp"
-                      class="absolute inset-0 w-full h-full object-cover js-open-modal"
-                      alt="Estoque"
-                    />
-                  </figure>
-
-                  <figure
-                    class="relative h-[140px] sm:h-[175px] md:h-[220px] lg:h-[260px] xl:h-[300px] rounded-xl overflow-hidden shadow-[0_10px_25px_-10px_rgba(0,0,0,0.35)] ring-1 ring-white/25 hover:ring-white/50 transition-all duration-200 cursor-zoom-in"
-                  >
-                    <img
-                      src="assets/img/background/sobre/producao-3.webp"
-                      data-full="assets/img/background/sobre/producao-3.webp"
-                      class="absolute inset-0 w-full h-full object-cover js-open-modal"
-                      alt="Equipe"
-                    />
-                  </figure>
-
-                  <figure
-                    class="relative h-[140px] sm:h-[175px] md:h-[220px] lg:h-[260px] xl:h-[300px] rounded-xl overflow-hidden shadow-[0_10px_25px_-10px_rgba(0,0,0,0.35)] ring-1 ring-white/25 hover:ring-white/50 transition-all duration-200 cursor-zoom-in"
-                  >
-                    <img
-                      src="assets/img/background/sobre/embalagem.webp"
-                      data-full="assets/img/background/sobre/embalagem.webp"
-                      class="absolute inset-0 w-full h-full object-cover js-open-modal"
-                      alt="Embalagem"
-                    />
-                  </figure>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Texto à direita -->
-          <div class="relative flex items-center bg-gray-100">
-            <span
-              class="hidden lg:absolute lg:inset-y-0 lg:-start-16 lg:block lg:w-16 lg:bg-gray-100"
-            ></span>
-
-            <div class="p-8 sm:p-16 lg:p-24">
-              <div class="flex items-baseline gap-3 flex-wrap">
-                <h2 class="text-3xl sm:text-4xl font-bold leading-tight">SCS Molduras</h2>
-                <span
-                  class="inline-flex items-center gap-1.5 rounded-full bg-neutral-900 text-white text-[11px] sm:text-xs px-3 py-1 leading-none whitespace-nowrap print:hidden"
-                  aria-label="Fábrica Própria"
-                  title="Fábrica Própria"
-                >
-                  <svg
-                    class="w-3.5 h-3.5"
-                    viewBox="0 0 24 24"
-                    fill="currentColor"
-                    aria-hidden="true"
-                  >
-                    <path d="M3 21h18v-9l-5 3V9l-5 3V3H3v18Z" />
-                  </svg>
-                  Fábrica Própria
-                </span>
-              </div>
-
-              <p class="mt-4 text-gray-600">
-                A <strong>SCS Molduras</strong> é especializada na fabricação de molduras padrão e
-                personalizadas, unindo organização, compromisso e qualidade em cada etapa do
-                processo. Nosso trabalho é pautado pela ética, pela responsabilidade e pelo cuidado
-                em entregar peças com acabamento limpo e prazos confiáveis, atendendo desde pedidos
-                individuais até grandes demandas corporativas.
-              </p>
-
-              <h3 class="mt-6 text-xl font-semibold text-gray-800">Missão</h3>
-              <p class="mt-2 text-gray-600">
-                Fornecer molduras com qualidade e preço justo, prezando pela confiança e
-                transparência no relacionamento com clientes e parceiros.
-              </p>
-
-              <h3 class="mt-6 text-xl font-semibold text-gray-800">Futuro</h3>
-              <p class="mt-2 text-gray-600">
-                Estamos investindo no desenvolvimento de um
-                <strong>sistema próprio de gestão</strong>, criado para organizar de forma eficiente
-                toda a produção e o atendimento, garantindo controle em tempo real e mais
-                praticidade para nossos clientes e parceiros.
-              </p>
-              <p class="mt-2 text-gray-600">
-                Os marketplaces, como Shopee e Mercado Livre, fazem parte da nossa estratégia como
-                canais de apoio, mas o foco é consolidar um
-                <strong>catálogo e sistema próprios</strong>, que fortaleçam a identidade da SCS
-                Molduras e ofereçam ainda mais confiança, seriedade e dedicação em cada pedido.
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Barra de separação -->
-    <!-- Separador estilo seção -->
-    <section class="bg-gray-50">
-      <div class="mx-auto max-w-screen-xl px-4 py-6 sm:px-6 lg:px-8">
-        <!-- vazio propositalmente -->
-      </div>
-    </section>
-
-    <!-- PRODUÇÃO (compacta) -->
-    <section id="producao">
-      <div class="mx-auto max-w-screen-2xl px-4 py-12 sm:px-6 lg:px-8">
-        <div class="grid grid-cols-1 lg:grid-cols-2 lg:gap-6 lg:min-h-[60vh]">
-          <!-- Texto à ESQUERDA -->
-          <div class="relative flex items-center bg-gray-100">
-            <span
-              class="hidden lg:absolute lg:inset-y-0 lg:-end-16 lg:block lg:w-16 lg:bg-gray-100"
-            ></span>
-            <div class="p-6 sm:p-12 lg:p-16 bg-gray-100">
-              <h2 class="text-2xl font-bold sm:text-3xl">Produção</h2>
-              <p class="mt-4 text-gray-600">
-                Fluxo <strong>simples, direto e organizado</strong>, com foco em
-                <strong>precisão</strong>, <strong>consistência</strong> e
-                <strong>prazos combinados</strong>. Cada pedido é identificado desde a entrada até a
-                expedição.
-              </p>
-
-              <!-- 4 etapas em cards curtos -->
-              <div class="mt-6 grid grid-cols-2 gap-4 text-sm">
-                <div class="rounded-xl border border-gray-200 bg-white p-3">
-                  <div class="font-semibold text-gray-800">Entrada</div>
-                  <div class="mt-1 text-gray-600">Registro do modelo, medidas, cor e prazo.</div>
-                </div>
-                <div class="rounded-xl border border-gray-200 bg-white p-3">
-                  <div class="font-semibold text-gray-800">Corte</div>
-                  <div class="mt-1 text-gray-600">Perfis e vidro nas dimensões do pedido.</div>
-                </div>
-                <div class="rounded-xl border border-gray-200 bg-white p-3">
-                  <div class="font-semibold text-gray-800">Montagem</div>
-                  <div class="mt-1 text-gray-600">
-                    Encaixe, fixação e retoque quando necessário.
-                  </div>
-                </div>
-                <div class="rounded-xl border border-gray-200 bg-white p-3">
-                  <div class="font-semibold text-gray-800">Expedição</div>
-                  <div class="mt-1 text-gray-600">Selagem, separação e reforço p/ transporte.</div>
-                </div>
-              </div>
-
-              <!-- O que pedimos (checklist enxuto) -->
-              <div class="mt-6 rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-                <h3 class="text-lg font-semibold text-gray-800 mb-4">
-                  O que pedimos (para acertar de primeira)
-                </h3>
-                <ul
-                  class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2 text-gray-700 text-sm list-disc list-inside"
-                >
-                  <li><strong>Modelo</strong> (ex.: <code>LA-2</code>, <code>LA-3</code>)</li>
-                  <li><strong>Medida da imagem (L×A)</strong></li>
-                  <li><strong>Uso</strong>: Mesa até <strong>25×30</strong> ou Parede</li>
-                  <li><strong>Cor/modelo</strong> desejados</li>
-                  <li><strong>Vidro</strong> padrão ou <strong>sem vidro</strong></li>
-                  <li><strong>Kits</strong> por tamanho/cor</li>
-                </ul>
-              </div>
-
-              <!-- CTA: pedir orçamento (fica ANTES dos <details>) -->
-              <div class="mt-6 flex flex-col sm:flex-row gap-3">
-                <a
-                  href="https://wa.me/551134528549?text=Ol%C3%A1%20SCS%20Molduras,%20venho%20por%20meio%20deste%20contato%20solicitar%20um%20or%C3%A7amento."
-                  target="_blank"
-                  rel="noopener"
-                  class="inline-flex items-center justify-center gap-2 rounded-lg bg-gray-900 px-5 py-3 text-white hover:opacity-90 w-full sm:w-auto"
-                  aria-label="Pedir orçamento no WhatsApp"
-                >
-                  <!-- ícone WhatsApp -->
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    class="h-5 w-5"
-                    viewBox="0 0 24 24"
-                    fill="currentColor"
-                    aria-hidden="true"
-                  >
-                    <path
-                      d="M20 3.5A10.5 10.5 0 0 0 3.3 16.9L2 22l5.3-1.3A10.5 10.5 0 1 0 20 3.5ZM12 20a8 8 0 0 1-4.1-1.1l-.3-.2-3 .7.7-2.9-.2-.3A8 8 0 1 1 12 20Zm4.4-5.8c-.2-.1-1.3-.6-1.5-.7s-.3-.1-.5.1-.5.7-.6.8-.3.2-.5.1a6.5 6.5 0 0 1-1.9-1.2 7 7 0 0 1-1.3-1.7c-.1-.2 0-.3.1-.4l.3-.4.2-.3c.1-.1.1-.2 0-.4l-.7-1.6c-.2-.5-.4-.4-.6-.4h-.5c-.2 0-.4 0-.6.3a2.5 2.5 0 0 0-.8 1.8c0 .5.2 1 .3 1.2a9.6 9.6 0 0 0 3.5 4 8.8 8.8 0 0 0 1.7.8c.7.2 1.3.2 1.8.1.6-.1 1.3-.6 1.5-1.2s.2-1.1.2-1.2-.1-.2-.3-.3Z"
-                    />
-                  </svg>
-                  Pedir orçamento no WhatsApp
-                </a>
-
-                <a
-                  href="#contact"
-                  class="inline-flex items-center justify-center rounded-lg border border-gray-300 px-5 py-3 text-gray-700 hover:bg-gray-50 w-full sm:w-auto"
-                >
-                  Ver contatos
-                </a>
-              </div>
-
-              <!-- Detalhes colapsáveis -->
-              <details class="mt-6 text-sm">
-                <summary class="cursor-pointer text-gray-700 hover:opacity-80">
-                  Ver etapas completas
-                </summary>
-                <ol class="mt-3 space-y-1 list-decimal list-inside text-gray-600">
-                  <li>Entrada do pedido</li>
-                  <li>Identificação e preparação</li>
-                  <li>Corte (perfis) + corte de vidro</li>
-                  <li>Montagem inicial</li>
-                  <li>Retoque</li>
-                  <li>Montagem final (vidro + Duratex)</li>
-                  <li>Selagem e separação</li>
-                  <li>Expedição (reforço para transporte)</li>
-                </ol>
-              </details>
-
-              <details class="mt-3 text-sm">
-                <summary class="cursor-pointer text-gray-700 hover:opacity-80">
-                  Exemplos de pedido
-                </summary>
-                <ul class="mt-3 space-y-1 text-gray-600">
-                  <li><code>LA-2 10×15 Preto Mesa x2</code></li>
-                  <li>
-                    <code>LA-3 25×30 Natural Mesa</code>
-                    <span class="text-gray-500">(máximo para Mesa)</span>
-                  </li>
-                  <li>
-                    <code>LA-3 30×40 Preto Parede (Retrato)</code>
-                    <span class="text-gray-500">(acima de 25×30, somente Parede)</span>
-                  </li>
-                </ul>
-              </details>
-            </div>
-          </div>
-
-          <!-- Imagem à DIREITA (carrossel com setas) -->
-          <div class="flex items-center justify-center">
-            <!-- Carrossel -->
-            <div id="carrossel-producao" class="relative w-full">
-              <!-- Wrapper -->
-              <div
-                class="relative h-72 sm:h-96 lg:h-[520px] xl:h-[560px] overflow-hidden rounded-lg shadow-[0_10px_25px_-10px_rgba(0,0,0,.35)] ring-1 ring-black/10"
-              >
-                <!-- Item 1 -->
-                <div
-                  id="carrossel-item-1"
-                  class="absolute inset-0 transition-transform duration-500 ease-out translate-x-0 z-10"
-                >
-                  <img
-                    src="assets/img/background/producao/producao-1.webp"
-                    alt="Produção — pallet"
-                    class="js-open-modal absolute left-1/2 top-1/2 block w-full -translate-x-1/2 -translate-y-1/2 object-cover"
-                    data-full="assets/img/background/producao/producao-1.webp"
-                    draggable="false"
-                  />
-                </div>
-
-                <!-- Item 2 -->
-                <div
-                  id="carrossel-item-2"
-                  class="absolute inset-0 transition-transform duration-500 ease-out translate-x-full z-0 pointer-events-none"
-                >
-                  <img
-                    src="assets/img/background/producao/producao-2.webp"
-                    alt="Produção — bancadas"
-                    class="js-open-modal absolute left-1/2 top-1/2 block w-full -translate-x-1/2 -translate-y-1/2 object-cover"
-                    data-full="assets/img/background/producao/producao-2.webp"
-                    draggable="false"
-                  />
-                </div>
-
-                <!-- Item 3 -->
-                <div
-                  id="carrossel-item-3"
-                  class="absolute inset-0 transition-transform duration-500 ease-out translate-x-full z-0 pointer-events-none"
-                >
-                  <img
-                    src="assets/img/background/producao/producao-3.webp"
-                    alt="Produção — bancadas"
-                    class="js-open-modal absolute left-1/2 top-1/2 block w-full -translate-x-1/2 -translate-y-1/2 object-cover"
-                    data-full="assets/img/background/producao/producao-3.webp"
-                    draggable="false"
-                  />
-                </div>
-
-                <!-- Item 4 -->
-                <div
-                  id="carrossel-item-4"
-                  class="absolute inset-0 transition-transform duration-500 ease-out translate-x-full z-0 pointer-events-none"
-                >
-                  <img
-                    src="assets/img/background/producao/producao-4.webp"
-                    alt="Produção — bancadas"
-                    class="js-open-modal absolute left-1/2 top-1/2 block w-full -translate-x-1/2 -translate-y-1/2 object-cover"
-                    data-full="assets/img/background/producao/producao-4.webp"
-                    draggable="false"
-                  />
-                </div>
-
-                <!-- Item 5 -->
-                <div
-                  id="carrossel-item-5"
-                  class="absolute inset-0 transition-transform duration-500 ease-out translate-x-full z-0 pointer-events-none"
-                >
-                  <img
-                    src="assets/img/background/producao/producao-5.webp"
-                    alt="Produção — bancadas"
-                    class="js-open-modal absolute left-1/2 top-1/2 block w-full -translate-x-1/2 -translate-y-1/2 object-cover"
-                    data-full="assets/img/background/producao/producao-5.webp"
-                    draggable="false"
-                  />
-                </div>
-
-                <!-- Item 6 -->
-                <div
-                  id="carrossel-item-6"
-                  class="absolute inset-0 transition-transform duration-500 ease-out translate-x-full z-0 pointer-events-none"
-                >
-                  <img
-                    src="assets/img/background/producao/producao-6.webp"
-                    alt="Produção — bancadas"
-                    class="js-open-modal absolute left-1/2 top-1/2 block w-full -translate-x-1/2 -translate-y-1/2 object-cover"
-                    data-full="assets/img/background/producao/producao-6.webp"
-                    draggable="false"
-                  />
-                </div>
-
-                <!-- Item 7 -->
-                <div
-                  id="carrossel-item-7"
-                  class="absolute inset-0 transition-transform duration-500 ease-out translate-x-full z-0 pointer-events-none"
-                >
-                  <img
-                    src="assets/img/background/producao/producao-7.webp"
-                    alt="Produção — bancadas"
-                    class="js-open-modal absolute inset-0 w-full h-full object-cover object-center"
-                    data-full="assets/img/background/producao/producao-7.webp"
-                    draggable="false"
-                  />
-                </div>
-
-                <!-- Item 8 -->
-                <div
-                  id="carrossel-item-8"
-                  class="absolute inset-0 transition-transform duration-500 ease-out translate-x-full z-0 pointer-events-none"
-                >
-                  <img
-                    src="assets/img/background/producao/producao-8.webp"
-                    alt="Produção — bancadas"
-                    class="js-open-modal absolute left-1/2 top-1/2 block w-full -translate-x-1/2 -translate-y-1/2 object-cover"
-                    data-full="assets/img/background/producao/producao-8.webp"
-                    draggable="false"
-                  />
-                </div>
-
-                <!-- Indicadores -->
-                <div class="absolute bottom-3 left-1/2 -translate-x-1/2 z-30 flex gap-2">
-                  <button
-                    data-dot="0"
-                    class="h-2.5 w-2.5 rounded-full bg-white/90 ring-1 ring-black/10"
-                    aria-current="true"
-                    aria-label="Slide 1"
-                  ></button>
-                  <button
-                    data-dot="1"
-                    class="h-2.5 w-2.5 rounded-full bg-white/40 ring-1 ring-black/10"
-                    aria-current="false"
-                    aria-label="Slide 2"
-                  ></button>
-                  <button
-                    data-dot="2"
-                    class="h-2.5 w-2.5 rounded-full bg-white/40 ring-1 ring-black/10"
-                    aria-current="false"
-                    aria-label="Slide 3"
-                  ></button>
-                  <button
-                    data-dot="3"
-                    class="h-2.5 w-2.5 rounded-full bg-white/40 ring-1 ring-black/10"
-                    aria-current="false"
-                    aria-label="Slide 4"
-                  ></button>
-                  <button
-                    data-dot="4"
-                    class="h-2.5 w-2.5 rounded-full bg-white/40 ring-1 ring-black/10"
-                    aria-current="false"
-                    aria-label="Slide 5"
-                  ></button>
-                  <button
-                    data-dot="5"
-                    class="h-2.5 w-2.5 rounded-full bg-white/40 ring-1 ring-black/10"
-                    aria-current="false"
-                    aria-label="Slide 6"
-                  ></button>
-                  <button
-                    data-dot="6"
-                    class="h-2.5 w-2.5 rounded-full bg-white/40 ring-1 ring-black/10"
-                    aria-current="false"
-                    aria-label="Slide 7"
-                  ></button>
-                  <button
-                    data-dot="7"
-                    class="h-2.5 w-2.5 rounded-full bg-white/40 ring-1 ring-black/10"
-                    aria-current="false"
-                    aria-label="Slide 8"
-                  ></button>
-                </div>
-
-                <!-- Botões -->
-                <button
-                  id="carrossel-prev"
-                  class="group absolute left-2 top-1/2 -translate-y-1/2 z-50 flex items-center focus:outline-none"
-                >
-                  <span
-                    class="inline-flex h-10 w-10 items-center justify-center rounded-full bg-black/40 border border-white/60 backdrop-blur-sm [backdrop-saturate:160%] shadow-md transition group-hover:bg-black/60"
-                  >
-                    <svg class="h-4 w-4 text-white" viewBox="0 0 6 10" fill="none">
-                      <path
-                        stroke="currentColor"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M5 1 1 5l4 4"
+                    <figure
+                      class="relative h-[140px] sm:h-[175px] md:h-[220px] lg:h-[260px] xl:h-[300px] rounded-xl overflow-hidden shadow-[0_10px_25px_-10px_rgba(0,0,0,0.35)] ring-1 ring-white/25 hover:ring-white/50 transition-all duration-200 cursor-zoom-in"
+                    >
+                      <img
+                        src="assets/img/background/sobre/producao-1.webp"
+                        data-full="assets/img/background/sobre/producao-1.webp"
+                        class="absolute inset-0 w-full h-full object-cover js-open-modal"
+                        alt="Produção"
                       />
-                    </svg>
-                  </span>
-                </button>
+                    </figure>
 
-                <button
-                  id="carrossel-next"
-                  class="group absolute right-2 top-1/2 -translate-y-1/2 z-50 flex items-center focus:outline-none"
-                >
-                  <span
-                    class="inline-flex h-10 w-10 items-center justify-center rounded-full bg-black/40 border border-white/60 backdrop-blur-sm [backdrop-saturate:160%] shadow-md transition group-hover:bg-black/60"
-                  >
-                    <svg class="h-4 w-4 text-white" viewBox="0 0 6 10" fill="none">
-                      <path
-                        stroke="currentColor"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="m1 9 4-4-4-4"
+                    <figure
+                      class="relative h-[140px] sm:h-[175px] md:h-[220px] lg:h-[260px] xl:h-[300px] rounded-xl overflow-hidden shadow-[0_10px_25px_-10px_rgba(0,0,0,0.35)] ring-1 ring-white/25 hover:ring-white/50 transition-all duration-200 cursor-zoom-in"
+                    >
+                      <img
+                        src="assets/img/background/sobre/estoque.webp"
+                        data-full="assets/img/background/sobre/estoque.webp"
+                        class="absolute inset-0 w-full h-full object-cover js-open-modal"
+                        alt="Estoque"
                       />
+                    </figure>
+
+                    <figure
+                      class="relative h-[140px] sm:h-[175px] md:h-[220px] lg:h-[260px] xl:h-[300px] rounded-xl overflow-hidden shadow-[0_10px_25px_-10px_rgba(0,0,0,0.35)] ring-1 ring-white/25 hover:ring-white/50 transition-all duration-200 cursor-zoom-in"
+                    >
+                      <img
+                        src="assets/img/background/sobre/producao-3.webp"
+                        data-full="assets/img/background/sobre/producao-3.webp"
+                        class="absolute inset-0 w-full h-full object-cover js-open-modal"
+                        alt="Equipe"
+                      />
+                    </figure>
+
+                    <figure
+                      class="relative h-[140px] sm:h-[175px] md:h-[220px] lg:h-[260px] xl:h-[300px] rounded-xl overflow-hidden shadow-[0_10px_25px_-10px_rgba(0,0,0,0.35)] ring-1 ring-white/25 hover:ring-white/50 transition-all duration-200 cursor-zoom-in"
+                    >
+                      <img
+                        src="assets/img/background/sobre/embalagem.webp"
+                        data-full="assets/img/background/sobre/embalagem.webp"
+                        class="absolute inset-0 w-full h-full object-cover js-open-modal"
+                        alt="Embalagem"
+                      />
+                    </figure>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Texto à direita -->
+            <div class="relative flex items-center bg-gray-100">
+              <span
+                class="hidden xl:absolute xl:inset-y-0 xl:-start-16 xl:block xl:w-16 xl:bg-gray-100"
+              ></span>
+
+              <div class="p-8 sm:p-16 lg:p-24">
+                <div class="flex items-baseline gap-3 flex-wrap">
+                  <h2 class="text-3xl sm:text-4xl font-bold leading-tight">SCS Molduras</h2>
+                  <span
+                    class="inline-flex items-center gap-1.5 rounded-full bg-neutral-900 text-white text-[11px] sm:text-xs px-3 py-1 leading-none whitespace-nowrap print:hidden"
+                    aria-label="Fábrica Própria"
+                    title="Fábrica Própria"
+                  >
+                    <svg
+                      class="w-3.5 h-3.5"
+                      viewBox="0 0 24 24"
+                      fill="currentColor"
+                      aria-hidden="true"
+                    >
+                      <path d="M3 21h18v-9l-5 3V9l-5 3V3H3v18Z" />
                     </svg>
+                    Fábrica Própria
                   </span>
-                </button>
+                </div>
+
+                <p class="mt-4 text-gray-600">
+                  A <strong>SCS Molduras</strong> é especializada na fabricação de molduras padrão e
+                  personalizadas, unindo organização, compromisso e qualidade em cada etapa do
+                  processo. Nosso trabalho é pautado pela ética, pela responsabilidade e pelo
+                  cuidado em entregar peças com acabamento limpo e prazos confiáveis, atendendo
+                  desde pedidos individuais até grandes demandas corporativas.
+                </p>
+
+                <h3 class="mt-6 text-xl font-semibold text-gray-800">Missão</h3>
+                <p class="mt-2 text-gray-600">
+                  Fornecer molduras com qualidade e preço justo, prezando pela confiança e
+                  transparência no relacionamento com clientes e parceiros.
+                </p>
+
+                <h3 class="mt-6 text-xl font-semibold text-gray-800">Futuro</h3>
+                <p class="mt-2 text-gray-600">
+                  Estamos investindo no desenvolvimento de um
+                  <strong>sistema próprio de gestão</strong>, criado para organizar de forma
+                  eficiente toda a produção e o atendimento, garantindo controle em tempo real e
+                  mais praticidade para nossos clientes e parceiros.
+                </p>
+                <p class="mt-2 text-gray-600">
+                  Os marketplaces, como Shopee e Mercado Livre, fazem parte da nossa estratégia como
+                  canais de apoio, mas o foco é consolidar um
+                  <strong>catálogo e sistema próprios</strong>, que fortaleçam a identidade da SCS
+                  Molduras e ofereçam ainda mais confiança, seriedade e dedicação em cada pedido.
+                </p>
               </div>
-              <!-- /wrapper -->
             </div>
-            <!-- /carrossel-producao -->
           </div>
-          <!-- /coluna direita -->
         </div>
-        <!-- /grid -->
-      </div>
-      <!-- /container -->
-    </section>
+      </section>
 
-    <!-- Barra de separação -->
-    <!-- Separador estilo seção -->
-    <section class="bg-gray-50">
-      <div class="mx-auto max-w-screen-xl px-4 py-6 sm:px-6 lg:px-8">
-        <!-- vazio propositalmente -->
-      </div>
-    </section>
+      <!-- Barra de separação -->
+      <!-- Separador estilo seção -->
+      <section class="bg-gray-50">
+        <div class="mx-auto max-w-screen-xl px-4 py-6 sm:px-6 lg:px-8">
+          <!-- vazio propositalmente -->
+        </div>
+      </section>
 
-    <!-- PÓS-VENDAS -->
-    <section id="pos-vendas">
-      <div class="mx-auto max-w-screen-2xl px-4 py-12 sm:px-6 lg:px-8">
-        <div class="grid grid-cols-1 lg:grid-cols-2 lg:gap-6 lg:min-h-[60vh]">
-          <!-- Imagem à ESQUERDA (uma imagem) -->
-          <div class="relative z-10 lg:py-16">
-            <div class="relative w-full h-72 sm:h-96 lg:h-[520px] xl:h-[560px] overflow-hidden">
-              <img
-                src=" assets/img/background/sobre/pos-vendas.webp"
-                alt="Atendimento pós-vendas"
-                class="absolute inset-0 w-full h-full object-cover object-[50%_62%]"
-              />
+      <!-- PRODUÇÃO (compacta) -->
+      <section id="producao" class="min-h-[calc(100svh-4rem)] snap-start scroll-mt-20">
+        <div class="mx-auto max-w-screen-2xl px-4 py-12 sm:px-6 lg:px-8">
+          <div class="grid grid-cols-1 gap-2 xl:min-h-[68vh] xl:grid-cols-2 xl:gap-8">
+            <!-- Texto à ESQUERDA -->
+            <div class="relative flex items-center bg-gray-100">
+              <span
+                class="hidden xl:absolute xl:inset-y-0 xl:-end-16 xl:block xl:w-16 xl:bg-gray-100"
+              ></span>
 
-              <!-- topo mais escuro, some antes do meio -->
-              <div
-                class="absolute inset-0 pointer-events-none bg-[linear-gradient(to_bottom,rgba(0,0,0,.62)_0%,rgba(0,0,0,.38)_24%,rgba(0,0,0,.12)_46%,rgba(0,0,0,0)_64%)]"
-              ></div>
+              <div class="p-6 sm:p-12 lg:p-16 bg-gray-100">
+                <h2 class="text-2xl font-bold sm:text-3xl">Produção</h2>
+                <p class="mt-4 text-gray-600">
+                  Fluxo <strong>simples, direto e organizado</strong>, com foco em
+                  <strong>precisão</strong>, <strong>consistência</strong> e
+                  <strong>prazos combinados</strong>. Cada pedido é identificado desde a entrada até
+                  a expedição.
+                </p>
 
-              <!-- vinheta bem sutil nas laterais (opcional) -->
-              <div
-                class="absolute inset-0 pointer-events-none bg-[radial-gradient(120%_100%_at_0%_50%,rgba(0,0,0,.16),transparent_60%), radial-gradient(120%_100%_at_100%_50%,rgba(0,0,0,.16),transparent_60%)]"
-              ></div>
-            </div>
-          </div>
-
-          <!-- Texto à DIREITA -->
-          <div class="relative flex items-center bg-gray-100">
-            <span
-              class="hidden lg:absolute lg:inset-y-0 lg:-start-16 lg:block lg:w-16 lg:bg-gray-100"
-            ></span>
-
-            <div class="p-6 sm:p-12 lg:p-16 bg-gray-100">
-              <h2 class="text-2xl font-bold sm:text-3xl">Pós-vendas</h2>
-
-              <p class="mt-4 text-gray-600">
-                Nosso pós-vendas existe para
-                <strong>ocorrências reais</strong> relacionadas ao produto (ajustes, dúvidas
-                objetivas ou eventuais problemas). Para pedidos
-                <strong>particulares</strong> (feitos diretamente conosco), o canal é o
-                <strong>WhatsApp</strong> indicado no rodapé. Ao abrir atendimento, envie
-                <strong>nº do pedido</strong> e, se possível, <strong>fotos</strong>.
-              </p>
-
-              <div class="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 text-sm">
-                <div class="rounded-xl border border-gray-200 bg-white p-4">
-                  <div class="font-semibold text-gray-800">Suporte prático</div>
-                  <div class="mt-1 text-gray-600">
-                    Resposta objetiva e solução quando necessário.
+                <!-- 4 etapas em cards curtos -->
+                <div class="mt-6 grid grid-cols-2 gap-4 text-sm">
+                  <div class="rounded-xl border border-gray-200 bg-white p-3">
+                    <div class="font-semibold text-gray-800">Entrada</div>
+                    <div class="mt-1 text-gray-600">Registro do modelo, medidas, cor e prazo.</div>
                   </div>
-                </div>
-                <div class="rounded-xl border border-gray-200 bg-white p-4">
-                  <div class="font-semibold text-gray-800">Ajustes e dúvidas</div>
-                  <div class="mt-1 text-gray-600">Acompanhamento em casos pontuais.</div>
-                </div>
-                <div class="rounded-xl border border-gray-200 bg-white p-4">
-                  <div class="font-semibold text-gray-800">Análise de ocorrências</div>
-                  <div class="mt-1 text-gray-600">Tratativa justa e transparente.</div>
-                </div>
-                <div class="rounded-xl border border-gray-200 bg-white p-4">
-                  <div class="font-semibold text-gray-800">Compromisso</div>
-                  <div class="mt-1 text-gray-600">Ética e seriedade em cada atendimento.</div>
-                </div>
-              </div>
-
-              <div
-                class="mt-6 rounded-xl border border-yellow-200 bg-yellow-50 p-4 text-sm text-yellow-900"
-              >
-                Pedidos via
-                <strong>marketplaces (Shopee / Mercado Livre)</strong> devem ser atendidos
-                <strong>exclusivamente pela plataforma</strong>, seguindo as políticas e prazos do
-                marketplace. Mensagens sobre compras de marketplace no WhatsApp serão direcionadas
-                para a plataforma.
-              </div>
-
-              <p class="mt-4 text-sm text-gray-500">
-                Consulte os
-                <a
-                  href="assets/docs/termos-pos-vendas.pdf"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  class="underline underline-offset-4 hover:opacity-80"
-                  >Termos de Pós-vendas</a
-                >
-                para escopo, prazos e condições.
-              </p>
-
-              <div class="mt-6 flex flex-col sm:flex-row gap-3">
-                <a
-                  href="https://wa.me/551134528549?text=Ol%C3%A1%20SCS%20Molduras,%20estou%20entrando%20em%20contato%20para%20relatar%20uma%20avaria%20ou%20problema%20em%20meu%20produto."
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  class="inline-flex items-center justify-center rounded-lg bg-gray-900 px-5 py-3 text-white hover:opacity-90 w-full sm:w-auto"
-                >
-                  Abrir Atendimento
-                </a>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Barra de separação -->
-    <!-- Separador estilo seção -->
-    <section class="bg-gray-50">
-      <div class="mx-auto max-w-screen-xl px-4 py-6 sm:px-6 lg:px-8">
-        <!-- vazio propositalmente -->
-      </div>
-    </section>
-
-    <!-- LOCALIZAÇÃO Endereço -->
-    <section id="localizacao">
-      <div class="mx-auto max-w-screen-2xl px-4 py-16 sm:px-6 lg:px-8">
-        <div class="grid grid-cols-1 items-center lg:grid-cols-2 lg:gap-8">
-          <!-- TEXTO (esquerda no desktop) -->
-          <div class="flex items-center bg-gray-100 lg:order-1 rounded-2xl">
-            <div class="p-8 sm:p-16 lg:p-24">
-              <h2 class="text-2xl font-bold sm:text-3xl">Onde estamos</h2>
-
-              <p class="mt-4 text-gray-600">
-                Nossa fábrica e atendimento estão localizados em Guarulhos/SP. Visite-nos para
-                conhecer de perto o processo e retirar pedidos quando combinado.
-              </p>
-
-              <div class="mt-6 text-sm text-gray-700 space-y-1">
-                <p class="font-semibold">Endereço</p>
-                <p>Rua Tasso Fragoso, nº 105</p>
-                <p>Parque das Nações — Guarulhos/SP</p>
-                <p>CEP 07243-570</p>
-              </div>
-
-              <!-- Ações -->
-              <div class="mt-6 flex flex-col sm:flex-row gap-3">
-                <a
-                  href="https://www.google.com/maps/dir/?api=1&destination=Rua+Tasso+Fragoso,+105,+Guarulhos,+SP"
-                  target="_blank"
-                  rel="noopener"
-                  class="inline-flex items-center justify-center rounded-lg bg-gray-900 px-4 py-2 text-white hover:opacity-90"
-                >
-                  Como chegar
-                </a>
-
-                <a
-                  href="https://www.google.com/maps?q=Rua+Tasso+Fragoso,+105,+Guarulhos,+SP"
-                  target="_blank"
-                  class="inline-flex items-center justify-center rounded-lg bg-gray-900 px-4 py-2 text-white hover:opacity-90"
-                >
-                  Ver no Google Maps
-                </a>
-
-                <button
-                  type="button"
-                  class="inline-flex items-center justify-center rounded-lg border border-gray-300 px-4 py-2 text-gray-700 hover:bg-gray-50"
-                  onclick="navigator.clipboard.writeText('Rua Tasso Fragoso, 105 - Parque das Nações, Guarulhos/SP - 07243-570')"
-                >
-                  Copiar endereço
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <!-- MAPA (direita no desktop) -->
-          <div class="mt-6 lg:mt-0 lg:order-2">
-            <div
-              class="map-card relative isolate rounded-2xl overflow-hidden ring-1 ring-black/10 shadow-lg aspect-[16/10] lg:aspect-[16/9]"
-            >
-              <!-- iFrame ocupa todo o cartão -->
-              <iframe
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d7321.013335271659!2d-46.41159395826342!3d-23.44218169870948!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x94ce62701f3f58d1%3A0x7040f1067ebf6f0f!2sR.%20Tasso%20Fragoso%2C%20105%20-%20Parque%20das%20Nacoes%2C%20Guarulhos%20-%20SP%2C%2007243-570!5e0!3m2!1spt-BR!2sbr!4v1759183706777!5m2!1spt-BR!2sbr"
-                class="absolute inset-0 h-full w-full"
-                style="border: 0"
-                allowfullscreen
-                loading="lazy"
-                referrerpolicy="no-referrer-when-downgrade"
-              ></iframe>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- /Sobre -->
-
-    <!-- LINHAS & PRODUTOS (apresentação) -->
-    <section id="produtos" class="bg-gray-100">
-      <div class="max-w-screen-2xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
-        <div class="grid grid-cols-1 gap-10 lg:grid-cols-3">
-          <div class="lg:flex lg:flex-col lg:justify-center lg:items-center lg:text-center">
-            <h2 class="text-2xl font-bold">Linhas & Produtos</h2>
-            <p class="mt-2 text-gray-600">Modelos padrão e sob medida para diferentes ambientes.</p>
-          </div>
-
-          <div class="lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-6">
-            <!-- Destaque: LA-2 -->
-            <article class="rounded-2xl bg-white border border-gray-200 p-6">
-              <header class="flex items-center justify-between">
-                <h3 class="text-lg font-semibold">LA-2 — destaque de vendas</h3>
-                <span
-                  class="inline-flex items-center rounded-full bg-gray-900 text-white text-xs px-2.5 py-1 text-center"
-                  >Mais pedido</span
-                >
-              </header>
-              <p class="mt-2 text-gray-600">
-                Perfil versátil e com ótimo custo-benefício. Indicado para residências e lojas.
-              </p>
-              <ul class="mt-4 text-sm text-gray-700 space-y-1 list-disc list-inside">
-                <li>
-                  Tamanhos de 10×15 até 25×30 para <strong>Mesa</strong>; acima disso,
-                  <strong>Parede</strong>
-                </li>
-                <li>Cores mais pedidas: Preto, Branco, Natural</li>
-                <li>Atende pedidos unitários e em volume</li>
-              </ul>
-            </article>
-
-            <!-- Segundo destaque (troque o modelo se for outro) -->
-            <article class="rounded-2xl bg-white border border-gray-200 p-6">
-              <header class="flex items-center justify-between">
-                <h3 class="text-lg font-semibold">LA-3 — segunda saída</h3>
-                <span
-                  class="inline-flex items-center rounded-full bg-gray-100 text-gray-700 text-xs px-2.5 py-1"
-                  >Saída constante</span
-                >
-              </header>
-              <p class="mt-2 text-gray-600">
-                Variação indicada para kits e composições. Mantém padrão e entrega rápida.
-              </p>
-              <ul class="mt-4 text-sm text-gray-700 space-y-1 list-disc list-inside">
-                <li>Mesmas faixas de tamanho do LA-2</li>
-                <li>Bom para kits e ambientações</li>
-                <li>Disponível nas cores base</li>
-              </ul>
-            </article>
-
-            <!-- Cores & Acabamentos (substitui o card anterior) -->
-            <article class="rounded-2xl bg-white border border-gray-200 p-6">
-              <h3 class="text-lg font-semibold">Cores & Acabamentos</h3>
-              <p class="mt-2 text-gray-600">Padrões com giro rápido e acabamento uniforme.</p>
-              <ul class="mt-4 text-sm text-gray-700 space-y-1 list-disc list-inside">
-                <li>Cores base: <strong>Preto</strong> e <strong>Branco</strong></li>
-                <li>
-                  Vidros: <strong>padrão</strong> (com fundo Duratex) e
-                  <strong>anti-reflexo</strong>
-                </li>
-                <li>Outras cores e acabamentos <strong>sob consulta</strong></li>
-              </ul>
-            </article>
-
-            <!-- Sob medida -->
-            <article class="rounded-2xl bg-white border border-gray-200 p-6">
-              <h3 class="text-lg font-semibold">Sob Medida</h3>
-              <p class="mt-2 text-gray-600">
-                Produção nas medidas que o seu projeto exige, com orientação e acabamento definidos
-                no pedido.
-              </p>
-            </article>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- /Produtos -->
-
-    <!-- Galeria (substitui “Projects”) -->
-    <section id="galeria" class="py-6">
-      <!-- reduzi de py-12 para py-6 -->
-      <div class="max-w-screen-lg px-3 sm:px-4 lg:px-6 mx-auto">
-        <!-- reduzi largura e padding -->
-        <header class="text-center">
-          <h2 class="text-lg font-bold text-gray-900 sm:text-2xl">Galeria de Molduras</h2>
-          <p class="max-w-md mx-auto mt-2 text-gray-500 text-sm">
-            Modelos mais vendidos e composições
-          </p>
-        </header>
-
-        <ul class="grid grid-cols-1 gap-4 mt-6 lg:grid-cols-3">
-          <!-- Imagem 1 (ESQUERDA, topo) -->
-          <li
-            class="rounded-lg overflow-hidden ring-1 ring-black/10 shadow transition hover:shadow-md"
-          >
-            <img
-              src="assets/img/background/produtos/LA-2/produto-1.webp"
-              alt="produto-1"
-              class="w-full aspect-square object-cover object-center cursor-pointer transition duration-300 hover:scale-[1.03] js-open-modal"
-              loading="lazy"
-            />
-          </li>
-
-          <!-- Imagem 2 (ESQUERDA, abaixo) -->
-          <li
-            class="rounded-lg overflow-hidden ring-1 ring-black/10 shadow transition hover:shadow-md"
-          >
-            <img
-              src="assets/img/background/produtos/LA-2/produto-2.webp"
-              alt="produto-2"
-              class="w-full aspect-square object-cover object-center cursor-pointer transition duration-300 hover:scale-[1.03] js-open-modal"
-              loading="lazy"
-            />
-          </li>
-
-          <!-- Imagem grande (DIREITA, 2 colunas x 2 linhas) -->
-          <li
-            class="lg:col-span-2 lg:col-start-2 lg:row-span-2 lg:row-start-1 rounded-lg overflow-hidden ring-1 ring-black/10 shadow transition hover:shadow-md"
-          >
-            <img
-              src="assets/img/background/produtos/LA-2/produto-3.webp"
-              alt="produto-3"
-              class="w-full aspect-square object-cover cursor-pointer transition duration-300 hover:scale-[1.02] js-open-modal"
-            />
-          </li>
-        </ul>
-      </div>
-    </section>
-
-    <!-- 💬 Modal lista de feedback -->
-    <!-- … section #feedback termina aqui … -->
-
-    <!-- 🖼️ Modal imagem -->
-    <div
-      id="modalImg"
-      class="fixed inset-0 z-[100] hidden items-center justify-center bg-black/70 p-4"
-    >
-      <!-- botão fechar -->
-      <button
-        type="button"
-        id="modalClose"
-        class="absolute top-4 right-4 text-white text-3xl leading-none px-2"
-        aria-label="Fechar"
-      >
-        ✕
-      </button>
-      <!-- imagem ampliada -->
-      <img
-        id="modalImgSrc"
-        class="max-w-[92vw] max-h-[90vh] rounded-xl shadow-2xl ring-1 ring-white/20 object-contain"
-        alt="Pré-visualização"
-      />
-    </div>
-
-    <!-- 💬 Modal lista de feedback -->
-    <div
-      id="modalFeedback"
-      class="fixed inset-0 z-[100] hidden items-center justify-center bg-black/60 p-4 sm:p-6"
-    >
-      <div
-        class="mx-auto w-[96vw] max-w-screen-lg lg:max-w-[1100px] 2xl:max-w-[1400px] bg-white rounded-2xl shadow-2xl ring-1 ring-black/10 max-h-[90vh] flex flex-col overflow-hidden"
-      >
-        <!-- Cabeçalho -->
-        <div class="sticky top-0 z-10 bg-white/95 backdrop-blur px-6 py-4 border-b">
-          <div class="flex items-start justify-between gap-3">
-            <div class="min-w-0">
-              <h3 id="modalFeedbackTitulo" class="text-lg sm:text-xl font-semibold truncate">
-                Avaliações do site (SCS)
-              </h3>
-              <p id="modalFeedbackSub" class="text-xs text-gray-500 mt-0.5">Carregando…</p>
-            </div>
-
-            <div class="flex items-center gap-2 shrink-0">
-              <!-- aparece só se houver link da plataforma -->
-              <a
-                id="modalFeedbackLink"
-                target="_blank"
-                class="hidden sm:inline-flex items-center rounded-md border px-3 py-1.5 text-xs hover:bg-gray-50"
-              >
-                Ver na plataforma
-              </a>
-              <button
-                id="modalFeedbackClose"
-                class="p-2 rounded-md hover:bg-gray-100"
-                aria-label="Fechar"
-              >
-                ✕
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Lista (rola dentro do card) -->
-        <div class="flex-1 overflow-auto">
-          <ul id="modalFeedbackLista" class="px-6 py-4 divide-y divide-gray-100"></ul>
-        </div>
-
-        <!-- Rodapé -->
-        <div class="flex items-center justify-between gap-2 px-6 py-4 border-t bg-gray-50">
-          <span id="modalFeedbackInfo" class="text-[11px] text-gray-500">—</span>
-          <button
-            id="modalFeedbackLoadMore"
-            class="inline-flex rounded-lg border px-3 py-1.5 text-xs hover:bg-gray-100"
-          >
-            Carregar mais
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <!-- /Galeria -->
-
-    <!-- Separador estilo seção -->
-    <section class="bg-gray-50">
-      <div class="mx-auto max-w-screen-xl px-4 py-6 sm:px-6 lg:px-8">
-        <!-- vazio propositalmente -->
-      </div>
-    </section>
-
-    <!-- FeedBack -->
-
-    <!-- FEEDBACK (padrão do bloco "Onde estamos": 2 colunas lado a lado) -->
-    <section id="feedback" class="py-6 scroll-mt-24">
-      <!-- Cabeçalho no estilo da galeria -->
-      <div class="max-w-screen-lg px-3 sm:px-4 lg:px-6 mx-auto">
-        <header class="text-center">
-          <h2 class="text-lg font-bold text-gray-900 sm:text-2xl">Avaliações de Clientes</h2>
-          <p class="max-w-md mx-auto mt-2 text-gray-500 text-sm">Mural das plataformas</p>
-        </header>
-      </div>
-
-      <!-- Bloco branco com os cards das avaliações de notas -->
-      <div class="mx-auto max-w-screen-2xl px-4 py-3 sm:px-6 lg:px-8 -mt-2">
-        <div class="rounded-2xl overflow-hidden ring-1 ring-black/10 shadow-lg bg-white">
-          <div class="px-5 sm:px-8 py-6 sm:py-7">
-            <!-- RESUMO (SCS) + CTA avaliação de notas -->
-            <div class="mt-5 grid grid-cols-1 md:grid-cols-3 gap-4 feedback-topo">
-              <!-- Barras -->
-              <div class="rounded-xl border border-gray-200 p-4 sm:p-5">
-                <div class="space-y-2">
-                  <div class="flex items-center gap-3">
-                    <span class="w-8 text-xs font-medium text-gray-600">5 ★</span>
-                    <div class="h-2 flex-1 rounded bg-gray-100 overflow-hidden">
-                      <div class="h-full bg-amber-400" style="width: 0%" data-sum-bar="5"></div>
+                  <div class="rounded-xl border border-gray-200 bg-white p-3">
+                    <div class="font-semibold text-gray-800">Corte</div>
+                    <div class="mt-1 text-gray-600">Perfis e vidro nas dimensões do pedido.</div>
+                  </div>
+                  <div class="rounded-xl border border-gray-200 bg-white p-3">
+                    <div class="font-semibold text-gray-800">Montagem</div>
+                    <div class="mt-1 text-gray-600">
+                      Encaixe, fixação e retoque quando necessário.
                     </div>
-                    <span class="w-10 text-right text-[11px] text-gray-500" data-sum-count="5"
-                      >0</span
-                    >
                   </div>
-                  <div class="flex items-center gap-3">
-                    <span class="w-8 text-xs font-medium text-gray-600">4 ★</span>
-                    <div class="h-2 flex-1 rounded bg-gray-100 overflow-hidden">
-                      <div class="h-full bg-amber-400" style="width: 0%" data-sum-bar="4"></div>
+                  <div class="rounded-xl border border-gray-200 bg-white p-3">
+                    <div class="font-semibold text-gray-800">Expedição</div>
+                    <div class="mt-1 text-gray-600">
+                      Selagem, separação e reforço p/ transporte.
                     </div>
-                    <span class="w-10 text-right text-[11px] text-gray-500" data-sum-count="4"
-                      >0</span
-                    >
-                  </div>
-                  <div class="flex items-center gap-3">
-                    <span class="w-8 text-xs font-medium text-gray-600">3 ★</span>
-                    <div class="h-2 flex-1 rounded bg-gray-100 overflow-hidden">
-                      <div class="h-full bg-amber-400" style="width: 0%" data-sum-bar="3"></div>
-                    </div>
-                    <span class="w-10 text-right text-[11px] text-gray-500" data-sum-count="3"
-                      >0</span
-                    >
-                  </div>
-                  <div class="flex items-center gap-3">
-                    <span class="w-8 text-xs font-medium text-gray-600">2 ★</span>
-                    <div class="h-2 flex-1 rounded bg-gray-100 overflow-hidden">
-                      <div class="h-full bg-amber-400" style="width: 0%" data-sum-bar="2"></div>
-                    </div>
-                    <span class="w-10 text-right text-[11px] text-gray-500" data-sum-count="2"
-                      >0</span
-                    >
-                  </div>
-                  <div class="flex items-center gap-3">
-                    <span class="w-8 text-xs font-medium text-gray-600">1 ★</span>
-                    <div class="h-2 flex-1 rounded bg-gray-100 overflow-hidden">
-                      <div class="h-full bg-amber-400" style="width: 0%" data-sum-bar="1"></div>
-                    </div>
-                    <span class="w-10 text-right text-[11px] text-gray-500" data-sum-count="1"
-                      >0</span
-                    >
                   </div>
                 </div>
-              </div>
 
-              <!-- Média -->
-              <div class="rounded-xl border border-gray-200 p-4 sm:p-5 bg-amber-50/50">
-                <div class="text-center">
-                  <div class="text-2xl sm:text-3xl font-semibold" data-sum-avg>–</div>
-                  <div class="mt-1 text-amber-500 text-lg" data-sum-stars>★★★★★</div>
-                  <div class="mt-1 text-[12px] text-gray-600">
-                    <span data-sum-total>0</span> avaliações
-                  </div>
-                  <div class="mt-1 text-[12px] text-gray-500">Somente SCS</div>
-                </div>
-              </div>
-
-              <!-- CTA -->
-              <div
-                class="rounded-xl border border-gray-200 bg-gray-50/80 p-5 flex flex-col items-center justify-between text-center feedback-cta hover:border-gray-300 transition"
-              >
-                <div>
-                  <h3 class="text-[14px] font-semibold text-gray-900 leading-tight">
-                    Compartilhe sua opinião
+                <!-- O que pedimos (checklist enxuto) -->
+                <div class="mt-6 rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
+                  <h3 class="text-lg font-semibold text-gray-800 mb-4">
+                    O que pedimos (para acertar de primeira)
                   </h3>
-                  <p class="mt-1 text-[11.5px] text-gray-500">Ajude outras pessoas a escolher.</p>
+                  <ul
+                    class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2 text-gray-700 text-sm list-disc list-inside"
+                  >
+                    <li><strong>Modelo</strong> (ex.: <code>LA-2</code>, <code>LA-3</code>)</li>
+                    <li><strong>Medida da imagem (L×A)</strong></li>
+                    <li><strong>Uso</strong>: Mesa até <strong>25×30</strong> ou Parede</li>
+                    <li><strong>Cor/modelo</strong> desejados</li>
+                    <li><strong>Vidro</strong> padrão ou <strong>sem vidro</strong></li>
+                    <li><strong>Kits</strong> por tamanho/cor</li>
+                  </ul>
                 </div>
 
-                <button
-                  type="button"
-                  class="mt-4 inline-flex items-center gap-1.5 rounded-full bg-neutral-900 px-3 py-1.5 text-[12.5px] font-medium text-white shadow-sm ring-1 ring-black/10 transition hover:bg-neutral-800 hover:scale-[1.02] active:scale-[0.98]"
-                  data-open-feedback
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    class="h-3.5 w-3.5"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
+                <!-- CTA: pedir orçamento (fica ANTES dos <details>) -->
+                <div class="mt-6 flex flex-col sm:flex-row gap-3">
+                  <a
+                    href="https://wa.me/551134528549?text=Ol%C3%A1%20SCS%20Molduras,%20venho%20por%20meio%20deste%20contato%20solicitar%20um%20or%C3%A7amento."
+                    target="_blank"
+                    rel="noopener"
+                    class="inline-flex items-center justify-center gap-2 rounded-lg bg-gray-900 px-5 py-3 text-white hover:opacity-90 w-full sm:w-auto"
+                    aria-label="Pedir orçamento no WhatsApp"
                   >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M12 4v16m8-8H4"
+                    <!-- ícone WhatsApp -->
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      class="h-5 w-5"
+                      viewBox="0 0 24 24"
+                      fill="currentColor"
+                      aria-hidden="true"
+                    >
+                      <path
+                        d="M20 3.5A10.5 10.5 0 0 0 3.3 16.9L2 22l5.3-1.3A10.5 10.5 0 1 0 20 3.5ZM12 20a8 8 0 0 1-4.1-1.1l-.3-.2-3 .7.7-2.9-.2-.3A8 8 0 1 1 12 20Zm4.4-5.8c-.2-.1-1.3-.6-1.5-.7s-.3-.1-.5.1-.5.7-.6.8-.3.2-.5.1a6.5 6.5 0 0 1-1.9-1.2 7 7 0 0 1-1.3-1.7c-.1-.2 0-.3.1-.4l.3-.4.2-.3c.1-.1.1-.2 0-.4l-.7-1.6c-.2-.5-.4-.4-.6-.4h-.5c-.2 0-.4 0-.6.3a2.5 2.5 0 0 0-.8 1.8c0 .5.2 1 .3 1.2a9.6 9.6 0 0 0 3.5 4 8.8 8.8 0 0 0 1.7.8c.7.2 1.3.2 1.8.1.6-.1 1.3-.6 1.5-1.2s.2-1.1.2-1.2-.1-.2-.3-.3Z"
+                      />
+                    </svg>
+                    Pedir orçamento no WhatsApp
+                  </a>
+
+                  <a
+                    href="#contact"
+                    class="inline-flex items-center justify-center rounded-lg border border-gray-300 px-5 py-3 text-gray-700 hover:bg-gray-50 w-full sm:w-auto"
+                  >
+                    Ver contatos
+                  </a>
+                </div>
+
+                <!-- Detalhes colapsáveis -->
+                <details class="mt-6 text-sm">
+                  <summary class="cursor-pointer text-gray-700 hover:opacity-80">
+                    Ver etapas completas
+                  </summary>
+                  <ol class="mt-3 space-y-1 list-decimal list-inside text-gray-600">
+                    <li>Entrada do pedido</li>
+                    <li>Identificação e preparação</li>
+                    <li>Corte (perfis) + corte de vidro</li>
+                    <li>Montagem inicial</li>
+                    <li>Retoque</li>
+                    <li>Montagem final (vidro + Duratex)</li>
+                    <li>Selagem e separação</li>
+                    <li>Expedição (reforço para transporte)</li>
+                  </ol>
+                </details>
+
+                <details class="mt-3 text-sm">
+                  <summary class="cursor-pointer text-gray-700 hover:opacity-80">
+                    Exemplos de pedido
+                  </summary>
+                  <ul class="mt-3 space-y-1 text-gray-600">
+                    <li><code>LA-2 10×15 Preto Mesa x2</code></li>
+                    <li>
+                      <code>LA-3 25×30 Natural Mesa</code>
+                      <span class="text-gray-500">(máximo para Mesa)</span>
+                    </li>
+                    <li>
+                      <code>LA-3 30×40 Preto Parede (Retrato)</code>
+                      <span class="text-gray-500">(acima de 25×30, somente Parede)</span>
+                    </li>
+                  </ul>
+                </details>
+              </div>
+            </div>
+
+            <!-- Imagem à DIREITA (carrossel com setas) -->
+            <div class="flex items-center justify-center mt-4 lg:mt-2">
+              <!-- Carrossel -->
+              <div id="carrossel-producao" class="relative w-full mx-auto">
+                <!-- Wrapper -->
+                <div
+                  class="relative h-72 sm:h-96 lg:h-[520px] xl:h-[560px] overflow-hidden rounded-lg shadow-[0_10px_25px_-10px_rgba(0,0,0,.35)] ring-1 ring-black/10"
+                >
+                  <!-- Item 1 -->
+                  <div
+                    id="carrossel-item-1"
+                    class="absolute inset-0 transition-transform duration-500 ease-out translate-x-0 z-10"
+                  >
+                    <img
+                      src="assets/img/background/producao/producao-1.webp"
+                      alt="Produção — pallet"
+                      class="js-open-modal absolute left-1/2 top-1/2 block w-full -translate-x-1/2 -translate-y-1/2 object-cover"
+                      data-full="assets/img/background/producao/producao-1.webp"
+                      draggable="false"
                     />
-                  </svg>
-                  Feedback
+                  </div>
+
+                  <!-- Item 2 -->
+                  <div
+                    id="carrossel-item-2"
+                    class="absolute inset-0 transition-transform duration-500 ease-out translate-x-full z-0 pointer-events-none"
+                  >
+                    <img
+                      src="assets/img/background/producao/producao-2.webp"
+                      alt="Produção — bancadas"
+                      class="js-open-modal absolute left-1/2 top-1/2 block w-full -translate-x-1/2 -translate-y-1/2 object-cover"
+                      data-full="assets/img/background/producao/producao-2.webp"
+                      draggable="false"
+                    />
+                  </div>
+
+                  <!-- Item 3 -->
+                  <div
+                    id="carrossel-item-3"
+                    class="absolute inset-0 transition-transform duration-500 ease-out translate-x-full z-0 pointer-events-none"
+                  >
+                    <img
+                      src="assets/img/background/producao/producao-3.webp"
+                      alt="Produção — bancadas"
+                      class="js-open-modal absolute left-1/2 top-1/2 block w-full -translate-x-1/2 -translate-y-1/2 object-cover"
+                      data-full="assets/img/background/producao/producao-3.webp"
+                      draggable="false"
+                    />
+                  </div>
+
+                  <!-- Item 4 -->
+                  <div
+                    id="carrossel-item-4"
+                    class="absolute inset-0 transition-transform duration-500 ease-out translate-x-full z-0 pointer-events-none"
+                  >
+                    <img
+                      src="assets/img/background/producao/producao-4.webp"
+                      alt="Produção — bancadas"
+                      class="js-open-modal absolute left-1/2 top-1/2 block w-full -translate-x-1/2 -translate-y-1/2 object-cover"
+                      data-full="assets/img/background/producao/producao-4.webp"
+                      draggable="false"
+                    />
+                  </div>
+
+                  <!-- Item 5 -->
+                  <div
+                    id="carrossel-item-5"
+                    class="absolute inset-0 transition-transform duration-500 ease-out translate-x-full z-0 pointer-events-none"
+                  >
+                    <img
+                      src="assets/img/background/producao/producao-5.webp"
+                      alt="Produção — bancadas"
+                      class="js-open-modal absolute left-1/2 top-1/2 block w-full -translate-x-1/2 -translate-y-1/2 object-cover"
+                      data-full="assets/img/background/producao/producao-5.webp"
+                      draggable="false"
+                    />
+                  </div>
+
+                  <!-- Item 6 -->
+                  <div
+                    id="carrossel-item-6"
+                    class="absolute inset-0 transition-transform duration-500 ease-out translate-x-full z-0 pointer-events-none"
+                  >
+                    <img
+                      src="assets/img/background/producao/producao-6.webp"
+                      alt="Produção — bancadas"
+                      class="js-open-modal absolute left-1/2 top-1/2 block w-full -translate-x-1/2 -translate-y-1/2 object-cover"
+                      data-full="assets/img/background/producao/producao-6.webp"
+                      draggable="false"
+                    />
+                  </div>
+
+                  <!-- Item 7 -->
+                  <div
+                    id="carrossel-item-7"
+                    class="absolute inset-0 transition-transform duration-500 ease-out translate-x-full z-0 pointer-events-none"
+                  >
+                    <img
+                      src="assets/img/background/producao/producao-7.webp"
+                      alt="Produção — bancadas"
+                      class="js-open-modal absolute inset-0 w-full h-full object-cover object-center"
+                      data-full="assets/img/background/producao/producao-7.webp"
+                      draggable="false"
+                    />
+                  </div>
+
+                  <!-- Item 8 -->
+                  <div
+                    id="carrossel-item-8"
+                    class="absolute inset-0 transition-transform duration-500 ease-out translate-x-full z-0 pointer-events-none"
+                  >
+                    <img
+                      src="assets/img/background/producao/producao-8.webp"
+                      alt="Produção — bancadas"
+                      class="js-open-modal absolute left-1/2 top-1/2 block w-full -translate-x-1/2 -translate-y-1/2 object-cover"
+                      data-full="assets/img/background/producao/producao-8.webp"
+                      draggable="false"
+                    />
+                  </div>
+
+                  <!-- Indicadores -->
+                  <div class="absolute bottom-3 left-1/2 -translate-x-1/2 z-30 flex gap-2">
+                    <button
+                      data-dot="0"
+                      class="h-2.5 w-2.5 rounded-full bg-white/90 ring-1 ring-black/10"
+                      aria-current="true"
+                      aria-label="Slide 1"
+                    ></button>
+                    <button
+                      data-dot="1"
+                      class="h-2.5 w-2.5 rounded-full bg-white/40 ring-1 ring-black/10"
+                      aria-current="false"
+                      aria-label="Slide 2"
+                    ></button>
+                    <button
+                      data-dot="2"
+                      class="h-2.5 w-2.5 rounded-full bg-white/40 ring-1 ring-black/10"
+                      aria-current="false"
+                      aria-label="Slide 3"
+                    ></button>
+                    <button
+                      data-dot="3"
+                      class="h-2.5 w-2.5 rounded-full bg-white/40 ring-1 ring-black/10"
+                      aria-current="false"
+                      aria-label="Slide 4"
+                    ></button>
+                    <button
+                      data-dot="4"
+                      class="h-2.5 w-2.5 rounded-full bg-white/40 ring-1 ring-black/10"
+                      aria-current="false"
+                      aria-label="Slide 5"
+                    ></button>
+                    <button
+                      data-dot="5"
+                      class="h-2.5 w-2.5 rounded-full bg-white/40 ring-1 ring-black/10"
+                      aria-current="false"
+                      aria-label="Slide 6"
+                    ></button>
+                    <button
+                      data-dot="6"
+                      class="h-2.5 w-2.5 rounded-full bg-white/40 ring-1 ring-black/10"
+                      aria-current="false"
+                      aria-label="Slide 7"
+                    ></button>
+                    <button
+                      data-dot="7"
+                      class="h-2.5 w-2.5 rounded-full bg-white/40 ring-1 ring-black/10"
+                      aria-current="false"
+                      aria-label="Slide 8"
+                    ></button>
+                  </div>
+
+                  <!-- Botões -->
+                  <button
+                    id="carrossel-prev"
+                    class="group absolute left-2 top-1/2 -translate-y-1/2 z-50 flex items-center focus:outline-none"
+                  >
+                    <span
+                      class="inline-flex h-10 w-10 items-center justify-center rounded-full bg-black/40 border border-white/60 backdrop-blur-sm [backdrop-saturate:160%] shadow-md transition group-hover:bg-black/60"
+                    >
+                      <svg class="h-4 w-4 text-white" viewBox="0 0 6 10" fill="none">
+                        <path
+                          stroke="currentColor"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M5 1 1 5l4 4"
+                        />
+                      </svg>
+                    </span>
+                  </button>
+
+                  <button
+                    id="carrossel-next"
+                    class="group absolute right-2 top-1/2 -translate-y-1/2 z-50 flex items-center focus:outline-none"
+                  >
+                    <span
+                      class="inline-flex h-10 w-10 items-center justify-center rounded-full bg-black/40 border border-white/60 backdrop-blur-sm [backdrop-saturate:160%] shadow-md transition group-hover:bg-black/60"
+                    >
+                      <svg class="h-4 w-4 text-white" viewBox="0 0 6 10" fill="none">
+                        <path
+                          stroke="currentColor"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="m1 9 4-4-4-4"
+                        />
+                      </svg>
+                    </span>
+                  </button>
+                </div>
+                <!-- /wrapper -->
+              </div>
+              <!-- /carrossel-producao -->
+            </div>
+            <!-- /coluna direita -->
+          </div>
+          <!-- /grid -->
+        </div>
+        <!-- /container -->
+      </section>
+
+      <!-- Barra de separação -->
+      <!-- Separador estilo seção -->
+      <section class="bg-gray-50">
+        <div class="mx-auto max-w-screen-xl px-4 py-6 sm:px-6 lg:px-8">
+          <!-- vazio propositalmente -->
+        </div>
+      </section>
+
+      <!-- PÓS-VENDAS -->
+      <section id="pos-vendas" class="min-h-[calc(100vh-4rem)] snap-start scroll-mt-20">
+        <div class="mx-auto max-w-screen-2xl px-4 py-12 sm:px-6 lg:px-8">
+          <div class="grid grid-cols-1 gap-6 xl:min-h-[68vh] xl:grid-cols-2 xl:gap-8">
+            <!-- Imagem à ESQUERDA (uma imagem) -->
+            <div class="relative flex items-center z-10 py-4 lg:py-2 xl:py-12">
+              <div class="relative w-full">
+                <div
+                  class="relative h-72 sm:h-96 lg:h-[520px] xl:h-[560px] shadow-[0_10px_25px_-10px_rgba(0,0,0,.35)] ring-1 ring-black/10"
+                >
+                  <img
+                    src=" assets/img/background/sobre/pos-vendas.webp"
+                    alt="Atendimento pós-vendas"
+                    class="absolute inset-0 w-full h-full object-cover object-[50%_92%]"
+                  />
+
+                  <!-- topo mais escuro, some antes do meio -->
+                  <div
+                    class="absolute inset-0 pointer-events-none bg-[linear-gradient(to_bottom,rgba(0,0,0,.62)_0%,rgba(0,0,0,.38)_24%,rgba(0,0,0,.12)_46%,rgba(0,0,0,0)_64%)]"
+                  ></div>
+
+                  <!-- vinheta bem sutil nas laterais (opcional) -->
+                  <div
+                    class="absolute inset-0 pointer-events-none bg-[radial-gradient(120%_100%_at_0%_50%,rgba(0,0,0,.16),transparent_60%),radial-gradient(120%_100%_at_100%_50%,rgba(0,0,0,.16),transparent_60%)]"
+                  ></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Texto à DIREITA -->
+            <div class="relative flex items-center bg-gray-100">
+              <span
+                class="hidden xl:absolute xl:inset-y-0 xl:-start-16 xl:block xl:w-16 xl:bg-gray-100"
+              ></span>
+
+              <div class="p-6 sm:p-12 lg:p-16 bg-gray-100">
+                <h2 class="text-2xl font-bold sm:text-3xl">Pós-vendas</h2>
+
+                <p class="mt-4 text-gray-600">
+                  Nosso pós-vendas existe para
+                  <strong>ocorrências reais</strong> relacionadas ao produto (ajustes, dúvidas
+                  objetivas ou eventuais problemas). Para pedidos
+                  <strong>particulares</strong> (feitos diretamente conosco), o canal é o
+                  <strong>WhatsApp</strong> indicado no rodapé. Ao abrir atendimento, envie
+                  <strong>nº do pedido</strong> e, se possível, <strong>fotos</strong>.
+                </p>
+
+                <div class="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 text-sm">
+                  <div class="rounded-xl border border-gray-200 bg-white p-4">
+                    <div class="font-semibold text-gray-800">Suporte prático</div>
+                    <div class="mt-1 text-gray-600">
+                      Resposta objetiva e solução quando necessário.
+                    </div>
+                  </div>
+                  <div class="rounded-xl border border-gray-200 bg-white p-4">
+                    <div class="font-semibold text-gray-800">Ajustes e dúvidas</div>
+                    <div class="mt-1 text-gray-600">Acompanhamento em casos pontuais.</div>
+                  </div>
+                  <div class="rounded-xl border border-gray-200 bg-white p-4">
+                    <div class="font-semibold text-gray-800">Análise de ocorrências</div>
+                    <div class="mt-1 text-gray-600">Tratativa justa e transparente.</div>
+                  </div>
+                  <div class="rounded-xl border border-gray-200 bg-white p-4">
+                    <div class="font-semibold text-gray-800">Compromisso</div>
+                    <div class="mt-1 text-gray-600">Ética e seriedade em cada atendimento.</div>
+                  </div>
+                </div>
+
+                <div
+                  class="mt-6 rounded-xl border border-yellow-200 bg-yellow-50 p-4 text-sm text-yellow-900"
+                >
+                  Pedidos via
+                  <strong>marketplaces (Shopee / Mercado Livre)</strong> devem ser atendidos
+                  <strong>exclusivamente pela plataforma</strong>, seguindo as políticas e prazos do
+                  marketplace. Mensagens sobre compras de marketplace no WhatsApp serão direcionadas
+                  para a plataforma.
+                </div>
+
+                <p class="mt-4 text-sm text-gray-500">
+                  Consulte os
+                  <a
+                    href="assets/docs/termos-pos-vendas.pdf"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="underline underline-offset-4 hover:opacity-80"
+                    >Termos de Pós-vendas</a
+                  >
+                  para escopo, prazos e condições.
+                </p>
+
+                <div class="mt-6 flex flex-col sm:flex-row gap-3">
+                  <a
+                    href="https://wa.me/551134528549?text=Ol%C3%A1%20SCS%20Molduras,%20estou%20entrando%20em%20contato%20para%20relatar%20uma%20avaria%20ou%20problema%20em%20meu%20produto."
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="inline-flex items-center justify-center rounded-lg bg-gray-900 px-5 py-3 text-white hover:opacity-90 w-full sm:w-auto"
+                  >
+                    Abrir Atendimento
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Barra de separação -->
+      <!-- Separador estilo seção -->
+      <section class="bg-gray-50">
+        <div class="mx-auto max-w-screen-xl px-4 py-6 sm:px-6 lg:px-8">
+          <!-- vazio propositalmente -->
+        </div>
+      </section>
+
+      <!-- LOCALIZAÇÃO Endereço -->
+      <section id="localizacao" class="min-h-[calc(100vh-4rem)] snap-start scroll-mt-20">
+        <div class="mx-auto max-w-screen-2xl px-4 py-12 sm:px-6 lg:px-8">
+          <div class="grid grid-cols-1 gap-6 items-center xl:grid-cols-2 xl:gap-8">
+            <!-- TEXTO (esquerda no desktop) -->
+            <div class="flex items-center bg-gray-100 lg:order-1 rounded-2xl">
+              <div class="p-8 sm:p-16 lg:p-24">
+                <h2 class="text-2xl font-bold sm:text-3xl">Onde estamos</h2>
+
+                <p class="mt-4 text-gray-600">
+                  Nossa fábrica e atendimento estão localizados em Guarulhos/SP. Visite-nos para
+                  conhecer de perto o processo e retirar pedidos quando combinado.
+                </p>
+
+                <div class="mt-6 text-sm text-gray-700 space-y-1">
+                  <p class="font-semibold">Endereço</p>
+                  <p>Rua Tasso Fragoso, nº 105</p>
+                  <p>Parque das Nações — Guarulhos/SP</p>
+                  <p>CEP 07243-570</p>
+                </div>
+
+                <!-- Ações -->
+                <div class="mt-6 flex flex-col sm:flex-row gap-3">
+                  <a
+                    href="https://www.google.com/maps/dir/?api=1&destination=Rua+Tasso+Fragoso,+105,+Guarulhos,+SP"
+                    target="_blank"
+                    rel="noopener"
+                    class="inline-flex items-center justify-center rounded-lg bg-gray-900 px-4 py-2 text-white hover:opacity-90"
+                  >
+                    Como chegar
+                  </a>
+
+                  <a
+                    href="https://www.google.com/maps?q=Rua+Tasso+Fragoso,+105,+Guarulhos,+SP"
+                    target="_blank"
+                    class="inline-flex items-center justify-center rounded-lg bg-gray-900 px-4 py-2 text-white hover:opacity-90"
+                  >
+                    Ver no Google Maps
+                  </a>
+
+                  <button
+                    type="button"
+                    class="inline-flex items-center justify-center rounded-lg border border-gray-300 px-4 py-2 text-gray-700 hover:bg-gray-50"
+                    onclick="navigator.clipboard.writeText('Rua Tasso Fragoso, 105 - Parque das Nações, Guarulhos/SP - 07243-570')"
+                  >
+                    Copiar endereço
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- MAPA (direita no desktop) -->
+            <div class="mt-6 lg:mt-0 lg:order-2">
+              <div
+                class="map-card relative isolate rounded-2xl overflow-hidden ring-1 ring-black/10 shadow-lg aspect-[16/10] lg:aspect-[16/9]"
+              >
+                <!-- iFrame ocupa todo o cartão -->
+                <iframe
+                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d7321.013335271659!2d-46.41159395826342!3d-23.44218169870948!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x94ce62701f3f58d1%3A0x7040f1067ebf6f0f!2sR.%20Tasso%20Fragoso%2C%20105%20-%20Parque%20das%20Nacoes%2C%20Guarulhos%20-%20SP%2C%2007243-570!5e0!3m2!1spt-BR!2sbr!4v1759183706777!5m2!1spt-BR!2sbr"
+                  class="absolute inset-0 h-full w-full"
+                  style="border: 0"
+                  allowfullscreen
+                  loading="lazy"
+                  referrerpolicy="no-referrer-when-downgrade"
+                ></iframe>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- /Sobre -->
+
+      <!-- LINHAS & PRODUTOS (apresentação) -->
+      <section id="produtos" class="bg-gray-100 snap-start scroll-mt-20">
+        <div class="max-w-screen-2xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
+          <div class="grid grid-cols-1 gap-10 lg:grid-cols-3">
+            <div class="lg:flex lg:flex-col lg:justify-center lg:items-center lg:text-center">
+              <h2 class="text-2xl font-bold">Linhas & Produtos</h2>
+              <p class="mt-2 text-gray-600">
+                Modelos padrão e sob medida para diferentes ambientes.
+              </p>
+            </div>
+
+            <div class="lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <!-- Destaque: LA-2 -->
+              <article class="rounded-2xl bg-white border border-gray-200 p-6">
+                <header class="flex items-center justify-between">
+                  <h3 class="text-lg font-semibold">LA-2 — destaque de vendas</h3>
+                  <span
+                    class="inline-flex items-center rounded-full bg-gray-900 text-white text-xs px-2.5 py-1 text-center"
+                    >Mais pedido</span
+                  >
+                </header>
+                <p class="mt-2 text-gray-600">
+                  Perfil versátil e com ótimo custo-benefício. Indicado para residências e lojas.
+                </p>
+                <ul class="mt-4 text-sm text-gray-700 space-y-1 list-disc list-inside">
+                  <li>
+                    Tamanhos de 10×15 até 25×30 para <strong>Mesa</strong>; acima disso,
+                    <strong>Parede</strong>
+                  </li>
+                  <li>Cores mais pedidas: Preto, Branco, Natural</li>
+                  <li>Atende pedidos unitários e em volume</li>
+                </ul>
+              </article>
+
+              <!-- Segundo destaque (troque o modelo se for outro) -->
+              <article class="rounded-2xl bg-white border border-gray-200 p-6">
+                <header class="flex items-center justify-between">
+                  <h3 class="text-lg font-semibold">LA-3 — segunda saída</h3>
+                  <span
+                    class="inline-flex items-center rounded-full bg-gray-100 text-gray-700 text-xs px-2.5 py-1"
+                    >Saída constante</span
+                  >
+                </header>
+                <p class="mt-2 text-gray-600">
+                  Variação indicada para kits e composições. Mantém padrão e entrega rápida.
+                </p>
+                <ul class="mt-4 text-sm text-gray-700 space-y-1 list-disc list-inside">
+                  <li>Mesmas faixas de tamanho do LA-2</li>
+                  <li>Bom para kits e ambientações</li>
+                  <li>Disponível nas cores base</li>
+                </ul>
+              </article>
+
+              <!-- Cores & Acabamentos (substitui o card anterior) -->
+              <article class="rounded-2xl bg-white border border-gray-200 p-6">
+                <h3 class="text-lg font-semibold">Cores & Acabamentos</h3>
+                <p class="mt-2 text-gray-600">Padrões com giro rápido e acabamento uniforme.</p>
+                <ul class="mt-4 text-sm text-gray-700 space-y-1 list-disc list-inside">
+                  <li>Cores base: <strong>Preto</strong> e <strong>Branco</strong></li>
+                  <li>
+                    Vidros: <strong>padrão</strong> (com fundo Duratex) e
+                    <strong>anti-reflexo</strong>
+                  </li>
+                  <li>Outras cores e acabamentos <strong>sob consulta</strong></li>
+                </ul>
+              </article>
+
+              <!-- Sob medida -->
+              <article class="rounded-2xl bg-white border border-gray-200 p-6">
+                <h3 class="text-lg font-semibold">Sob Medida</h3>
+                <p class="mt-2 text-gray-600">
+                  Produção nas medidas que o seu projeto exige, com orientação e acabamento
+                  definidos no pedido.
+                </p>
+              </article>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- /Produtos -->
+
+      <!-- Galeria -->
+      <section id="galeria" class="py-6 min-h-[calc(100vh-4rem)] snap-start scroll-mt-20">
+        <!-- reduzi de py-12 para py-6 -->
+        <div class="max-w-screen-lg px-3 sm:px-4 lg:px-6 mx-auto">
+          <!-- reduzi largura e padding -->
+          <header class="text-center">
+            <h2 class="text-lg font-bold text-gray-900 sm:text-2xl">Galeria de Molduras</h2>
+            <p class="max-w-md mx-auto mt-2 text-gray-500 text-sm">
+              Modelos mais vendidos e composições
+            </p>
+          </header>
+
+          <ul class="grid grid-cols-1 gap-4 mt-6 lg:grid-cols-3">
+            <!-- Imagem 1 (ESQUERDA, topo) -->
+            <li
+              class="rounded-lg overflow-hidden ring-1 ring-black/10 shadow transition hover:shadow-md"
+            >
+              <img
+                src="assets/img/background/produtos/LA-2/produto-1.webp"
+                alt="produto-1"
+                class="w-full aspect-square object-cover object-center cursor-pointer transition duration-300 hover:scale-[1.03] js-open-modal"
+                loading="lazy"
+              />
+            </li>
+
+            <!-- Imagem 2 (ESQUERDA, abaixo) -->
+            <li
+              class="rounded-lg overflow-hidden ring-1 ring-black/10 shadow transition hover:shadow-md"
+            >
+              <img
+                src="assets/img/background/produtos/LA-2/produto-2.webp"
+                alt="produto-2"
+                class="w-full aspect-square object-cover object-center cursor-pointer transition duration-300 hover:scale-[1.03] js-open-modal"
+                loading="lazy"
+              />
+            </li>
+
+            <!-- Imagem grande (DIREITA, 2 colunas x 2 linhas) -->
+            <li
+              class="lg:col-span-2 lg:col-start-2 lg:row-span-2 lg:row-start-1 rounded-lg overflow-hidden ring-1 ring-black/10 shadow transition hover:shadow-md"
+            >
+              <img
+                src="assets/img/background/produtos/LA-2/produto-3.webp"
+                alt="produto-3"
+                class="w-full aspect-square object-cover cursor-pointer transition duration-300 hover:scale-[1.02] js-open-modal"
+              />
+            </li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- 💬 Modal lista de feedback -->
+      <!-- … section #feedback termina aqui … -->
+
+      <!-- 🖼️ Modal imagem -->
+      <div
+        id="modalImg"
+        class="fixed inset-0 z-[100] hidden items-center justify-center bg-black/70 p-4"
+      >
+        <!-- botão fechar -->
+        <button
+          type="button"
+          id="modalClose"
+          class="absolute top-4 right-4 text-white text-3xl leading-none px-2"
+          aria-label="Fechar"
+        >
+          ✕
+        </button>
+        <!-- imagem ampliada -->
+        <img
+          id="modalImgSrc"
+          class="max-w-[92vw] max-h-[90vh] rounded-xl shadow-2xl ring-1 ring-white/20 object-contain"
+          alt="Pré-visualização"
+        />
+      </div>
+
+      <!-- 💬 Modal lista de feedback -->
+      <div
+        id="modalFeedback"
+        class="fixed inset-0 z-[100] hidden items-center justify-center bg-black/60 p-4 sm:p-6"
+      >
+        <div
+          class="mx-auto w-[96vw] max-w-screen-lg lg:max-w-[1100px] 2xl:max-w-[1400px] bg-white rounded-2xl shadow-2xl ring-1 ring-black/10 max-h-[90vh] flex flex-col overflow-hidden"
+        >
+          <!-- Cabeçalho -->
+          <div class="sticky top-0 z-10 bg-white/95 backdrop-blur px-6 py-4 border-b">
+            <div class="flex items-start justify-between gap-3">
+              <div class="min-w-0">
+                <h3 id="modalFeedbackTitulo" class="text-lg sm:text-xl font-semibold truncate">
+                  Avaliações do site (SCS)
+                </h3>
+                <p id="modalFeedbackSub" class="text-xs text-gray-500 mt-0.5">Carregando…</p>
+              </div>
+
+              <div class="flex items-center gap-2 shrink-0">
+                <!-- aparece só se houver link da plataforma -->
+                <a
+                  id="modalFeedbackLink"
+                  target="_blank"
+                  class="hidden sm:inline-flex items-center rounded-md border px-3 py-1.5 text-xs hover:bg-gray-50"
+                >
+                  Ver na plataforma
+                </a>
+                <button
+                  id="modalFeedbackClose"
+                  class="p-2 rounded-md hover:bg-gray-100"
+                  aria-label="Fechar"
+                >
+                  ✕
                 </button>
               </div>
             </div>
-
-            <!-- GRID 4 CARDS (SCS + Shopee + ML + Google) -->
-            <div class="mt-4 md:mt-5 grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
-              <!-- SCS -->
-              <div class="p-1">
-                <section
-                  class="rounded-xl border border-gray-200 p-3 h-full flex flex-col overflow-hidden"
-                  data-feedback-card="scs"
-                  data-variant="media"
-                >
-                  <header class="flex flex-wrap items-center justify-between gap-x-2 gap-y-1">
-                    <span
-                      class="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium border shrink-0"
-                      style="background: #eef2ff; color: #3730a3; border-color: #c7d2fe"
-                      >SCS</span
-                    >
-                    <!-- (opcional) remova este data-c-estrelas se quiser as estrelas só dentro do cinza -->
-                    <div
-                      class="flex items-center gap-1.5 text-xs leading-none whitespace-nowrap"
-                      data-c-estrelas
-                    ></div>
-                  </header>
-
-                  <!-- Área cinza -->
-                  <article class="mt-2 rounded-lg bg-gray-50 p-2 text-[13px] min-w-0" data-c-list>
-                    <div class="media-grid">
-                      <!-- TOPO (autor à esq / data à dir) -->
-                      <div class="meta-row flex items-center justify-between gap-2">
-                        <span class="header-author truncate" data-c-autor></span>
-                        <time class="header-date" data-c-data></time>
-                      </div>
-
-                      <!-- TEXTO -->
-                      <div class="text-wrap">
-                        <p
-                          class="text-gray-800 leading-5 break-words hyphens-auto line-clamp-none"
-                          data-c-texto
-                        ></p>
-                      </div>
-
-                      <!-- Separado de linha -->
-                      <div class="photo-sep"></div>
-
-                      <!-- FOTO EMBAIXO (alinhada à direita) -->
-                      <figure class="photo-wrap">
-                        <button
-                          type="button"
-                          class="thumb-container group relative rounded-xl overflow-hidden border border-gray-200 bg-white js-open-modal hidden"
-                          aria-label="Ver foto em tela cheia"
-                        >
-                          <img
-                            src=""
-                            data-full=""
-                            alt=""
-                            class="transition duration-300 group-hover:scale-[1.03]"
-                            loading="lazy"
-                          />
-                          <span class="badge-ghost">Ver foto</span>
-                        </button>
-                        <div
-                          class="thumb-fallback rounded-xl border border-dashed grid place-items-center bg-white text-[10px] text-gray-400"
-                        >
-                          sem foto
-                        </div>
-                      </figure>
-                    </div>
-                  </article>
-
-                  <a
-                    href="#"
-                    class="mt-2 inline-flex justify-center rounded-lg border px-2.5 py-1.5 text-[12px] hover:bg-gray-50"
-                    data-plataforma="scs"
-                    data-action="ver-mais"
-                    data-c-ver-mais
-                    >Ver mais</a
-                  >
-                </section>
-              </div>
-
-              <!-- Shopee -->
-              <div class="p-1">
-                <section
-                  class="rounded-xl border border-gray-200 p-3 h-full flex flex-col overflow-hidden"
-                  data-feedback-card="shopee"
-                  data-variant="media"
-                >
-                  <header class="flex flex-wrap items-center justify-between gap-x-2 gap-y-1">
-                    <span
-                      class="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium border shrink-0"
-                      style="background: #fff7ed; color: #9a3412; border-color: #fed7aa"
-                      >Shopee</span
-                    >
-                    <div
-                      class="flex items-center gap-1.5 text-xs leading-none whitespace-nowrap"
-                      data-c-estrelas
-                    ></div>
-                  </header>
-
-                  <!-- Área cinza -->
-                  <article class="mt-2 rounded-lg bg-gray-50 p-2 text-[13px] min-w-0" data-c-list>
-                    <div class="media-grid">
-                      <!-- TOPO (autor à esq / data à dir) -->
-                      <div class="meta-row flex items-center justify-between gap-2">
-                        <span class="header-author truncate" data-c-autor></span>
-                        <time class="header-date" data-c-data></time>
-                      </div>
-
-                      <!-- TEXTO -->
-                      <div class="text-wrap">
-                        <p
-                          class="text-gray-800 leading-5 break-words hyphens-auto line-clamp-none"
-                          data-c-texto
-                        ></p>
-                      </div>
-
-                      <!-- Separador -->
-                      <div class="photo-sep"></div>
-
-                      <!-- FOTO EMBAIXO -->
-                      <figure class="photo-wrap">
-                        <button
-                          type="button"
-                          class="thumb-container group relative rounded-xl overflow-hidden border border-gray-200 bg-white js-open-modal hidden"
-                          aria-label="Ver foto em tela cheia"
-                        >
-                          <img
-                            src=""
-                            data-full=""
-                            alt=""
-                            class="transition duration-300 group-hover:scale-[1.03]"
-                            loading="lazy"
-                          />
-                          <span class="badge-ghost">Ver foto</span>
-                        </button>
-                        <div
-                          class="thumb-fallback rounded-xl border border-dashed grid place-items-center bg-white text-[10px] text-gray-400"
-                        >
-                          sem foto
-                        </div>
-                      </figure>
-                    </div>
-                  </article>
-
-                  <a
-                    href="#"
-                    class="mt-2 inline-flex justify-center rounded-lg border px-2.5 py-1.5 text-[12px] hover:bg-gray-50"
-                    data-plataforma="shopee"
-                    data-action="ver-mais"
-                    data-c-ver-mais
-                    >Ver mais</a
-                  >
-                </section>
-              </div>
-
-              <!-- Mercado Livre -->
-              <div class="p-1">
-                <section
-                  class="rounded-xl border border-gray-200 p-3 h-full flex flex-col overflow-hidden"
-                  data-feedback-card="ml"
-                  data-variant="media"
-                >
-                  <header class="flex flex-wrap items-center justify-between gap-x-2 gap-y-1">
-                    <span
-                      class="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium border shrink-0"
-                      style="background: #fef9c3; color: #854d0e; border-color: #fde68a"
-                      >Mercado Livre</span
-                    >
-                    <div
-                      class="flex items-center gap-1.5 text-xs leading-none whitespace-nowrap"
-                      data-c-estrelas
-                    ></div>
-                  </header>
-
-                  <!-- Área cinza -->
-                  <article class="mt-2 rounded-lg bg-gray-50 p-2 text-[13px] min-w-0" data-c-list>
-                    <div class="media-grid">
-                      <!-- TOPO -->
-                      <div class="meta-row flex items-center justify-between gap-2">
-                        <span class="header-author truncate" data-c-autor></span>
-                        <time class="header-date" data-c-data></time>
-                      </div>
-
-                      <!-- TEXTO -->
-                      <div class="text-wrap">
-                        <p
-                          class="text-gray-800 leading-5 break-words hyphens-auto line-clamp-none"
-                          data-c-texto
-                        ></p>
-                      </div>
-
-                      <!-- Separador -->
-                      <div class="photo-sep"></div>
-
-                      <!-- FOTO EMBAIXO -->
-                      <figure class="photo-wrap">
-                        <button
-                          type="button"
-                          class="thumb-container group relative rounded-xl overflow-hidden border border-gray-200 bg-white js-open-modal hidden"
-                          aria-label="Ver foto em tela cheia"
-                        >
-                          <img
-                            src=""
-                            data-full=""
-                            alt=""
-                            class="transition duration-300 group-hover:scale-[1.03]"
-                            loading="lazy"
-                          />
-                          <span class="badge-ghost">Ver foto</span>
-                        </button>
-                        <div
-                          class="thumb-fallback rounded-xl border border-dashed grid place-items-center bg-white text-[10px] text-gray-400"
-                        >
-                          sem foto
-                        </div>
-                      </figure>
-                    </div>
-                  </article>
-
-                  <a
-                    href="#"
-                    class="mt-2 inline-flex justify-center rounded-lg border px-2.5 py-1.5 text-[12px] hover:bg-gray-50"
-                    data-plataforma="ml"
-                    data-action="ver-mais"
-                    data-c-ver-mais
-                    >Ver mais</a
-                  >
-                </section>
-              </div>
-
-              <!-- Google -->
-              <div class="p-1">
-                <section
-                  class="rounded-xl border border-gray-200 p-3 h-full flex flex-col overflow-hidden"
-                  data-feedback-card="google"
-                  data-variant="media"
-                >
-                  <header class="flex flex-wrap items-center justify-between gap-x-2 gap-y-1">
-                    <span
-                      class="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium border shrink-0"
-                      style="background: #eff6ff; color: #1d4ed8; border-color: #bfdbfe"
-                      >Google</span
-                    >
-                    <div
-                      class="flex items-center gap-1.5 text-xs leading-none whitespace-nowrap"
-                      data-c-estrelas
-                    ></div>
-                  </header>
-
-                  <!-- Área cinza -->
-                  <article class="mt-2 rounded-lg bg-gray-50 p-2 text-[13px] min-w-0" data-c-list>
-                    <div class="media-grid">
-                      <!-- TOPO -->
-                      <div class="meta-row flex items-center justify-between gap-2">
-                        <span class="header-author truncate" data-c-autor></span>
-                        <time class="header-date" data-c-data></time>
-                      </div>
-
-                      <!-- TEXTO -->
-                      <div class="text-wrap">
-                        <p
-                          class="text-gray-800 leading-5 break-words hyphens-auto line-clamp-none"
-                          data-c-texto
-                        ></p>
-                      </div>
-
-                      <!-- Separador -->
-                      <div class="photo-sep"></div>
-
-                      <!-- FOTO EMBAIXO -->
-                      <figure class="photo-wrap">
-                        <button
-                          type="button"
-                          class="thumb-container group relative rounded-xl overflow-hidden border border-gray-200 bg-white js-open-modal hidden"
-                          aria-label="Ver foto em tela cheia"
-                        >
-                          <img
-                            src=""
-                            data-full=""
-                            alt=""
-                            class="transition duration-300 group-hover:scale-[1.03]"
-                            loading="lazy"
-                          />
-                          <span class="badge-ghost">Ver foto</span>
-                        </button>
-                        <div
-                          class="thumb-fallback rounded-xl border border-dashed grid place-items-center bg-white text-[10px] text-gray-400"
-                        >
-                          sem foto
-                        </div>
-                      </figure>
-                    </div>
-                  </article>
-
-                  <a
-                    href="#"
-                    class="mt-2 inline-flex justify-center rounded-lg border px-2.5 py-1.5 text-[12px] hover:bg-gray-50"
-                    data-plataforma="google"
-                    data-action="ver-mais"
-                    data-c-ver-mais
-                    >Ver mais</a
-                  >
-                </section>
-              </div>
-            </div>
-
-            <p class="text-[11px] text-gray-400 mt-4">
-              Conteúdo reproduzido de avaliações públicas.
-            </p>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- /FeedBack -->
-    <!-- Form do feedback Modal -->
-    <!-- FORM (esquerda no desktop) -->
-    <div class="flex bg-gray-100 rounded-2xl lg:order-1">
-      <div class="p-6 sm:p-6 lg:p-7 w-full">
-        <h2 class="text-2xl font-semibold sm:text-3xl">Deixe seu feedback</h2>
-
-        <!-- Avaliação por estrelas (HTML-only, acessível) -->
-        <fieldset class="mt-4" aria-label="Avaliação">
-          <legend class="sr-only">Avaliação</legend>
-
-          <div id="rating-group" class="flex items-center gap-1 text-xl select-none">
-            <input class="sr-only" type="radio" name="rating_star" id="rate1" value="1" required />
-            <label for="rate1" class="star" title="1 estrela"></label>
-
-            <input class="sr-only" type="radio" name="rating_star" id="rate2" value="2" />
-            <label for="rate2" class="star" title="2 estrelas"></label>
-
-            <input class="sr-only" type="radio" name="rating_star" id="rate3" value="3" />
-            <label for="rate3" class="star" title="3 estrelas"></label>
-
-            <input class="sr-only" type="radio" name="rating_star" id="rate4" value="4" />
-            <label for="rate4" class="star" title="4 estrelas"></label>
-
-            <input class="sr-only" type="radio" name="rating_star" id="rate5" value="5" />
-            <label for="rate5" class="star" title="5 estrelas"></label>
-          </div>
-          <input type="hidden" id="rating" name="rating" value="" />
-          <p class="mt-1 text-xs text-gray-500">
-            Selecione de 1 a 5 estrelas.
-            <span id="rating-badge" class="hidden">0/5</span>
-          </p>
-        </fieldset>
-
-        <!-- Formulário (HTML-only) -->
-        <form class="mt-6 space-y-4" id="feedback-form" novalidate>
-          <!-- Hidden técnicos -->
-          <input type="hidden" name="origem" value="scs" />
-          <input type="hidden" name="timestamp_cliente" id="timestamp_cliente" value="" />
-          <!-- Honeypot (anti-bot) -->
-          <div class="hidden" aria-hidden="true">
-            <label
-              >Não preencher:
-              <input type="text" id="honeypot" name="honeypot" tabindex="-1" autocomplete="off" />
-            </label>
           </div>
 
-          <!-- Nome (obrigatório) -->
-          <div>
-            <label for="nome" class="block text-sm font-medium text-gray-700">Seu nome</label>
-            <input
-              id="nome"
-              name="nome"
-              required
-              class="mt-1 w-full rounded-lg border-gray-300"
-              placeholder="Como devemos exibir seu nome?"
-            />
+          <!-- Lista (rola dentro do card) -->
+          <div class="flex-1 overflow-auto">
+            <ul id="modalFeedbackLista" class="px-6 py-4 divide-y divide-gray-100"></ul>
           </div>
 
-          <!-- Comentário (20–600) -->
-          <div>
-            <label for="comentario" class="block text-sm font-medium text-gray-700"
-              >Comentário</label
+          <!-- Rodapé -->
+          <div class="flex items-center justify-between gap-2 px-6 py-4 border-t bg-gray-50">
+            <span id="modalFeedbackInfo" class="text-[11px] text-gray-500">—</span>
+            <button
+              id="modalFeedbackLoadMore"
+              class="inline-flex rounded-lg border px-3 py-1.5 text-xs hover:bg-gray-100"
             >
-            <textarea
-              id="comentario"
-              name="comentario"
-              rows="3"
-              required
-              minlength="20"
-              maxlength="600"
-              class="mt-1 w-full rounded-lg border-gray-300 text-sm resize-none h-24 min-h"
-              placeholder="Conte como foi sua experiência (20 a 600 caracteres)"
-            ></textarea>
-            <p class="mt-1 text-xs text-gray-500">
-              <span id="contador-comentario">0</span>/600 caracteres.
-              <!-- contador em tempo real entra depois no JS -->
-            </p>
+              Carregar mais
+            </button>
           </div>
+        </div>
+      </div>
 
-          <!-- Foto (opcional, 1 imagem) -->
-          <div>
-            <label for="foto" class="block text-sm font-medium text-gray-700">
-              Foto da sua moldura (opcional)
-            </label>
-            <div class="relative mt-1">
-              <input
-                type="file"
-                id="foto"
-                name="foto"
-                accept="image/*"
-                capture="environment"
-                class="peer absolute inset-0 opacity-0 cursor-pointer z-10"
-              />
-              <div
-                class="flex items-center justify-between rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-600 shadow-sm peer-hover:border-gray-400 peer-focus:border-gray-900 transition"
-              >
-                <span id="foto-label" class="truncate" aria-live="polite">
-                  Nenhum arquivo selecionado</span
-                >
+      <!-- /Galeria -->
 
-                <span
-                  class="inline-flex items-center gap-1 rounded-md bg-gray-900 text-white text-xs px-2 py-1 shadow hover:opacity-90 transition"
+      <!-- Separador estilo seção -->
+      <section class="bg-gray-50">
+        <div class="mx-auto max-w-screen-xl px-4 py-6 sm:px-6 lg:px-8">
+          <!-- vazio propositalmente -->
+        </div>
+      </section>
+
+      <!-- FeedBack -->
+
+      <!-- FEEDBACK (padrão do bloco "Onde estamos": 2 colunas lado a lado) -->
+      <section id="feedback" class="py-6 scroll-mt-20 min-h-[calc(100vh-4rem)] snap-start">
+        <!-- Cabeçalho no estilo da galeria -->
+        <div class="max-w-screen-lg px-3 sm:px-4 lg:px-6 mx-auto">
+          <header class="text-center">
+            <h2 class="text-lg font-bold text-gray-900 sm:text-2xl">Avaliações de Clientes</h2>
+            <p class="max-w-md mx-auto mt-2 text-gray-500 text-sm">Mural das plataformas</p>
+          </header>
+        </div>
+
+        <!-- Bloco branco com os cards das avaliações de notas -->
+        <div class="mx-auto max-w-screen-2xl px-4 py-3 sm:px-6 lg:px-8 -mt-2">
+          <div class="rounded-2xl overflow-hidden ring-1 ring-black/10 shadow-lg bg-white">
+            <div class="px-5 sm:px-8 py-6 sm:py-7">
+              <!-- RESUMO (SCS) + CTA avaliação de notas -->
+              <div class="mt-5 grid grid-cols-1 md:grid-cols-3 gap-4 feedback-topo">
+                <!-- Barras -->
+                <div class="rounded-xl border border-gray-200 p-4 sm:p-5">
+                  <div class="space-y-2">
+                    <div class="flex items-center gap-3">
+                      <span class="w-8 text-xs font-medium text-gray-600">5 ★</span>
+                      <div class="h-2 flex-1 rounded bg-gray-100 overflow-hidden">
+                        <div class="h-full bg-amber-400" style="width: 0%" data-sum-bar="5"></div>
+                      </div>
+                      <span class="w-10 text-right text-[11px] text-gray-500" data-sum-count="5"
+                        >0</span
+                      >
+                    </div>
+                    <div class="flex items-center gap-3">
+                      <span class="w-8 text-xs font-medium text-gray-600">4 ★</span>
+                      <div class="h-2 flex-1 rounded bg-gray-100 overflow-hidden">
+                        <div class="h-full bg-amber-400" style="width: 0%" data-sum-bar="4"></div>
+                      </div>
+                      <span class="w-10 text-right text-[11px] text-gray-500" data-sum-count="4"
+                        >0</span
+                      >
+                    </div>
+                    <div class="flex items-center gap-3">
+                      <span class="w-8 text-xs font-medium text-gray-600">3 ★</span>
+                      <div class="h-2 flex-1 rounded bg-gray-100 overflow-hidden">
+                        <div class="h-full bg-amber-400" style="width: 0%" data-sum-bar="3"></div>
+                      </div>
+                      <span class="w-10 text-right text-[11px] text-gray-500" data-sum-count="3"
+                        >0</span
+                      >
+                    </div>
+                    <div class="flex items-center gap-3">
+                      <span class="w-8 text-xs font-medium text-gray-600">2 ★</span>
+                      <div class="h-2 flex-1 rounded bg-gray-100 overflow-hidden">
+                        <div class="h-full bg-amber-400" style="width: 0%" data-sum-bar="2"></div>
+                      </div>
+                      <span class="w-10 text-right text-[11px] text-gray-500" data-sum-count="2"
+                        >0</span
+                      >
+                    </div>
+                    <div class="flex items-center gap-3">
+                      <span class="w-8 text-xs font-medium text-gray-600">1 ★</span>
+                      <div class="h-2 flex-1 rounded bg-gray-100 overflow-hidden">
+                        <div class="h-full bg-amber-400" style="width: 0%" data-sum-bar="1"></div>
+                      </div>
+                      <span class="w-10 text-right text-[11px] text-gray-500" data-sum-count="1"
+                        >0</span
+                      >
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Média -->
+                <div class="rounded-xl border border-gray-200 p-4 sm:p-5 bg-amber-50/50">
+                  <div class="text-center">
+                    <div class="text-2xl sm:text-3xl font-semibold" data-sum-avg>–</div>
+                    <div class="mt-1 text-amber-500 text-lg" data-sum-stars>★★★★★</div>
+                    <div class="mt-1 text-[12px] text-gray-600">
+                      <span data-sum-total>0</span> avaliações
+                    </div>
+                    <div class="mt-1 text-[12px] text-gray-500">Somente SCS</div>
+                  </div>
+                </div>
+
+                <!-- CTA -->
+                <div
+                  class="rounded-xl border border-gray-200 bg-gray-50/80 p-5 flex flex-col items-center justify-between text-center feedback-cta hover:border-gray-300 transition"
                 >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    class="h-3.5 w-3.5"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
+                  <div>
+                    <h3 class="text-[14px] font-semibold text-gray-900 leading-tight">
+                      Compartilhe sua opinião
+                    </h3>
+                    <p class="mt-1 text-[11.5px] text-gray-500">Ajude outras pessoas a escolher.</p>
+                  </div>
+
+                  <button
+                    type="button"
+                    class="mt-4 inline-flex items-center gap-1.5 rounded-full bg-neutral-900 px-3 py-1.5 text-[12.5px] font-medium text-white shadow-sm ring-1 ring-black/10 transition hover:bg-neutral-800 hover:scale-[1.02] active:scale-[0.98]"
+                    data-open-feedback
                   >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M12 12V4m0 8l-3-3m3 3l3-3"
-                    />
-                  </svg>
-                  Selecionar
-                </span>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      class="h-3.5 w-3.5"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M12 4v16m8-8H4"
+                      />
+                    </svg>
+                    Feedback
+                  </button>
+                </div>
+              </div>
+
+              <!-- GRID 4 CARDS (SCS + Shopee + ML + Google) -->
+              <div class="mt-4 md:mt-5 grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
+                <!-- SCS -->
+                <div class="p-1">
+                  <section
+                    class="rounded-xl border border-gray-200 p-3 h-full flex flex-col overflow-hidden"
+                    data-feedback-card="scs"
+                    data-variant="media"
+                  >
+                    <header class="flex flex-wrap items-center justify-between gap-x-2 gap-y-1">
+                      <span
+                        class="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium border shrink-0"
+                        style="background: #eef2ff; color: #3730a3; border-color: #c7d2fe"
+                        >SCS</span
+                      >
+                      <!-- (opcional) remova este data-c-estrelas se quiser as estrelas só dentro do cinza -->
+                      <div
+                        class="flex items-center gap-1.5 text-xs leading-none whitespace-nowrap"
+                        data-c-estrelas
+                      ></div>
+                    </header>
+
+                    <!-- Área cinza -->
+                    <article class="mt-2 rounded-lg bg-gray-50 p-2 text-[13px] min-w-0" data-c-list>
+                      <div class="media-grid">
+                        <!-- TOPO (autor à esq / data à dir) -->
+                        <div class="meta-row flex items-center justify-between gap-2">
+                          <span class="header-author truncate" data-c-autor></span>
+                          <time class="header-date" data-c-data></time>
+                        </div>
+
+                        <!-- TEXTO -->
+                        <div class="text-wrap">
+                          <p
+                            class="text-gray-800 leading-5 break-words hyphens-auto line-clamp-none"
+                            data-c-texto
+                          ></p>
+                        </div>
+
+                        <!-- Separado de linha -->
+                        <div class="photo-sep"></div>
+
+                        <!-- FOTO EMBAIXO (alinhada à direita) -->
+                        <figure class="photo-wrap">
+                          <button
+                            type="button"
+                            class="thumb-container group relative rounded-xl overflow-hidden border border-gray-200 bg-white js-open-modal hidden"
+                            aria-label="Ver foto em tela cheia"
+                          >
+                            <img
+                              src=""
+                              data-full=""
+                              alt=""
+                              class="transition duration-300 group-hover:scale-[1.03]"
+                              loading="lazy"
+                            />
+                            <span class="badge-ghost">Ver foto</span>
+                          </button>
+                          <div
+                            class="thumb-fallback rounded-xl border border-dashed grid place-items-center bg-white text-[10px] text-gray-400"
+                          >
+                            sem foto
+                          </div>
+                        </figure>
+                      </div>
+                    </article>
+
+                    <a
+                      href="#"
+                      class="mt-2 inline-flex justify-center rounded-lg border px-2.5 py-1.5 text-[12px] hover:bg-gray-50"
+                      data-plataforma="scs"
+                      data-action="ver-mais"
+                      data-c-ver-mais
+                      >Ver mais</a
+                    >
+                  </section>
+                </div>
+
+                <!-- Shopee -->
+                <div class="p-1">
+                  <section
+                    class="rounded-xl border border-gray-200 p-3 h-full flex flex-col overflow-hidden"
+                    data-feedback-card="shopee"
+                    data-variant="media"
+                  >
+                    <header class="flex flex-wrap items-center justify-between gap-x-2 gap-y-1">
+                      <span
+                        class="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium border shrink-0"
+                        style="background: #fff7ed; color: #9a3412; border-color: #fed7aa"
+                        >Shopee</span
+                      >
+                      <div
+                        class="flex items-center gap-1.5 text-xs leading-none whitespace-nowrap"
+                        data-c-estrelas
+                      ></div>
+                    </header>
+
+                    <!-- Área cinza -->
+                    <article class="mt-2 rounded-lg bg-gray-50 p-2 text-[13px] min-w-0" data-c-list>
+                      <div class="media-grid">
+                        <!-- TOPO (autor à esq / data à dir) -->
+                        <div class="meta-row flex items-center justify-between gap-2">
+                          <span class="header-author truncate" data-c-autor></span>
+                          <time class="header-date" data-c-data></time>
+                        </div>
+
+                        <!-- TEXTO -->
+                        <div class="text-wrap">
+                          <p
+                            class="text-gray-800 leading-5 break-words hyphens-auto line-clamp-none"
+                            data-c-texto
+                          ></p>
+                        </div>
+
+                        <!-- Separador -->
+                        <div class="photo-sep"></div>
+
+                        <!-- FOTO EMBAIXO -->
+                        <figure class="photo-wrap">
+                          <button
+                            type="button"
+                            class="thumb-container group relative rounded-xl overflow-hidden border border-gray-200 bg-white js-open-modal hidden"
+                            aria-label="Ver foto em tela cheia"
+                          >
+                            <img
+                              src=""
+                              data-full=""
+                              alt=""
+                              class="transition duration-300 group-hover:scale-[1.03]"
+                              loading="lazy"
+                            />
+                            <span class="badge-ghost">Ver foto</span>
+                          </button>
+                          <div
+                            class="thumb-fallback rounded-xl border border-dashed grid place-items-center bg-white text-[10px] text-gray-400"
+                          >
+                            sem foto
+                          </div>
+                        </figure>
+                      </div>
+                    </article>
+
+                    <a
+                      href="#"
+                      class="mt-2 inline-flex justify-center rounded-lg border px-2.5 py-1.5 text-[12px] hover:bg-gray-50"
+                      data-plataforma="shopee"
+                      data-action="ver-mais"
+                      data-c-ver-mais
+                      >Ver mais</a
+                    >
+                  </section>
+                </div>
+
+                <!-- Mercado Livre -->
+                <div class="p-1">
+                  <section
+                    class="rounded-xl border border-gray-200 p-3 h-full flex flex-col overflow-hidden"
+                    data-feedback-card="ml"
+                    data-variant="media"
+                  >
+                    <header class="flex flex-wrap items-center justify-between gap-x-2 gap-y-1">
+                      <span
+                        class="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium border shrink-0"
+                        style="background: #fef9c3; color: #854d0e; border-color: #fde68a"
+                        >Mercado Livre</span
+                      >
+                      <div
+                        class="flex items-center gap-1.5 text-xs leading-none whitespace-nowrap"
+                        data-c-estrelas
+                      ></div>
+                    </header>
+
+                    <!-- Área cinza -->
+                    <article class="mt-2 rounded-lg bg-gray-50 p-2 text-[13px] min-w-0" data-c-list>
+                      <div class="media-grid">
+                        <!-- TOPO -->
+                        <div class="meta-row flex items-center justify-between gap-2">
+                          <span class="header-author truncate" data-c-autor></span>
+                          <time class="header-date" data-c-data></time>
+                        </div>
+
+                        <!-- TEXTO -->
+                        <div class="text-wrap">
+                          <p
+                            class="text-gray-800 leading-5 break-words hyphens-auto line-clamp-none"
+                            data-c-texto
+                          ></p>
+                        </div>
+
+                        <!-- Separador -->
+                        <div class="photo-sep"></div>
+
+                        <!-- FOTO EMBAIXO -->
+                        <figure class="photo-wrap">
+                          <button
+                            type="button"
+                            class="thumb-container group relative rounded-xl overflow-hidden border border-gray-200 bg-white js-open-modal hidden"
+                            aria-label="Ver foto em tela cheia"
+                          >
+                            <img
+                              src=""
+                              data-full=""
+                              alt=""
+                              class="transition duration-300 group-hover:scale-[1.03]"
+                              loading="lazy"
+                            />
+                            <span class="badge-ghost">Ver foto</span>
+                          </button>
+                          <div
+                            class="thumb-fallback rounded-xl border border-dashed grid place-items-center bg-white text-[10px] text-gray-400"
+                          >
+                            sem foto
+                          </div>
+                        </figure>
+                      </div>
+                    </article>
+
+                    <a
+                      href="#"
+                      class="mt-2 inline-flex justify-center rounded-lg border px-2.5 py-1.5 text-[12px] hover:bg-gray-50"
+                      data-plataforma="ml"
+                      data-action="ver-mais"
+                      data-c-ver-mais
+                      >Ver mais</a
+                    >
+                  </section>
+                </div>
+
+                <!-- Google -->
+                <div class="p-1">
+                  <section
+                    class="rounded-xl border border-gray-200 p-3 h-full flex flex-col overflow-hidden"
+                    data-feedback-card="google"
+                    data-variant="media"
+                  >
+                    <header class="flex flex-wrap items-center justify-between gap-x-2 gap-y-1">
+                      <span
+                        class="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium border shrink-0"
+                        style="background: #eff6ff; color: #1d4ed8; border-color: #bfdbfe"
+                        >Google</span
+                      >
+                      <div
+                        class="flex items-center gap-1.5 text-xs leading-none whitespace-nowrap"
+                        data-c-estrelas
+                      ></div>
+                    </header>
+
+                    <!-- Área cinza -->
+                    <article class="mt-2 rounded-lg bg-gray-50 p-2 text-[13px] min-w-0" data-c-list>
+                      <div class="media-grid">
+                        <!-- TOPO -->
+                        <div class="meta-row flex items-center justify-between gap-2">
+                          <span class="header-author truncate" data-c-autor></span>
+                          <time class="header-date" data-c-data></time>
+                        </div>
+
+                        <!-- TEXTO -->
+                        <div class="text-wrap">
+                          <p
+                            class="text-gray-800 leading-5 break-words hyphens-auto line-clamp-none"
+                            data-c-texto
+                          ></p>
+                        </div>
+
+                        <!-- Separador -->
+                        <div class="photo-sep"></div>
+
+                        <!-- FOTO EMBAIXO -->
+                        <figure class="photo-wrap">
+                          <button
+                            type="button"
+                            class="thumb-container group relative rounded-xl overflow-hidden border border-gray-200 bg-white js-open-modal hidden"
+                            aria-label="Ver foto em tela cheia"
+                          >
+                            <img
+                              src=""
+                              data-full=""
+                              alt=""
+                              class="transition duration-300 group-hover:scale-[1.03]"
+                              loading="lazy"
+                            />
+                            <span class="badge-ghost">Ver foto</span>
+                          </button>
+                          <div
+                            class="thumb-fallback rounded-xl border border-dashed grid place-items-center bg-white text-[10px] text-gray-400"
+                          >
+                            sem foto
+                          </div>
+                        </figure>
+                      </div>
+                    </article>
+
+                    <a
+                      href="#"
+                      class="mt-2 inline-flex justify-center rounded-lg border px-2.5 py-1.5 text-[12px] hover:bg-gray-50"
+                      data-plataforma="google"
+                      data-action="ver-mais"
+                      data-c-ver-mais
+                      >Ver mais</a
+                    >
+                  </section>
+                </div>
+              </div>
+
+              <p class="text-[11px] text-gray-400 mt-4">
+                Conteúdo reproduzido de avaliações públicas.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- /FeedBack -->
+      <!-- Form do feedback Modal -->
+      <!-- FORM (esquerda no desktop) -->
+      <div class="flex bg-gray-100 rounded-2xl lg:order-1">
+        <div class="p-6 sm:p-6 lg:p-7 w-full">
+          <h2 class="text-2xl font-semibold sm:text-3xl">Deixe seu feedback</h2>
+
+          <!-- Avaliação por estrelas (HTML-only, acessível) -->
+          <fieldset class="mt-4" aria-label="Avaliação">
+            <legend class="sr-only">Avaliação</legend>
+
+            <div id="rating-group" class="flex items-center gap-1 text-xl select-none">
+              <input
+                class="sr-only"
+                type="radio"
+                name="rating_star"
+                id="rate1"
+                value="1"
+                required
+              />
+              <label for="rate1" class="star" title="1 estrela"></label>
+
+              <input class="sr-only" type="radio" name="rating_star" id="rate2" value="2" />
+              <label for="rate2" class="star" title="2 estrelas"></label>
+
+              <input class="sr-only" type="radio" name="rating_star" id="rate3" value="3" />
+              <label for="rate3" class="star" title="3 estrelas"></label>
+
+              <input class="sr-only" type="radio" name="rating_star" id="rate4" value="4" />
+              <label for="rate4" class="star" title="4 estrelas"></label>
+
+              <input class="sr-only" type="radio" name="rating_star" id="rate5" value="5" />
+              <label for="rate5" class="star" title="5 estrelas"></label>
+            </div>
+            <input type="hidden" id="rating" name="rating" value="" />
+            <p class="mt-1 text-xs text-gray-500">
+              Selecione de 1 a 5 estrelas.
+              <span id="rating-badge" class="hidden">0/5</span>
+            </p>
+          </fieldset>
+
+          <!-- Formulário (HTML-only) -->
+          <form class="mt-6 space-y-4" id="feedback-form" novalidate>
+            <!-- Hidden técnicos -->
+            <input type="hidden" name="origem" value="scs" />
+            <input type="hidden" name="timestamp_cliente" id="timestamp_cliente" value="" />
+            <!-- Honeypot (anti-bot) -->
+            <div class="hidden" aria-hidden="true">
+              <label
+                >Não preencher:
+                <input type="text" id="honeypot" name="honeypot" tabindex="-1" autocomplete="off" />
+              </label>
+            </div>
+
+            <!-- Nome (obrigatório) -->
+            <div>
+              <label for="nome" class="block text-sm font-medium text-gray-700">Seu nome</label>
+              <input
+                id="nome"
+                name="nome"
+                required
+                class="mt-1 w-full rounded-lg border-gray-300"
+                placeholder="Como devemos exibir seu nome?"
+              />
+            </div>
+
+            <!-- Comentário (20–600) -->
+            <div>
+              <label for="comentario" class="block text-sm font-medium text-gray-700"
+                >Comentário</label
+              >
+              <textarea
+                id="comentario"
+                name="comentario"
+                rows="3"
+                required
+                minlength="20"
+                maxlength="600"
+                class="mt-1 w-full rounded-lg border-gray-300 text-sm resize-none h-24 min-h"
+                placeholder="Conte como foi sua experiência (20 a 600 caracteres)"
+              ></textarea>
+              <p class="mt-1 text-xs text-gray-500">
+                <span id="contador-comentario">0</span>/600 caracteres.
+                <!-- contador em tempo real entra depois no JS -->
+              </p>
+            </div>
+
+            <!-- Foto (opcional, 1 imagem) -->
+            <div>
+              <label for="foto" class="block text-sm font-medium text-gray-700">
+                Foto da sua moldura (opcional)
+              </label>
+              <div class="relative mt-1">
+                <input
+                  type="file"
+                  id="foto"
+                  name="foto"
+                  accept="image/*"
+                  capture="environment"
+                  class="peer absolute inset-0 opacity-0 cursor-pointer z-10"
+                />
+                <div
+                  class="flex items-center justify-between rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-600 shadow-sm peer-hover:border-gray-400 peer-focus:border-gray-900 transition"
+                >
+                  <span id="foto-label" class="truncate" aria-live="polite">
+                    Nenhum arquivo selecionado</span
+                  >
+
+                  <span
+                    class="inline-flex items-center gap-1 rounded-md bg-gray-900 text-white text-xs px-2 py-1 shadow hover:opacity-90 transition"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      class="h-3.5 w-3.5"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M12 12V4m0 8l-3-3m3 3l3-3"
+                      />
+                    </svg>
+                    Selecionar
+                  </span>
+                </div>
+              </div>
+              <!-- Prévia usada no UI.js -->
+              <div
+                id="foto-preview"
+                class="mt-2 w-24 aspect-square overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm flex-none self-start inline-block align-top"
+                style="width: 96px; height: 96px; flex: 0 0 96px"
+                title="Clique para ampliar"
+              ></div>
+            </div>
+            <p class="mt-2 text-xs text-gray-500">
+              Envie 1 imagem (máx. 5 MB). Otimizaremos o tamanho depois.
+            </p>
+
+            <!-- Opcionais -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label for="contato" class="block text-sm font-medium text-gray-700">
+                  Contato (opcional)
+                </label>
+                <input
+                  id="contato"
+                  name="contato"
+                  class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                  placeholder="WhatsApp ou e-mail"
+                />
               </div>
             </div>
-            <!-- Prévia usada no UI.js -->
-            <div
-              id="foto-preview"
-              class="mt-2 w-24 aspect-square overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm flex-none self-start inline-block align-top"
-              style="width: 96px; height: 96px; flex: 0 0 96px"
-              title="Clique para ampliar"
-            ></div>
+
+            <!-- Aviso -->
+            <p class="text-xs text-gray-600">
+              Ao enviar, você autoriza a publicação do depoimento no site. Dados de contato não são
+              exibidos.
+            </p>
+
+            <!-- Botão -->
+            <button
+              id="btn-submit"
+              type="submit"
+              class="mt-4 inline-flex items-center justify-center rounded-lg bg-gray-900 px-4 py-3 text-sm font-medium text-white shadow hover:opacity-90 sm:w-auto sm:px-6 sm:py-2.5 transition"
+            >
+              Enviar feedback
+            </button>
+            <span
+              id="form-status"
+              role="status"
+              aria-live="polite"
+              class="text-sm text-gray-600"
+            ></span>
+          </form>
+        </div>
+      </div>
+
+      <!-- Separador estilo seção -->
+      <section class="bg-gray-50">
+        <div class="mx-auto max-w-screen-xl px-4 py-6 sm:px-6 lg:px-8">
+          <!-- vazio propositalmente -->
+        </div>
+      </section>
+
+      <!-- Celine (substitui “Work Experience”) -->
+      <section id="celine" class="bg-gray-100">
+        <div class="max-w-screen-2xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
+          <div class="flex items-center gap-2">
+            <h2 class="text-3xl font-bold">Sistema interno — codinome Celine</h2>
+            <span
+              class="inline-flex items-center text-center rounded-full bg-gray-900 text-white text-xs px-2.5 py-1"
+            >
+              Implantação por fases
+            </span>
           </div>
-          <p class="mt-2 text-xs text-gray-500">
-            Envie 1 imagem (máx. 5 MB). Otimizaremos o tamanho depois.
+
+          <p class="mt-3 text-gray-700 max-w-3xl">
+            Sistema interno para <strong>padronizar o processo</strong>,
+            <strong>evitar erros manuais</strong> e
+            <strong>otimizar o tempo de produção</strong> com acompanhamento em
+            <strong>tempo real</strong>. A operação segue normal enquanto a implantação acontece por
+            etapas.
           </p>
 
-          <!-- Opcionais -->
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div>
-              <label for="contato" class="block text-sm font-medium text-gray-700">
-                Contato (opcional)
-              </label>
-              <input
-                id="contato"
-                name="contato"
-                class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
-                placeholder="WhatsApp ou e-mail"
-              />
-            </div>
+          <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch">
+            <!-- Pilares -->
+            <article class="h-full flex flex-col rounded-2xl bg-white border border-gray-200 p-6">
+              <h3 class="font-semibold">Pilares</h3>
+              <!-- Pilares (substituir a UL atual) -->
+              <ul class="mt-3 space-y-1 text-sm text-gray-700 list-disc list-inside">
+                <li><strong>Padroniza</strong> etapas com checklists e conferências</li>
+                <li>
+                  <strong>Controle por usuários/setores</strong> (Corte, Vidro, Montagem, Expedição)
+                </li>
+                <li><strong>Rastreia</strong> o pedido de ponta a ponta em tempo real</li>
+                <li><strong>Organiza filas e prioridades</strong> por prazo e demanda</li>
+                <li>
+                  <strong>Sistema robusto e independente</strong> (uso interno, estável e sem
+                  dependências externas críticas)
+                </li>
+              </ul>
+            </article>
+
+            <!-- Funcionalidades em implantação -->
+            <article class="h-full flex flex-col rounded-2xl bg-white border border-gray-200 p-6">
+              <h3 class="font-semibold">Funcionalidades (em implantação)</h3>
+              <ul class="mt-3 space-y-1 text-sm text-gray-700 list-disc list-inside">
+                <li>
+                  Painel interno de <strong>status por etapa</strong> (Corte, Vidro, Montagem,
+                  Finalizado)
+                </li>
+                <li><strong>Priorização dinâmica</strong> por prazo e demanda</li>
+                <li><strong>Histórico por cliente</strong> e registro de ajustes/reposições</li>
+                <li><strong>Apontamento de tempo</strong> por etapa (ganho de produtividade)</li>
+              </ul>
+            </article>
+
+            <!-- Resultados esperados -->
+            <article class="h-full flex flex-col rounded-2xl bg-white border border-gray-200 p-6">
+              <h3 class="font-semibold">Resultados esperados</h3>
+              <ul class="mt-3 space-y-1 text-sm text-gray-700 list-disc list-inside">
+                <li>Menos retrabalho e menos falhas de conferência</li>
+                <li><strong>Tempo de Espera</strong> menor e mais previsível</li>
+                <li>Visão clara do que está pronto para retirada/expedição</li>
+                <li>Melhor aproveitamento do time no chão de fábrica</li>
+              </ul>
+            </article>
           </div>
 
-          <!-- Aviso -->
-          <p class="text-xs text-gray-600">
-            Ao enviar, você autoriza a publicação do depoimento no site. Dados de contato não são
-            exibidos.
+          <p class="mt-6 text-xs text-gray-500">
+            Hoje o acompanhamento é <strong>manual</strong>, com prazos combinados e comunicação
+            direta. Pedidos via marketplaces seguem o fluxo e suporte da própria plataforma.
           </p>
-
-          <!-- Botão -->
-          <button
-            id="btn-submit"
-            type="submit"
-            class="mt-4 inline-flex items-center justify-center rounded-lg bg-gray-900 px-4 py-3 text-sm font-medium text-white shadow hover:opacity-90 sm:w-auto sm:px-6 sm:py-2.5 transition"
-          >
-            Enviar feedback
-          </button>
-          <span
-            id="form-status"
-            role="status"
-            aria-live="polite"
-            class="text-sm text-gray-600"
-          ></span>
-        </form>
-      </div>
-    </div>
-
-    <!-- Separador estilo seção -->
-    <section class="bg-gray-50">
-      <div class="mx-auto max-w-screen-xl px-4 py-6 sm:px-6 lg:px-8">
-        <!-- vazio propositalmente -->
-      </div>
-    </section>
-
-    <!-- Celine (substitui “Work Experience”) -->
-    <section id="celine" class="bg-gray-100">
-      <div class="max-w-screen-2xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
-        <div class="flex items-center gap-2">
-          <h2 class="text-3xl font-bold">Sistema interno — codinome Celine</h2>
-          <span
-            class="inline-flex items-center text-center rounded-full bg-gray-900 text-white text-xs px-2.5 py-1"
-          >
-            Implantação por fases
-          </span>
         </div>
+      </section>
 
-        <p class="mt-3 text-gray-700 max-w-3xl">
-          Sistema interno para <strong>padronizar o processo</strong>,
-          <strong>evitar erros manuais</strong> e <strong>otimizar o tempo de produção</strong> com
-          acompanhamento em <strong>tempo real</strong>. A operação segue normal enquanto a
-          implantação acontece por etapas.
-        </p>
-
-        <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch">
-          <!-- Pilares -->
-          <article class="h-full flex flex-col rounded-2xl bg-white border border-gray-200 p-6">
-            <h3 class="font-semibold">Pilares</h3>
-            <!-- Pilares (substituir a UL atual) -->
-            <ul class="mt-3 space-y-1 text-sm text-gray-700 list-disc list-inside">
-              <li><strong>Padroniza</strong> etapas com checklists e conferências</li>
-              <li>
-                <strong>Controle por usuários/setores</strong> (Corte, Vidro, Montagem, Expedição)
-              </li>
-              <li><strong>Rastreia</strong> o pedido de ponta a ponta em tempo real</li>
-              <li><strong>Organiza filas e prioridades</strong> por prazo e demanda</li>
-              <li>
-                <strong>Sistema robusto e independente</strong> (uso interno, estável e sem
-                dependências externas críticas)
-              </li>
-            </ul>
-          </article>
-
-          <!-- Funcionalidades em implantação -->
-          <article class="h-full flex flex-col rounded-2xl bg-white border border-gray-200 p-6">
-            <h3 class="font-semibold">Funcionalidades (em implantação)</h3>
-            <ul class="mt-3 space-y-1 text-sm text-gray-700 list-disc list-inside">
-              <li>
-                Painel interno de <strong>status por etapa</strong> (Corte, Vidro, Montagem,
-                Finalizado)
-              </li>
-              <li><strong>Priorização dinâmica</strong> por prazo e demanda</li>
-              <li><strong>Histórico por cliente</strong> e registro de ajustes/reposições</li>
-              <li><strong>Apontamento de tempo</strong> por etapa (ganho de produtividade)</li>
-            </ul>
-          </article>
-
-          <!-- Resultados esperados -->
-          <article class="h-full flex flex-col rounded-2xl bg-white border border-gray-200 p-6">
-            <h3 class="font-semibold">Resultados esperados</h3>
-            <ul class="mt-3 space-y-1 text-sm text-gray-700 list-disc list-inside">
-              <li>Menos retrabalho e menos falhas de conferência</li>
-              <li><strong>Tempo de Espera</strong> menor e mais previsível</li>
-              <li>Visão clara do que está pronto para retirada/expedição</li>
-              <li>Melhor aproveitamento do time no chão de fábrica</li>
-            </ul>
-          </article>
-        </div>
-
-        <p class="mt-6 text-xs text-gray-500">
-          Hoje o acompanhamento é <strong>manual</strong>, com prazos combinados e comunicação
-          direta. Pedidos via marketplaces seguem o fluxo e suporte da própria plataforma.
-        </p>
-      </div>
-    </section>
-
-    <!-- /Celine -->
-
+      <!-- /Celine -->
+    </main>
     <!-- Footer / Contato -->
     <footer class="bg-white lg:grid lg:grid-cols-2" id="contact">
       <div class="px-4 py-16 sm:px-6 lg:col-span-2 lg:px-8">
@@ -2527,10 +2545,12 @@
             </li>
           </ul>
 
-          <div class="mt-12 border-t border-gray-100 pt-12 sm:col-span-2">
-            <p class="text-xs text-gray-500 tracking-wider">
-              © <span id="ano"></span> SCS Molduras • Razão social: SCS Comércio em Geral
+          <div class="mt-16 border-t border-gray-200 pt-8 text-center sm:col-span-2 space-y-3">
+            <p class="text-[11px] text-gray-500 tracking-wider">
+              © <span id="ano"></span> SCS Molduras • SCS Comércio em Geral
             </p>
+
+            <p class="text-[11px] text-gray-400 tracking-wider italic">Celine Studio — D.</p>
           </div>
         </div>
       </div>
