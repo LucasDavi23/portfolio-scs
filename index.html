@@ -1844,7 +1844,7 @@
 
                 <!-- CTA -->
                 <div
-                  class="rounded-xl border border-gray-200 bg-gray-50/80 p-5 flex flex-col items-center justify-between text-center feedback-cta hover:border-gray-300 transition"
+                  class="rounded-xl border border-gray-200 bg-gray-50/80 p-8 flex flex-col items-center justify-between text-center feedback-cta hover:border-gray-300 transition"
                 >
                   <div>
                     <h3 class="text-[14px] font-semibold text-gray-900 leading-tight">
@@ -1855,12 +1855,12 @@
 
                   <button
                     type="button"
-                    class="mt-4 inline-flex items-center gap-1.5 rounded-full bg-neutral-900 px-3 py-1.5 text-[12.5px] font-medium text-white shadow-sm ring-1 ring-black/10 transition hover:bg-neutral-800 hover:scale-[1.02] active:scale-[0.98]"
+                    class="mt-4 inline-flex items-center justify-center gap-2 rounded-full bg-neutral-900 px-5 py-2 text-sm font-medium text-white shadow-sm ring-1 ring-black/10 transition hover:bg-neutral-800 hover:scale-[1.02] active:scale-[0.98]"
                     data-open-feedback
                   >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
-                      class="h-3.5 w-3.5"
+                      class="h-4 w-4"
                       fill="none"
                       viewBox="0 0 24 24"
                       stroke="currentColor"
@@ -2602,8 +2602,10 @@
     <!-- 1) Define o endpoint UMA vez -->
     <!-- 1) Base — seta window.FEEDBACK_ENDPOINT automaticamente ao carregar -->
     <script type="module" src="assets/js/feedback/feedback.base.js"></script>
-    <script type="module" src="assets/js/feedback/feedbackCardModal/feedbackCardAPI.js"></script>
 
+    <!-- FeedBack Cards -->
+    <script type="module" src="assets/js/feedback/feedbackCardModal/feedbackCardAPI.js"></script>
+    <script type="module" src="/assets/js/feedback/summary/summary.js"></script>
     <script src="assets/js/feedback/feedbackCardModal/feedbackImagem.js"></script>
     <script src="assets/js/feedback/feedbackCardModal/feedbackLista.js"></script>
     <script defer src="assets/js/feedback/feedbackCardModal/feedbackPreload.js"></script>

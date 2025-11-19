@@ -1,0 +1,77 @@
+
+📘 README — Equipe Celestial do Sistema de Feedback
+
+Nomes simbólicos usados para identificar módulos internos do sistema.
+Não representam pessoas reais — são apelidos espirituais/técnicos que dão identidade ao código e facilitam manutenção.
+
+✨ 👩‍💻 Equipe Celestial — Módulos do Sistema de Feedback
+
+Cada módulo JS recebe um “codinome” inspirado em personagens bíblicas femininas, representando seu propósito técnico e simbólico dentro do sistema.
+
+Essa identidade ajuda na organização, na didática e na apresentação profissional do template.
+
+🌟 Abigaíl — Summary de Avaliações
+
+Arquivos: summaryPro.js, summaryHelpers.js
+
+PT: Representa sabedoria, prudência e clareza. Coordena o resumo das avaliações — média, distribuição de estrelas, barras, fallback, retry e cache.
+
+EN: Represents wisdom and clarity. Handles the SCS reviews summary — average, star distribution, bars, fallback, retry and caching.
+
+🌿 Selah — Mural de Avaliações
+
+Arquivo: feedbackMural.js
+
+PT: Simboliza contemplação e leitura suave. Organiza a exibição das avaliações no mural, garantindo harmonia e transições elegantes.
+
+EN: Symbolizes contemplation and smooth reading. Renders the review wall with harmony and elegant transitions.
+
+🪨 Petra — Protetora das Imagens
+
+Arquivo: feedbackImagem.js
+
+PT: Representa força e estabilidade. Cuida do carregamento seguro das imagens (proxy, retry, fallback), evitando que a UI quebre.
+
+EN: Represents strength and stability. Ensures image loading safety (proxy, retry, fallback) so the UI never breaks.
+
+💬 Priscila — Formulário de Feedback
+
+Arquivos: feedbackForm.js, feedbackFormModal.js
+
+PT: Simboliza ensino e orientação. Gerencia o fluxo completo do formulário — validação, envio, feedback visual e UX do modal.
+
+EN: Symbolizes teaching and guidance. Manages the feedback form — validation, submission, UI states and modal UX.
+
+🔗 Talita — API do Feedback
+
+Arquivo: feedbackAPI.js
+
+PT: Representa renovo e ligação. Faz a ponte entre o front-end e o Apps Script, centralizando URLs, rotas e endpoints.
+
+EN: Represents renewal and connection. Bridges the front-end with Apps Script, centralizing URLs, routes and endpoints.
+
+🌙 Selina — Guardiã do Preload
+
+Arquivo: feedbackPreload.js
+
+PT: Nome ligado à luz suave e transição. Cuida dos loaders, skeletons e estados intermediários enquanto o sistema carrega dados.
+
+EN: Linked to soft light and transition. Handles loaders, skeleton screens and intermediate states during data loading.
+
+💛 Celine — Diretora de Front/UI
+
+Arquivo: (Identidade global do projeto)
+
+PT: Derivado de “celestial”. Simboliza cuidado, estética e comunicação — padrão UI/UX do sistema.
+
+EN: Derived from “celestial”. Represents care, aesthetics and communication — the UI/UX lead of the system.
+
+🧱 Resumo Técnico
+Persona	Arquivo(s)	Papel Técnico
+Abigaíl	summaryPro.js / summaryHelpers.js	Summary, estatísticas, fallback PRO
+Selah	feedbackMural.js	Mural de avaliações
+Petra	feedbackImagem.js	Imagens + proxy + fallback
+Priscila	feedbackForm.js / feedbackFormModal.js	Formulário + Modal
+Talita	feedbackAPI.js	API e endpoints
+Selina	feedbackPreload.js	Preload e loaders
+Celine	Global	UI/UX chefia

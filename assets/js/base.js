@@ -221,7 +221,7 @@ document.querySelector('#menu').addEventListener('click', (e) => {
 })();
 
 // modal imagem
-// modal imagem
+
 (function () {
   function ready(fn) {
     if (document.readyState !== 'loading') {
@@ -262,22 +262,39 @@ document.querySelector('#menu').addEventListener('click', (e) => {
     // 🔥 Delegação global — funciona mesmo para cards criados depois
     document.addEventListener('click', (e) => {
       const opener = e.target.closest('.js-open-modal');
-      if (!opener) return;
+      if (!opener) return; // clique não foi em nada com js-open-modal
 
-      console.log('[modal] clique em opener:', opener);
+      let src = '';
+      let altText = '';
 
-      const img = opener.querySelector('img') || opener;
+      // 1) Tenta primeiro o data-full do PRÓPRIO botão (é o que seu código já setou)
+      src = opener.getAttribute('data-full') || opener.dataset.full || '';
 
-      console.log('[modal] img encontrada:', img);
-      console.log('[modal] img.dataset.full =', img.dataset.full);
-      console.log("[modal] img.getAttribute('data-full') =", img.getAttribute('data-full'));
-      console.log('[modal] img.src =', img.src);
+      // 2) Se ainda não achou, tenta pegar a <img> de dentro (para outros usos antigos do site)
+      if (!src) {
+        const innerImg = opener.querySelector('img');
+        if (innerImg) {
+          src = innerImg.getAttribute('data-full') || innerImg.dataset.full || innerImg.src || '';
+          altText = innerImg.alt || altText;
+        }
+      }
 
-      const src = img.dataset.full || img.getAttribute('data-full') || img.src;
+      // 3) Se o próprio opener for uma <img> (caso dos “modais padrão” antigos)
+      if (!src && opener.tagName === 'IMG') {
+        src = opener.src || '';
+        altText = opener.alt || altText;
+      }
 
-      const altText = img.alt || opener.getAttribute('aria-label') || '';
+      // 4) alt fallback: aria-label do botão, se tiver
+      if (!altText) {
+        altText = opener.getAttribute('aria-label') || '';
+      }
+      console.log('[modal] src final:', src);
 
-      console.log('[modal] src calculada =', src);
+      if (!src) {
+        console.warn('[modal] ❗ src não encontrado, não vou abrir a imagem.');
+        return;
+      }
 
       openModal(src, altText);
     });

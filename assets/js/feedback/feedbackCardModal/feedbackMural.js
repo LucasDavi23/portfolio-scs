@@ -453,7 +453,14 @@ import {
      *     2) Reset visual/attrs
      *     3) Decide URLs (thumb/full) with pickImagePair()
      *     4) Load image with short retries
-     *     5) Start background auto-recover
+     *     5) Start background auto-recover  
+     * Conceito importante:
+        - Não abrimos o modal com o link cru do Google (GAS)
+          porque ele pode retornar HTML, erros ou headers inválidos.
+        - A thumb já passa por proxy, auto-recover e conversão → 
+          então ela é **o teste perfeito** de que a imagem funciona.
+        - Se a thumb exibiu algo, o modal DEVE usar esse mesmo src.
+        ================================================================
      */
     {
       const btnThumbEl = lista.querySelector('.thumb-container'); // área clicável (abre modal)
@@ -463,12 +470,23 @@ import {
         console.warn('[thumb] nós não encontrados', { btnThumb: !!btnThumbEl, img: !!imgEl, root });
       } else {
         // 1) URLs normalizadas (proxy p/ Drive; http normal como está)
-        const { thumbUrl, fullUrl } = pickImagePair(item); // o que a thumb vai tentar carregar
+        const { thumbUrl, fullUrl } = pickImagePair(item);
 
-        // 2) “primeira” URL a tentar na thumb + URL grande pro modal
-        //    let usado aqui porque você pode ajustar o fallback de escolha em cenários diferentes
-        let proxyUrl = thumbUrl || fullUrl || ''; // o que a thumb vai tentar carregar
-        const bigUrl = thumbUrl || fullUrl || ''; // o que o modal vai abrir (preferir "full")
+        /*  
+          🇧🇷 sourceForThumb = URL usada para tentar carregar a imagem da thumb.
+              Essa URL entra no "moedor" (proxy + retries + base64).
+
+          🇺🇸 sourceForThumb = the URL we try to load through the proxy pipeline.
+        */
+        const sourceForThumb = thumbUrl || fullUrl || '';
+
+        /*  
+          🇧🇷 rawBigUrl = URL original maior (caso queira futuro HD).
+              Ela NÃO é usada no modal atualmente, somente guardada.
+
+          🇺🇸 rawBigUrl = original bigger image URL (kept for future use only).
+        */
+        const rawBigUrl = fullUrl || thumbUrl || '';
 
         //garantindo o root card
         const rootCard = root || lista.closest('section[data-feedback-card]'); // se já tem 'root', use-o
@@ -484,9 +502,9 @@ import {
         imgEl.removeAttribute('src');
         imgEl.referrerPolicy = 'no-referrer'; // ajuda em cenários de Cores/origem
         imgEl.decoding = 'async';
-        imgEl.setAttribute('loadign', 'eager');
+        imgEl.setAttribute('loading', 'eager');
 
-        if (!proxyUrl) {
+        if (!sourceForThumb) {
           console.log('[thumb] sem URL válida – ficará oculto');
           // opcional: imgEl.src = FALLBACK_IMG;
           markHasPhoto(rootCard, false);
@@ -496,28 +514,31 @@ import {
             // let aqui pra você poder calibrar rápido (ex.: 2 em dev, 3 em prod)
             let maxAttempts = 2;
 
-            await loadThumbWithRetries(imgEl, btnThumbEl, proxyUrl, bigUrl, maxAttempts);
+            await loadThumbWithRetries(imgEl, btnThumbEl, sourceForThumb, rawBigUrl, maxAttempts);
 
             // --> AQUI: se carregou, o botão NÃO estará "hidden"
             const ok = !btnThumbEl.classList.contains('hidden');
             markHasPhoto(rootCard, ok);
 
+            // 👇 NOVO: usa A SRC FINAL DA THUMB COMO FONTE DO MODAL
+            const finalUrlForModal = imgEl.src; // já é algo que o navegador conseguiu exibir (base64 ou não)
+
             // 5) Com a thumb visível, configurar dados p/ modal
-            // (o loadThumbWithRetries já remove a classe "hidden" quando carrega)
-            if (bigUrl) {
-              imgEl.setAttribute('data-full', bigUrl);
-              btnThumbEl.setAttribute('data-full', bigUrl);
-              btnThumbEl.classList.add('js-open-modal'); // marca que abre o modal
+            if (finalUrlForModal && ok) {
+              // só se carregou mesmo
+              imgEl.dataset.full = finalUrlForModal;
+              btnThumbEl.dataset.full = finalUrlForModal; // marca que abre o modal
+              btnThumbEl.classList.add('js-open-modal');
               btnThumbEl.setAttribute('role', 'button'); // acessibilidade
               btnThumbEl.setAttribute('tabindex', '0'); // focável via teclado
             }
             // 6) Auto-recover em background (se o proxy “acordar”, a imagem troca sozinha)
-            smartAutoRecover(imgEl, proxyUrl, 60000, 10000); // total 60s, tenta a cada 10s
+            smartAutoRecover(imgEl, sourceForThumb, 60000, 10000); // total 60s, tenta a cada 10s
           } catch (err) {
             console.warn('[thumb] falhou até após retries, fallback + auto-recover', err);
             imgEl.src = FALLBACK_IMG;
             btnThumbEl.classList.remove('js-open-modal');
-            smartAutoRecover(imgEl, proxyUrl, 60000, 10000); // total 60s, tenta a cada 10s
+            smartAutoRecover(imgEl, sourceForThumb, 60000, 10000); // total 60s, tenta a cada 10s
             markHasPhoto(rootCard, false);
           }
         }
