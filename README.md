@@ -33,10 +33,25 @@ A identidade ajuda na organização, didática e apresentação profissional do 
 
 ## 🌟 Abigaíl — Summary de Avaliações
 
-**Arquivos:** `summaryPro.js`, `summaryHelpers.js`
+**Arquivo:** `summary.js`
 
-- **PT:** Sabedoria e clareza. Coordena a média, distribuição de estrelas, barras, fallback, retry e cache.
-- **EN:** Wisdom and clarity. Handles average, star distribution, bars, fallback, retry and caching.
+- **PT:** Clareza e apresentação. Abigaíl coordena a camada de interface do summary:
+  encontra elementos do DOM, aplica a média e a distribuição calculadas por
+  Athenais, gerencia o fallback visual e orquestra o fluxo cache → rede → tela.
+- **EN:** Clarity and presentation. Abigail coordinates the UI layer of the summary:
+  locates DOM elements, applies the average and star distribution computed by
+  Athenais, manages the visual fallback and orchestrates the cache → network → UI flow.
+
+## ✨ Athenais — Helpers do Summary
+
+**Arquivo:** `summary-helpers.js`
+
+- **PT:** Sabedoria técnica e precisão. Athenais cuida da lógica pura do summary:
+  retry, timeout, fetch ao Apps Script, cache local e conversão dos dados brutos
+  em um objeto limpo (média, total e distribuição por estrelas).
+- **EN:** Technical wisdom and precision. Athenais handles the pure logic of the
+  summary: retry, timeout, fetch to Apps Script, local caching and conversion of
+  raw data into a clean summary object (average, total and star distribution).
 
 ---
 
@@ -94,16 +109,15 @@ A identidade ajuda na organização, didática e apresentação profissional do 
 
 ---
 
-## 🧱 Resumo Técnico
+## 🧱 Resumo Técnico (Versão Resumida)
 
-| Persona  | Arquivo(s)                             | Papel Técnico               |
-| -------- | -------------------------------------- | --------------------------- |
-| Abigaíl  | summaryPro.js / summaryHelpers.js      | Summary, estatísticas PRO   |
-| Selah    | feedbackMural.js                       | Mural de avaliações         |
-| Petra    | feedbackImagem.js                      | Proxy e fallback de imagens |
-| Priscila | feedbackForm.js / feedbackFormModal.js | Formulário e modal          |
-| Talita   | feedbackAPI.js                         | API e endpoints             |
-| Selina   | feedbackPreload.js                     | Preload e loaders           |
-| Celine   | Global                                 | UI/UX diretora              |
-
----
+| Persona  | Arquivo(s)                             | Papel Técnico Resumido                    |
+| -------- | -------------------------------------- | ----------------------------------------- |
+| Abigaíl  | summary.js                             | UI e fluxo do Summary                     |
+| Athenais | summary-helpers.js                     | Lógica do Summary (cache, retry, parsing) |
+| Selah    | feedbackMural.js                       | Renderização do mural                     |
+| Petra    | feedbackImagem.js                      | Proxy e fallback de imagens               |
+| Priscila | feedbackForm.js / feedbackFormModal.js | Formulário e modal                        |
+| Talita   | feedbackAPI.js                         | API e comunicação com Apps Script         |
+| Selina   | feedbackPreload.js                     | Preload e skeletons                       |
+| Celine   | Global                                 | Direção de UI/UX                          |

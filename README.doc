@@ -66,12 +66,15 @@ PT: Derivado de “celestial”. Simboliza cuidado, estética e comunicação �
 
 EN: Derived from “celestial”. Represents care, aesthetics and communication — the UI/UX lead of the system.
 
-🧱 Resumo Técnico
-Persona	Arquivo(s)	Papel Técnico
-Abigaíl	summaryPro.js / summaryHelpers.js	Summary, estatísticas, fallback PRO
-Selah	feedbackMural.js	Mural de avaliações
-Petra	feedbackImagem.js	Imagens + proxy + fallback
-Priscila	feedbackForm.js / feedbackFormModal.js	Formulário + Modal
-Talita	feedbackAPI.js	API e endpoints
-Selina	feedbackPreload.js	Preload e loaders
-Celine	Global	UI/UX chefia
+## 🧱 Resumo Técnico
+
+| Persona   | Arquivo(s)                             | Papel Técnico                                                                                         |
+|-----------|----------------------------------------|--------------------------------------------------------------------------------------------------------|
+| Abigaíl   | summary.js                             | UI e fluxo do Summary: DOM, aplicação visual, fallback, refresh e orquestração cache → rede → tela.  |
+| Athenais  | summary-helpers.js                     | Lógica pura do Summary: retry, timeout, validação, fetch ao GAS, cache local e parsing dos dados.     |
+| Selah     | feedbackMural.js                       | Renderização do mural com transições suaves, grid e paginação.                                        |
+| Petra     | feedbackImagem.js                      | Proxy de imagens, fallback automático, retries e validação de thumb.                                  |
+| Priscila  | feedbackForm.js / feedbackFormModal.js | Validação do formulário, experiência de uso, envio ao GAS e controle do modal.                        |
+| Talita    | feedbackAPI.js                         | Ponte entre front-end e Apps Script: rotas, endpoints, normalização da requisição e da resposta.      |
+| Selina    | feedbackPreload.js                     | Loaders, skeleton screens, transições iniciais e pré-carregamento das imagens.                        |
+| Celine    | Global                                 | Direção de UI/UX: identidade visual, padrões, usabilidade e consistência entre módulos.               |
