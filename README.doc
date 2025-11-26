@@ -1,80 +1,154 @@
 
 📘 README — Equipe Celestial do Sistema de Feedback
 
+(Versão reorganizada e refinada)
+
 Nomes simbólicos usados para identificar módulos internos do sistema.
 Não representam pessoas reais — são apelidos espirituais/técnicos que dão identidade ao código e facilitam manutenção.
 
-✨ 👩‍💻 Equipe Celestial — Módulos do Sistema de Feedback
+Cada módulo JavaScript recebe um “codinome” inspirado em personagens femininas (bíblicas ou simbólicas).
+Esses nomes representam o papel técnico e o papel simbólico dentro do ecossistema do Feedback.
 
-Cada módulo JS recebe um “codinome” inspirado em personagens bíblicas femininas, representando seu propósito técnico e simbólico dentro do sistema.
+A identidade das personas ajuda na organização, didática e clareza estrutural do template.
 
-Essa identidade ajuda na organização, na didática e na apresentação profissional do template.
+|-----------|----------------------------------------|-------------------------------------------------------------------------------------------------------|
 
+✨ 👩‍💻 Equipe Celestial — Personas e Funções
 🌟 Abigaíl — Summary de Avaliações
 
-Arquivos: summaryPro.js, summaryHelpers.js
+Arquivos: abigail-summary-ui.js
 
-PT: Representa sabedoria, prudência e clareza. Coordena o resumo das avaliações — média, distribuição de estrelas, barras, fallback, retry e cache.
+PT: Representa sabedoria, prudência e clareza. Coordena o summary completo das avaliações, incluindo média, distribuição de estrelas, barras, fallback, retry e cache.
+EN: Represents wisdom and clarity. Handles the full review summary — average, star distribution, bars, fallback, retry and caching.
 
-EN: Represents wisdom and clarity. Handles the SCS reviews summary — average, star distribution, bars, fallback, retry and caching.
+|-----------|----------------------------------------|-------------------------------------------------------------------------------------------------------|
 
-🌿 Selah — Mural de Avaliações
+✨ Athenais — Helpers do Summary
 
-Arquivo: feedbackMural.js
+Arquivo: athenais-summary-helpers.js
 
-PT: Simboliza contemplação e leitura suave. Organiza a exibição das avaliações no mural, garantindo harmonia e transições elegantes.
+PT: Sabedoria técnica e precisão. Athenais cuida da lógica pura do summary: retry, timeout, validação, fetch ao Apps Script, cache local e parsing dos dados.
+EN: Technical wisdom and precision. Athenais handles the pure logic of the summary: retry, timeout, validation, Apps Script fetch, local caching and data parsing.
 
+|-----------|----------------------------------------|-------------------------------------------------------------------------------------------------------|
+
+🌿 Selah — Board de Avaliações
+
+Arquivo: selah-board-ui.js
+
+PT: Simboliza contemplação e leitura suave. Organiza a exibição das avaliações no mural, com harmonia e transições elegantes.
 EN: Symbolizes contemplation and smooth reading. Renders the review wall with harmony and elegant transitions.
+
+|-----------|----------------------------------------|-------------------------------------------------------------------------------------------------------|
+
+🌿 Elara — Helpers do Board
+
+Arquivo: elara-board-helpers.js
+
+PT:
+Simboliza precisão silenciosa. Processa os dados do Mural: normaliza estruturas, seleciona imagens plausíveis, filtra candidatos e gerencia paginação antes da renderização pela Selah.
+
+EN:
+Symbolizes quiet precision. Processes the Board data: normalizes structures, selects plausible images, filters candidates, and manages pagination before Selah renders the UI.
+
+
+
+|-----------|----------------------------------------|-------------------------------------------------------------------------------------------------------|
 
 🪨 Petra — Protetora das Imagens
 
-Arquivo: feedbackImagem.js
+Arquivo: petra-image-ui.js
 
 PT: Representa força e estabilidade. Cuida do carregamento seguro das imagens (proxy, retry, fallback), evitando que a UI quebre.
+EN: Represents strength and stability. Ensures safe image loading (proxy, retry, fallback) so the UI never breaks.
 
-EN: Represents strength and stability. Ensures image loading safety (proxy, retry, fallback) so the UI never breaks.
+|-----------|----------------------------------------|-------------------------------------------------------------------------------------------------------|
+
+🪷 Dália — Guardiã da Lógica de Imagem
+
+Arquivo: dalia-image-helpers.js
+
+PT: Representa precisão silenciosa. Dália cuida da lógica pura das imagens: normalização, validação e fallback de URLs, garantindo que apenas dados confiáveis cheguem até Petra.
+
+EN: Represents quiet precision. Dalia handles the pure logic of images: URL normalization, validation, and fallback decisions, ensuring only reliable data reaches Petra.
+
+|-----------|----------------------------------------|-------------------------------------------------------------------------------------------------------|
 
 💬 Priscila — Formulário de Feedback
 
 Arquivos: feedbackForm.js, feedbackFormModal.js
 
-PT: Simboliza ensino e orientação. Gerencia o fluxo completo do formulário — validação, envio, feedback visual e UX do modal.
+PT: Simboliza ensino e orientação. Gerencia o formulário completo — validação, envio, UX, modal e feedback visual.
+EN: Symbolizes teaching and guidance. Manages the feedback form — validation, submission, modal states and UX flow.
 
-EN: Symbolizes teaching and guidance. Manages the feedback form — validation, submission, UI states and modal UX.
+|-----------|----------------------------------------|-------------------------------------------------------------------------------------------------------|
 
 🔗 Talita — API do Feedback
 
 Arquivo: feedbackAPI.js
 
-PT: Representa renovo e ligação. Faz a ponte entre o front-end e o Apps Script, centralizando URLs, rotas e endpoints.
+PT: Representa ligação e renovo. Conecta o front-end com o Apps Script, centralizando rotas, URLs e normalização da resposta.
+EN: Represents connection and renewal. Bridges the front-end with Apps Script, centralizing routes, URLs and response normalization.
 
-EN: Represents renewal and connection. Bridges the front-end with Apps Script, centralizing URLs, routes and endpoints.
+|-----------|----------------------------------------|-------------------------------------------------------------------------------------------------------|
 
 🌙 Selina — Guardiã do Preload
 
 Arquivo: feedbackPreload.js
 
-PT: Nome ligado à luz suave e transição. Cuida dos loaders, skeletons e estados intermediários enquanto o sistema carrega dados.
+PT: Nome ligado à luz suave e transição. Cuida dos loaders, skeletons e estados intermediários enquanto os dados carregam.
+EN: Linked to soft light and transition. Handles loaders, skeleton screens and transitional states during data loading.
 
-EN: Linked to soft light and transition. Handles loaders, skeleton screens and intermediate states during data loading.
 
 💛 Celine — Diretora de Front/UI
 
-Arquivo: (Identidade global do projeto)
+Arquivo: Identidade global do projeto
 
-PT: Derivado de “celestial”. Simboliza cuidado, estética e comunicação — padrão UI/UX do sistema.
-
+PT: Derivado de “celestial”. Simboliza cuidado, estética e comunicação — é o padrão UI/UX do sistema.
 EN: Derived from “celestial”. Represents care, aesthetics and communication — the UI/UX lead of the system.
+
+|-----------|----------------------------------------|-------------------------------------------------------------------------------------------------------|
+
+🎀 Mira — Modal de Lista (Ver Mais)
+
+Arquivo: mira-list.js
+Função: Controladora do Modal LISTA (“Ver mais”)
+
+🧬 Significado do Nome
+
+PT:
+“Mira” possui significados como maravilha, paz, foco e ver com clareza.
+Reflete sua função de trazer ordem, nitidez e fluidez na exibição expandida das avaliações.
+
+EN:
+“Mira” means wonder, focus, peace, or to see clearly.
+Perfect for the persona guiding clarity and organization within the expanded LIST view.
+
+|-----------|----------------------------------------|-------------------------------------------------------------------------------------------------------|
+
+🎀 Dara — Helpers do Modal LISTA
+
+Arquivo: dara-list-helpers.js
+
+PT: Representa sabedoria e precisão. Dara é a irmã lógica da Mira, cuidando da camada de helpers puros do LISTA: 
+normalização dos dados, paginação e pequenas transformações necessárias antes da renderização das avaliações.
+
+EN: Represents wisdom and precision. Dara is Mira’s logic sister, handling the LIST pure helpers: data normalization, 
+pagination, and small transformations needed before rendering the reviews.
 
 ## 🧱 Resumo Técnico
 
 | Persona   | Arquivo(s)                             | Papel Técnico                                                                                         |
-|-----------|----------------------------------------|--------------------------------------------------------------------------------------------------------|
-| Abigaíl   | summary.js                             | UI e fluxo do Summary: DOM, aplicação visual, fallback, refresh e orquestração cache → rede → tela.  |
-| Athenais  | summary-helpers.js                     | Lógica pura do Summary: retry, timeout, validação, fetch ao GAS, cache local e parsing dos dados.     |
-| Selah     | feedbackMural.js                       | Renderização do mural com transições suaves, grid e paginação.                                        |
-| Petra     | feedbackImagem.js                      | Proxy de imagens, fallback automático, retries e validação de thumb.                                  |
+|-----------|----------------------------------------|-------------------------------------------------------------------------------------------------------|
+| Abigaíl   | abigail-summary-ui.js                  | UI e fluxo do Summary: DOM, aplicação visual, fallback, refresh e orquestração cache → rede → tela.   |
+| Athenais  | atheinais-summary-helpers.js           | Lógica pura do Summary: retry, timeout, validação, fetch ao GAS, cache local e parsing dos dados.     |
+| Selah     | selah-board-ui.js                      | Interface do Board: modal, cards, animações e transições suaves.                                      |
+| Elara     | elara-board-helpers.js                 | Helpers do Board: normalização de dados, seleção de imagem e paginação.                               |
+| Petra     | petra-image-ui.js                      | Proxy de imagens, fallback automático, retries e validação de thumb.                                  |
+| Dália     | dalia-image-helpers.js                 | Lógica pura de imagem: normalização de URLs, validação, construção de proxy, fallback seguro e decisão da melhor fonte de imagem para a Petra.  |
 | Priscila  | feedbackForm.js / feedbackFormModal.js | Validação do formulário, experiência de uso, envio ao GAS e controle do modal.                        |
 | Talita    | feedbackAPI.js                         | Ponte entre front-end e Apps Script: rotas, endpoints, normalização da requisição e da resposta.      |
 | Selina    | feedbackPreload.js                     | Loaders, skeleton screens, transições iniciais e pré-carregamento das imagens.                        |
 | Celine    | Global                                 | Direção de UI/UX: identidade visual, padrões, usabilidade e consistência entre módulos.               |
+| Mira      | mira-list-ui.js                        | Modal LISTA (Ver Mais): organização da lista, paginação e exibição expandida                          |
+| Dara      | dara-list-helpers.js                   | Helpers do LISTA: lógica pura, normalização de dados e paginação para a Mira.                         |

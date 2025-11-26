@@ -17,7 +17,7 @@
 //       • conversion of raw data (items[]) into the final summary object.
 
 // import endpoint
-import { obterEndpoint } from '/assets/js/feedback/feedback.base.js';
+import { getEndpoint } from '/assets/js/feedback/feedback-endpoint.js';
 
 // ============================================================
 // 1. CONFIGURAÇÕES INTERNAS (CACHE, TIMEOUT, RETRY)
@@ -117,7 +117,7 @@ export function fetchWithTimeout(url, timeoutMs) {
 // EN: Performs the request to GAS with extra retries.
 export async function fetchSummaryWithRetry() {
   // ENDPOINT oficial do sistema — obtido via módulo base
-  const ENDPOINT = obterEndpoint();
+  const ENDPOINT = getEndpoint();
 
   if (!ENDPOINT) {
     console.warn('summary-helpers.js: FEEDBACK_ENDPOINT não definido / not defined.');

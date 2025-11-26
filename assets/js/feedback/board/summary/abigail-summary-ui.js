@@ -20,7 +20,7 @@
 
 // PT: Usa a função oficial do sistema para pegar o endpoint.
 // EN: Uses the system's official function to obtain the endpoint.
-import { obterEndpoint } from '/assets/js/feedback/feedback.base.js';
+import { getEndpoint } from '/assets/js/feedback/feedback-endpoint.js';
 
 // Import summary helpers
 import {
@@ -28,7 +28,7 @@ import {
   saveSummarytoCache,
   fetchSummaryWithRetry,
   buildSummaryFromResponse,
-} from './summary-helpers.js';
+} from './athenais-summary-helpers.js';
 
 (function () {
   console.log('summary.js: carregado / loaded. (Abigaíl entrou em ação)');
@@ -38,7 +38,7 @@ import {
 
   // PT: Endpoint global definido em feedbackAPI.js (exposto no window).
   // EN: Global endpoint defined in feedbackAPI.js (exposed on window).
-  const ENDPOINT = obterEndpoint();
+  const ENDPOINT = getEndpoint();
 
   // console.log('🔗 ENDPOINT summary:', ENDPOINT);
 

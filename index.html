@@ -2601,17 +2601,24 @@
     <script type="module" src="assets/js/feedback/feedbackHelpers.js"></script>
     <!-- 1) Define o endpoint UMA vez -->
     <!-- 1) Base — seta window.FEEDBACK_ENDPOINT automaticamente ao carregar -->
-    <script type="module" src="assets/js/feedback/feedback.base.js"></script>
+    <script type="module" src="assets/js/feedback/feedback-endpoint.js"></script>
 
     <!-- FeedBack Cards -->
-    <script type="module" src="assets/js/feedback/feedbackCardModal/feedbackCardAPI.js"></script>
-    <script type="module" src="/assets/js/feedback/summary/summary.js"></script>
-    <script src="assets/js/feedback/feedbackCardModal/feedbackImagem.js"></script>
-    <script src="assets/js/feedback/feedbackCardModal/feedbackLista.js"></script>
-    <script defer src="assets/js/feedback/feedbackCardModal/feedbackPreload.js"></script>
-    <script type="module" src="assets/js/feedback/feedbackCardModal/feedbackMural.js"></script>
+    <script type="module" src="assets/js/feedback/board/feedbackCardAPI.js"></script>
 
-    <script src="assets/js/feedback/feedbackCardModal/feedbackInit.js"></script>
+    <!-- Abigail (Summary UI) -->
+    <script type="module" src="/assets/js/feedback/board/summary/abigail-summary-ui.js"></script>
+
+    <!-- Petra  (Image UI)-->
+    <script type="module" src="assets/js/feedback/board/image/petra-image-ui.js"></script>
+
+    <!-- Mira (LISTA do modal) -->
+    <script type="module" src="assets/js/feedback/board/list/mira-list-ui.js"></script>
+
+    <script defer src="assets/js/feedback/board/feedbackPreload.js"></script>
+    <script type="module" src="assets/js/feedback/board/feedbackMural.js"></script>
+
+    <script src="assets/js/feedback/board/feedbackInit.js"></script>
 
     <!-- Feedback Form -->
     <script type="module" src="assets/js/feedback/feedbackForm/feedbackfunction.js"></script>
@@ -2620,7 +2627,7 @@
     <script type="module" src="assets/js/feedback/feedbackForm/feedbackForm.fotoLabel.js"></script>
     <script type="module" src="assets/js/feedback/feedbackForm/feedbackForm.estrelas.js"></script>
     <script type="module" src="assets/js/feedback/feedbackForm/feedbackForm.core.js"></script>
-    <script src="assets/js/feedback/feedbackCardModal/feedbackAvatar.js"></script>
+    <script src="assets/js/feedback/board/feedbackAvatar.js"></script>
 
     <script src="assets/js/base.js"></script>
     <script type="module" src="/main.js"></script>

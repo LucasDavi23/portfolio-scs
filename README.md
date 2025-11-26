@@ -33,7 +33,7 @@ A identidade ajuda na organização, didática e apresentação profissional do 
 
 ## 🌟 Abigaíl — Summary de Avaliações
 
-**Arquivo:** `summary.js`
+**Arquivo:** `abigail-summary-ui.js`
 
 - **PT:** Clareza e apresentação. Abigaíl coordena a camada de interface do summary:
   encontra elementos do DOM, aplica a média e a distribuição calculadas por
@@ -42,9 +42,9 @@ A identidade ajuda na organização, didática e apresentação profissional do 
   locates DOM elements, applies the average and star distribution computed by
   Athenais, manages the visual fallback and orchestrates the cache → network → UI flow.
 
-## ✨ Athenais — Helpers do Summary
+## 🌟 Athenais — Helpers do Summary
 
-**Arquivo:** `summary-helpers.js`
+**Arquivo:** `athenais-summary-helpers.js`
 
 - **PT:** Sabedoria técnica e precisão. Athenais cuida da lógica pura do summary:
   retry, timeout, fetch ao Apps Script, cache local e conversão dos dados brutos
@@ -55,21 +55,39 @@ A identidade ajuda na organização, didática e apresentação profissional do 
 
 ---
 
-## 🌿 Selah — Mural de Avaliações
+## 🌿 Selah — Board de Avaliações (UI)
 
-**Arquivo:** `feedbackMural.js`
+**Arquivo:** `selah-board-ui.js`
 
 - **PT:** Simboliza contemplação. Exibe o mural com transições suaves.
 - **EN:** Symbolizes contemplation. Renders the review wall with smooth transitions.
 
 ---
 
-## 🪨 Petra — Protetora das Imagens
+## 🌿 Elara — Helpers do Board
 
-**Arquivo:** `feedbackImagem.js`
+**Arquivo:** `elara-board-helpers.js`
+
+- **PT:** Simboliza precisão silenciosa. Processa os dados do Board: normalização, seleção de imagens e paginação.
+- **EN:** Symbolizes quiet precision. Processes Board data: normalization, image selection, and pagination.
+
+---
+
+## 🪷 Petra — Protetora das Imagens
+
+**Arquivo:** `petra-image-ui.js`
 
 - **PT:** Força e estabilidade. Cuida de proxy, retry e fallback das imagens.
 - **EN:** Strength and stability. Handles image proxy, retry and fallback.
+
+---
+
+## 🪷 Dália — Guardiã da Lógica de Imagem
+
+**Arquivo:** `dalia-image-helpers.js`
+
+- **PT:** Precisão silenciosa. Cuida da validação, normalização e fallback lógico das URLs de imagem.
+- **EN:** Quiet precision. Handles image URL validation, normalization and logical fallback.
 
 ---
 
@@ -109,15 +127,53 @@ A identidade ajuda na organização, didática e apresentação profissional do 
 
 ---
 
+## 🌸 Persona: Mira
+
+**Arquivo:** `mira-list-ui.js`  
+**Responsável pelo Modal LISTA (Ver Mais)**
+
+### PT — Descrição
+
+Mira organiza a exibição expandida das avaliações dentro do Modal LISTA (“Ver mais”).  
+Ela controla a paginação, o carregamento incremental e garante que a listagem seja clara, fluida e agradável de navegar.  
+Integra-se com Selah (mural), Petra (imagens), Selina (preload) e Talita (API), mantendo o padrão de UI/UX definido pela Celine.
+
+### EN — Description
+
+Mira manages the expanded review listing inside the LIST modal (“View more”).  
+She handles pagination, incremental loading, and ensures the list is clear, fluid, and pleasant to browse.  
+Mira integrates with Selah (mural), Petra (image handling), Selina (preload), and Talita (API), always following Celine’s UI/UX direction.
+
+### Significado / Meaning
+
+**PT:** “Mira” significa _maravilha_, _foco_ ou _ver com clareza_. Representa precisão visual e organização, ideal para um modal de listagem.  
+**EN:** “Mira” means _wonder_, _focus_, or _to see clearly_. It conveys visual precision and organization, ideal for a listing modal.
+
+---
+
+### 🌸 Persona: Dara
+
+**Arquivo:** `dara-list-helpers.js`
+
+**PT:** Representa sabedoria e precisão. Dara é a irmã lógica da Mira, cuidando da camada de helpers puros do LISTA: normalização dos dados, paginação e pequenas transformações necessárias antes da renderização das avaliações.
+
+**EN:** Represents wisdom and precision. Dara is Mira’s logic sister, handling the LIST pure helpers: data normalization, pagination, and small transformations needed before rendering the reviews.
+
+---
+
 ## 🧱 Resumo Técnico (Versão Resumida)
 
-| Persona  | Arquivo(s)                             | Papel Técnico Resumido                    |
-| -------- | -------------------------------------- | ----------------------------------------- |
-| Abigaíl  | summary.js                             | UI e fluxo do Summary                     |
-| Athenais | summary-helpers.js                     | Lógica do Summary (cache, retry, parsing) |
-| Selah    | feedbackMural.js                       | Renderização do mural                     |
-| Petra    | feedbackImagem.js                      | Proxy e fallback de imagens               |
-| Priscila | feedbackForm.js / feedbackFormModal.js | Formulário e modal                        |
-| Talita   | feedbackAPI.js                         | API e comunicação com Apps Script         |
-| Selina   | feedbackPreload.js                     | Preload e skeletons                       |
-| Celine   | Global                                 | Direção de UI/UX                          |
+| Persona  | Arquivo(s)                               | Papel Técnico Resumido                                                                          |
+| -------- | ---------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| Petra    | `petra-imagem-ui.js`                     | Proxy e fallback de imagens                                                                     |
+| Dália    | `dalia-imagem-helpers.js`                | Lógica pura de imagem: validação, normalização, fallback e decisões técnicas                    |
+| Priscila | `feedbackForm.js / feedbackFormModal.js` | Formulário e modal                                                                              |
+| Talita   | `feedbackAPI.js`                         | API e comunicação com Apps Script                                                               |
+| Selina   | `feedbackPreload.js`                     | Preload e skeletons                                                                             |
+| Celine   | `Global`                                 | Direção de UI/UX                                                                                |
+| Abigaíl  | `abigail-summary-ui.js`                  | UI e fluxo do Summary                                                                           |
+| Athenais | `athenais-summary-helpers.js`            | Lógica do Summary (cache, retry, parsing)                                                       |
+| Selah    | `selah-feedback-board-ui.js`             | UI do BOARD: modal, cards, paginação visual e interações.mural                                  |
+| Elara    | `elara-feedback-board-helpers.js`        | Helpers do BOARD: lógica pura, normalização de dados, seleção de imagem, validação e paginação. |
+| Mira     | `mira-list-ui.js`                        | Modal LISTA (Ver Mais): organização da lista, paginação e exibição expandida                    |
+| Dara     | `dara-list-helpers.js`                   | Helpers do LISTA: lógica pura, normalização de dados e paginação para a Mira.                   |
