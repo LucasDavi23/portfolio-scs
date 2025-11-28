@@ -136,19 +136,57 @@ normalização dos dados, paginação e pequenas transformações necessárias a
 EN: Represents wisdom and precision. Dara is Mira’s logic sister, handling the LIST pure helpers: data normalization, 
 pagination, and small transformations needed before rendering the reviews.
 
-## 🧱 Resumo Técnico
 
-| Persona   | Arquivo(s)                             | Papel Técnico                                                                                         |
-|-----------|----------------------------------------|-------------------------------------------------------------------------------------------------------|
-| Abigaíl   | abigail-summary-ui.js                  | UI e fluxo do Summary: DOM, aplicação visual, fallback, refresh e orquestração cache → rede → tela.   |
-| Athenais  | atheinais-summary-helpers.js           | Lógica pura do Summary: retry, timeout, validação, fetch ao GAS, cache local e parsing dos dados.     |
-| Selah     | selah-board-ui.js                      | Interface do Board: modal, cards, animações e transições suaves.                                      |
-| Elara     | elara-board-helpers.js                 | Helpers do Board: normalização de dados, seleção de imagem e paginação.                               |
-| Petra     | petra-image-ui.js                      | Proxy de imagens, fallback automático, retries e validação de thumb.                                  |
-| Dália     | dalia-image-helpers.js                 | Lógica pura de imagem: normalização de URLs, validação, construção de proxy, fallback seguro e decisão da melhor fonte de imagem para a Petra.  |
-| Priscila  | feedbackForm.js / feedbackFormModal.js | Validação do formulário, experiência de uso, envio ao GAS e controle do modal.                        |
-| Talita    | feedbackAPI.js                         | Ponte entre front-end e Apps Script: rotas, endpoints, normalização da requisição e da resposta.      |
-| Selina    | feedbackPreload.js                     | Loaders, skeleton screens, transições iniciais e pré-carregamento das imagens.                        |
-| Celine    | Global                                 | Direção de UI/UX: identidade visual, padrões, usabilidade e consistência entre módulos.               |
-| Mira      | mira-list-ui.js                        | Modal LISTA (Ver Mais): organização da lista, paginação e exibição expandida                          |
-| Dara      | dara-list-helpers.js                   | Helpers do LISTA: lógica pura, normalização de dados e paginação para a Mira.                         |
+🌷 Lívia — UI do Avatar
+
+(ícone exclusivo para UI visual, mantendo identidade suave)
+
+PT:
+Lívia cuida da parte visual do avatar: posiciona o wrap, aplica o estilo, observa mudanças no nome e atualiza as iniciais nos cards de mídia.
+Significado do nome (resumido): presença suave e clara.
+
+EN:
+Handles the visual layer of the avatar: wrapping, styling, watching for name updates and applying initials.
+Name meaning (short): soft and clear presence.
+
+🌷 Helena — Helpers do Avatar
+
+(ícone exclusivo, algo mais técnico/clean)
+
+PT:
+Helena cuida da lógica pura: extrai palavras, normaliza texto e gera as iniciais usadas pela UI da Lívia.
+Significado do nome (resumido): ligada à luz/clareza.
+
+EN:
+Responsible for pure logic: extracts words, normalizes text and generates the initials consumed by Lívia’s UI.
+Name meaning (short): tied to clarity/light.
+
+
+## ⭐ Resumo Técnico (Portfolio)
+| Persona | Pasta / Escopo Alvo | Arquivo(s)   | Papel Técnico Resumido                                              |
+| ------- | ------------------- | ------------ | ------------------------------------------------------------------- |
+| Celine  | Global              | (conceitual) | Direção de UI/UX: padrões, consistência visual e diretrizes gerais. |
+
+
+## 🧱 Resumo Técnico (Board)
+
+| Persona  | Pasta / Escopo Alvo     | Arquivo(s)                        | Papel Técnico Resumido                                                              |
+| -------- | ----------------------- | --------------------------------- | ----------------------------------------------------------------------------------- |
+| Celine   | Global                  | (conceitual)                      | Direção de UI/UX: padrões, consistência visual e diretrizes gerais.                 |
+| Abigaíl  | feedback/board/summary/ | `abigail-summary-ui.js`           | UI do Summary: renderização, fallback e fluxo geral da tela de resumo.              |
+| Athenais | feedback/board/summary/ | `athenais-summary-helpers.js`     | Lógica do Summary: caching, retry, timeout, parsing e fetch ao GAS.                 |
+| Selah    | feedback/board/main/    | `selah-feedback-board-ui.js`      | UI do Board: modal, interação, animações e fluxo visual dos cards.                  |
+| Elara    | feedback/board/main/    | `elara-feedback-board-helpers.js` | Helpers do Board: normalização de dados, paginação, seleção de imagem e validações. |
+| Petra    | feedback/board/image/   | `petra-imagem-ui.js`              | UI de imagens: proxy, fallback visual, estados de carregamento.                     |
+| Dália    | feedback/board/image/   | `dalia-imagem-helpers.js`         | Lógica pura de imagem: normalização de URLs, validação e fallback técnico.          |
+| Selina   | feedback/board/preload/ | `feedbackPreload.js`              | Preload, skeletons e otimização do carregamento inicial.                            |
+| Mira     | feedback/board/list/    | `mira-list-ui.js`                 | UI da LISTA (Ver Mais): estrutura do modal, paginação visual e exibição expandida.  |
+| Dara     | feedback/board/list/    | `dara-list-helpers.js`            | Lógica do LISTA: normalização de dados, paginação e helpers para Mira.              |
+| Helena   | feedback/board/avatar/  | `helena-avatar-helpers.js`        | Helpers do Avatar: lógica de nomes, normalização e geração de iniciais.             |
+| Lívia    | feedback/board/avatar/  | `livia-avatar-ui.js`              | UI do Avatar: aplicação visual das iniciais e integração com os cards.              |
+
+📝 Resumo Técnico (Form)
+| Persona  | Pasta / Escopo Alvo | Arquivo(s)                               | Papel Técnico Resumido                                                |
+| -------- | ------------------- | ---------------------------------------- | --------------------------------------------------------------------- |
+| Priscila | feedback/form/      | `feedbackForm.js`, `feedbackFormModal.js` | Formulário: UX, validação, envio ao GAS e controle do modal.          |
+| Talita   | feedback/api/       | `feedbackAPI.js`                         | API: comunicação com Google Apps Script e normalização das respostas. |

@@ -232,106 +232,106 @@ import {
   }
 
   // ---------- HERO (preenche in-place, não recria HTML) ----------
-  // function renderHeroInPlace(root, item) {
-  //   if (!root) return;
-  //   console.log('[renderHeroInPlace] ENTER', { item });
-  //   const elAutor = root.querySelector('[data-h-autor]');
-  //   const elEstrelas = root.querySelector('[data-h-estrelas]');
-  //   const elData = root.querySelector('[data-h-data]');
-  //   const elTexto = root.querySelector('[data-h-texto]');
-  //   const btnMais = root.querySelector('[data-h-ver-mais]');
+  function renderHeroInPlace(root, item) {
+    if (!root) return;
+    console.log('[renderHeroInPlace] ENTER', { item });
+    const elAutor = root.querySelector('[data-h-autor]');
+    const elEstrelas = root.querySelector('[data-h-estrelas]');
+    const elData = root.querySelector('[data-h-data]');
+    const elTexto = root.querySelector('[data-h-texto]');
+    const btnMais = root.querySelector('[data-h-ver-mais]');
 
-  //   if (!item) {
-  //     if (elAutor) elAutor.textContent = '';
-  //     if (elEstrelas) elEstrelas.innerHTML = '';
-  //     if (elData) elData.textContent = '';
-  //     if (elTexto) elTexto.textContent = '';
-  //   } else {
-  //     if (elAutor) elAutor.textContent = item.autor ?? 'Cliente';
-  //     if (elEstrelas) elEstrelas.innerHTML = renderEstrelas(item.estrelas ?? item.rating);
-  //     if (elData) elData.textContent = formatarData(item.data ?? item.data_iso);
-  //     if (elTexto) elTexto.textContent = item.texto ?? item.comentario ?? '';
-  //   }
+    if (!item) {
+      if (elAutor) elAutor.textContent = '';
+      if (elEstrelas) elEstrelas.innerHTML = '';
+      if (elData) elData.textContent = '';
+      if (elTexto) elTexto.textContent = '';
+    } else {
+      if (elAutor) elAutor.textContent = item.autor ?? 'Cliente';
+      if (elEstrelas) elEstrelas.innerHTML = renderEstrelas(item.estrelas ?? item.rating);
+      if (elData) elData.textContent = formatarData(item.data ?? item.data_iso);
+      if (elTexto) elTexto.textContent = item.texto ?? item.comentario ?? '';
+    }
 
-  //   // --- THUMB do Hero (miniatura clicável) ---
-  //   const btnThumb = root.querySelector('.thumb-container');
-  //   const img = btnThumb?.querySelector('img');
-  //   console.log('[renderHeroInPlace] thumb nodes', { btnThumb, img });
+    // --- THUMB do Hero (miniatura clicável) ---
+    const btnThumb = root.querySelector('.thumb-container');
+    const img = btnThumb?.querySelector('img');
+    console.log('[renderHeroInPlace] thumb nodes', { btnThumb, img });
 
-  //   if (btnThumb && img) {
-  //     const { thumbUrl, fullUrl } = pickImagePair(item);
-  //     console.log('[hero-thumb]', { thumbUrl, fullUrl, item });
+    if (btnThumb && img) {
+      const { thumbUrl, fullUrl } = pickImagePair(item);
+      console.log('[hero-thumb]', { thumbUrl, fullUrl, item });
 
-  //     // estado inicial
-  //     btnThumb.classList.add('hidden');
-  //     btnThumb.classList.remove('js-open-modal');
-  //     img.removeAttribute('data-full');
-  //     btnThumb.removeAttribute('data-full');
-  //     img.removeAttribute('srcset'); // evita conflitos
-  //     img.removeAttribute('loading'); // evita lazy travado com hidden
-  //     img.onload = null;
-  //     img.onerror = null;
+      // estado inicial
+      btnThumb.classList.add('hidden');
+      btnThumb.classList.remove('js-open-modal');
+      img.removeAttribute('data-full');
+      btnThumb.removeAttribute('data-full');
+      img.removeAttribute('srcset'); // evita conflitos
+      img.removeAttribute('loading'); // evita lazy travado com hidden
+      img.onload = null;
+      img.onerror = null;
 
-  //     if (thumbUrl) {
-  //       img.onload = () => {
-  //         console.log('[hero-thumb] onload OK');
-  //         btnThumb.classList.remove('hidden');
-  //         btnThumb.classList.add('js-open-modal');
-  //         img.setAttribute('data-full', fullUrl);
-  //         btnThumb.setAttribute('data-full', fullUrl);
-  //       };
-  //       img.onerror = () => {
-  //         const retried = img.getAttribute('data-retried') === '1';
-  //         if (!retried && fullUrl && fullUrl !== thumbUrl) {
-  //           img.setAttribute('data-retried', '1');
-  //           img.src = fullUrl; // fallback
-  //           return;
-  //         }
-  //         btnThumb.classList.add('hidden');
-  //         btnThumb.classList.remove('js-open-modal');
-  //         img.removeAttribute('src');
-  //       };
-  //       img.removeAttribute('src');
-  //       img.src = thumbUrl;
-  //     } else {
-  //       console.log('[hero-thumb] sem thumbUrl');
-  //       img.removeAttribute('src');
-  //     }
-  //   } else {
-  //     console.warn('[renderHeroInPlace] NÃO encontrou .thumb-container img no HERO');
-  //   }
-  // }
+      if (thumbUrl) {
+        img.onload = () => {
+          console.log('[hero-thumb] onload OK');
+          btnThumb.classList.remove('hidden');
+          btnThumb.classList.add('js-open-modal');
+          img.setAttribute('data-full', fullUrl);
+          btnThumb.setAttribute('data-full', fullUrl);
+        };
+        img.onerror = () => {
+          const retried = img.getAttribute('data-retried') === '1';
+          if (!retried && fullUrl && fullUrl !== thumbUrl) {
+            img.setAttribute('data-retried', '1');
+            img.src = fullUrl; // fallback
+            return;
+          }
+          btnThumb.classList.add('hidden');
+          btnThumb.classList.remove('js-open-modal');
+          img.removeAttribute('src');
+        };
+        img.removeAttribute('src');
+        img.src = thumbUrl;
+      } else {
+        console.log('[hero-thumb] sem thumbUrl');
+        img.removeAttribute('src');
+      }
+    } else {
+      console.warn('[renderHeroInPlace] NÃO encontrou .thumb-container img no HERO');
+    }
+  }
 
-  // function renderHeroLoading(root) {
-  //   const elTexto = root?.querySelector('[data-h-texto]');
-  //   const elEst = root?.querySelector('[data-h-estrelas]');
-  //   const elAutor = root?.querySelector('[data-h-autor]');
-  //   const elData = root?.querySelector('[data-h-data]');
-  //   if (elEst) elEst.innerHTML = skeletonLines(1);
-  //   if (elAutor) elAutor.textContent = '';
-  //   if (elData) elData.textContent = '';
-  //   if (elTexto) elTexto.innerHTML = skeletonLines(3);
-  // }
+  function renderHeroLoading(root) {
+    const elTexto = root?.querySelector('[data-h-texto]');
+    const elEst = root?.querySelector('[data-h-estrelas]');
+    const elAutor = root?.querySelector('[data-h-autor]');
+    const elData = root?.querySelector('[data-h-data]');
+    if (elEst) elEst.innerHTML = skeletonLines(1);
+    if (elAutor) elAutor.textContent = '';
+    if (elData) elData.textContent = '';
+    if (elTexto) elTexto.innerHTML = skeletonLines(3);
+  }
 
-  // function renderHeroError(root, msg, onRetry) {
-  //   const elTexto = root?.querySelector('[data-h-texto]');
-  //   const elEst = root?.querySelector('[data-h-estrelas]');
-  //   const elAutor = root?.querySelector('[data-h-autor]');
-  //   const elData = root?.querySelector('[data-h-data]');
-  //   if (elEst) elEst.innerHTML = '';
-  //   if (elAutor) elAutor.textContent = '';
-  //   if (elData) elData.textContent = '';
-  //   if (elTexto) {
-  //     elTexto.innerHTML = `
-  //       <div class="rounded-lg border p-3">
-  //         <p class="text-sm text-red-600 mb-2">${msg || 'Falha ao carregar.'}</p>
-  //         <button type="button" class="px-3 py-1.5 rounded bg-neutral-900 text-white text-sm" data-h-retry> Tentar novamente </button>
-  //       </div>`;
-  //     elTexto
-  //       .querySelector('[data-h-retry]')
-  //       ?.addEventListener('click', () => onRetry && onRetry());
-  //   }
-  // }
+  function renderHeroError(root, msg, onRetry) {
+    const elTexto = root?.querySelector('[data-h-texto]');
+    const elEst = root?.querySelector('[data-h-estrelas]');
+    const elAutor = root?.querySelector('[data-h-autor]');
+    const elData = root?.querySelector('[data-h-data]');
+    if (elEst) elEst.innerHTML = '';
+    if (elAutor) elAutor.textContent = '';
+    if (elData) elData.textContent = '';
+    if (elTexto) {
+      elTexto.innerHTML = `
+        <div class="rounded-lg border p-3">
+          <p class="text-sm text-red-600 mb-2">${msg || 'Falha ao carregar.'}</p>
+          <button type="button" class="px-3 py-1.5 rounded bg-neutral-900 text-white text-sm" data-h-retry> Tentar novamente </button>
+        </div>`;
+      elTexto
+        .querySelector('[data-h-retry]')
+        ?.addEventListener('click', () => onRetry && onRetry());
+    }
+  }
 
   async function carregarHero(seq, { silent = false } = {}) {
     const root = document.querySelector(CFG.seletores.heroRoot);

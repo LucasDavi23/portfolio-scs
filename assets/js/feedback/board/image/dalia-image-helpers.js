@@ -106,7 +106,7 @@ export function imgProxyUrl(anyUrlOrId, cacheBust = '') {
   const id = extractDriveId(anyUrlOrId);
   if (!id) return '';
   const v = cacheBust ? `&v=${encodeURIComponent(cacheBust)}` : '';
-  return `${getEndpoint}?action=img&id=${encodeURIComponent(id)}${v}`;
+  return `${getEndpoint()}?action=img&id=${encodeURIComponent(id)}${v}`;
 }
 
 /* ------------------------------------------------------------

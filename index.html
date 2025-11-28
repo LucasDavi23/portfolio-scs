@@ -2597,11 +2597,12 @@
     </script>
     <!-- Feedback -->
 
-    <!-- Helpers -->
-    <script type="module" src="assets/js/feedback/feedbackHelpers.js"></script>
     <!-- 1) Define o endpoint UMA vez -->
     <!-- 1) Base — seta window.FEEDBACK_ENDPOINT automaticamente ao carregar -->
-    <script type="module" src="assets/js/feedback/feedback-endpoint.js"></script>
+    <script type="module" src="/assets/js/feedback/feedback-endpoint.js"></script>
+
+    <!-- Selah (Board UI) -->
+    <script type="module" src="/assets/js/feedback/board/main/selah-board-ui.js"></script>
 
     <!-- FeedBack Cards -->
     <script type="module" src="assets/js/feedback/board/feedbackCardAPI.js"></script>
@@ -2609,14 +2610,18 @@
     <!-- Abigail (Summary UI) -->
     <script type="module" src="/assets/js/feedback/board/summary/abigail-summary-ui.js"></script>
 
-    <!-- Petra  (Image UI)-->
-    <script type="module" src="assets/js/feedback/board/image/petra-image-ui.js"></script>
+    <!-- Livia (Avatar UI) -->
+    <script type="module" src="/assets/js/feedback/board/avatar/livia-avatar-ui.js"></script>
 
-    <!-- Mira (LISTA do modal) -->
-    <script type="module" src="assets/js/feedback/board/list/mira-list-ui.js"></script>
+    <!-- Petra  (Image UI)-->
+    <script type="module" src="/assets/js/feedback/board/image/petra-image-ui.js"></script>
+
+    <!-- Mira (LIST Modal-Board) -->
+    <script type="module" src="/assets/js/feedback/board/list/mira-list-ui.js"></script>
 
     <script defer src="assets/js/feedback/board/feedbackPreload.js"></script>
-    <script type="module" src="assets/js/feedback/board/feedbackMural.js"></script>
+
+    <!-- <script type="module" src="assets/js/feedback/board/feedbackMural.js"></script> -->
 
     <script src="assets/js/feedback/board/feedbackInit.js"></script>
 
@@ -2627,7 +2632,7 @@
     <script type="module" src="assets/js/feedback/feedbackForm/feedbackForm.fotoLabel.js"></script>
     <script type="module" src="assets/js/feedback/feedbackForm/feedbackForm.estrelas.js"></script>
     <script type="module" src="assets/js/feedback/feedbackForm/feedbackForm.core.js"></script>
-    <script src="assets/js/feedback/board/feedbackAvatar.js"></script>
+    <!-- <script src="assets/js/feedback/board/feedbackAvatar.js"></script> -->
 
     <script src="assets/js/base.js"></script>
     <script type="module" src="/main.js"></script>
