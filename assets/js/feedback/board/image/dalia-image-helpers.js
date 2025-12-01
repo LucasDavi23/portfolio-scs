@@ -6,7 +6,7 @@
 
 // PT: Usa a função oficial do sistema para pegar o endpoint.
 // EN: Uses the system's official function to obtain the endpoint.
-import { getEndpoint } from '/assets/js/feedback/feedback-endpoint.js';
+import { getEndpoint } from '/assets/js/feedback/core/config/feedback-endpoint.js';
 
 /* ------------------------------------------------------------
  * parseDrive(raw, item?)

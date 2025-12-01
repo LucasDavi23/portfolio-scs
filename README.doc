@@ -13,7 +13,57 @@ A identidade das personas ajuda na organização, didática e clareza estrutural
 
 |-----------|----------------------------------------|-------------------------------------------------------------------------------------------------------|
 
+🌉 Ponteira — Guardiã do Caminho (Infra Geral)
+
+Arquivos: feedback-endpoint.js
+Pasta: feedback/core/config/
+
+PT:
+Simboliza direção, centralização e ordem.
+A Ponteira mantém o caminho oficial por onde todas as requisições passam.
+Ela define e sincroniza o FEEDBACK_ENDPOINT, garantindo que todo o sistema — Board, Form, Summary, Lista e CardAPI — fale com a mesma origem, evitando inconsistências.
+
+É a primeira peça da infraestrutura, e nada acontece sem que o caminho seja definido por ela.
+
+EN:
+Represents direction, centralization and structure.
+Ponteira maintains the system’s official communication path, defining and synchronizing the FEEDBACK_ENDPOINT so that every module — Board, Form, Summary, List and CardAPI — speaks to the same backend source.
+
+She is the first piece of the infrastructure; nothing works before the path is established.
+
 ✨ 👩‍💻 Equipe Celestial — Personas e Funções
+
+🧬 Nádia — Núcleo de Rede (API Core)
+
+Arquivos: nadia-api-core-helpers.js
+
+PT:
+Simboliza firmeza, estabilidade e resiliência.
+É o núcleo de rede do sistema: controla timeout, retry inteligente, cache em memória, coalescência de requisições e normalização segura.
+Garante que qualquer chamada ao Apps Script seja confiável e tolerante a falhas, servindo como base para todas as outras personas do Board.
+
+EN:
+Represents stability and resilience.
+She is the network core, handling timeouts, smart retries, in-memory caching, request coalescing and safe normalization.
+Ensures every request to the backend is reliable and fault-tolerant, forming the foundation for all Board operations.
+
+|-----------|----------------------------------------|-------------------------------------------------------------------------------------------------------|
+🌸 Naomi — Especialista em Cards (FeedbackCardAPI)
+
+Arquivos: naomi-card-api-helpers.js
+
+PT:
+Simboliza precisão, organização e visão clara.
+É a especialista em Feedback Cards: monta URLs da API, chama o Core da Nádia com segurança, normaliza cada item e entrega dados prontos para o Board, Summary, Lista e Avatar.
+Transforma respostas brutas do backend em cards padronizados e consistentes para toda a interface.
+
+EN:
+Represents precision, structure and clarity.
+She is the feedback card specialist: builds API URLs, calls Nádia’s Core safely, normalizes each item and delivers ready-to-use data for the Board, Summary, List and Avatar.
+Converts raw backend responses into consistent, standardized card objects for the interface.
+
+|-----------|----------------------------------------|-------------------------------------------------------------------------------------------------------|
+
 🌟 Abigaíl — Summary de Avaliações
 
 Arquivos: abigail-summary-ui.js
@@ -162,17 +212,19 @@ Responsible for pure logic: extracts words, normalizes text and generates the in
 Name meaning (short): tied to clarity/light.
 
 
-## ⭐ Resumo Técnico (Portfolio)
+## ⭐ Arquitetura Geral do Sistema
 | Persona | Pasta / Escopo Alvo | Arquivo(s)   | Papel Técnico Resumido                                              |
-| ------- | ------------------- | ------------ | ------------------------------------------------------------------- |
-| Celine  | Global              | (conceitual) | Direção de UI/UX: padrões, consistência visual e diretrizes gerais. |
+| ------- | -------------------- | --------------------- | ------------------------------------------------------------------ |
+| Celine  | Global               | (conceitual)         | Direção de UI/UX: padrões, consistência visual e diretrizes gerais. |
+| Ponteira| feedback/core/config/| feedback-endpoint.js | Guardiã do endpoint: define e sincroniza o FEEDBACK_ENDPOINT.       |
 
 
-## 🧱 Resumo Técnico (Board)
+## 🧱 Arquitetura do Board (Visualização dos Feedbacks)
 
 | Persona  | Pasta / Escopo Alvo     | Arquivo(s)                        | Papel Técnico Resumido                                                              |
 | -------- | ----------------------- | --------------------------------- | ----------------------------------------------------------------------------------- |
-| Celine   | Global                  | (conceitual)                      | Direção de UI/UX: padrões, consistência visual e diretrizes gerais.                 |
+| Nádia	   | feedback/board/api/rede/| nadia-api-core-helpers.js         | Core de rede: timeout, retry, cache, coalescência e normalização segura.            |
+| Naomi    | feedback/board/api/card/| naomi-card-api-helpers.js         | FeedbackCardAPI: monta URLs, chama o Core da Nádia e normaliza dados em cards.      |
 | Abigaíl  | feedback/board/summary/ | `abigail-summary-ui.js`           | UI do Summary: renderização, fallback e fluxo geral da tela de resumo.              |
 | Athenais | feedback/board/summary/ | `athenais-summary-helpers.js`     | Lógica do Summary: caching, retry, timeout, parsing e fetch ao GAS.                 |
 | Selah    | feedback/board/main/    | `selah-feedback-board-ui.js`      | UI do Board: modal, interação, animações e fluxo visual dos cards.                  |
@@ -185,8 +237,15 @@ Name meaning (short): tied to clarity/light.
 | Helena   | feedback/board/avatar/  | `helena-avatar-helpers.js`        | Helpers do Avatar: lógica de nomes, normalização e geração de iniciais.             |
 | Lívia    | feedback/board/avatar/  | `livia-avatar-ui.js`              | UI do Avatar: aplicação visual das iniciais e integração com os cards.              |
 
-📝 Resumo Técnico (Form)
+
+
+📝 Arquitetura do Form (Envio de Feedbacks)
 | Persona  | Pasta / Escopo Alvo | Arquivo(s)                               | Papel Técnico Resumido                                                |
 | -------- | ------------------- | ---------------------------------------- | --------------------------------------------------------------------- |
 | Priscila | feedback/form/      | `feedbackForm.js`, `feedbackFormModal.js` | Formulário: UX, validação, envio ao GAS e controle do modal.          |
 | Talita   | feedback/api/       | `feedbackAPI.js`                         | API: comunicação com Google Apps Script e normalização das respostas. |
+
+
+🎨 Arquitetura do Portfólio
+
+(componentes visuais fora do Board, como hero, seções, etc.)

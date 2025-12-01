@@ -8,7 +8,14 @@
 //     format.
 /* -----------------------------------------------------------------------------*/
 
-import { toPublicImageUrl } from '/assets/js/feedback/feedbackHelpers.js';
+// PT: Usa a função oficial do sistema para pegar o endpoint.
+// EN: Uses the system's official function to obtain the endpoint.
+import { getEndpoint } from '/assets/js/feedback/core/config/feedback-endpoint.js';
+
+/* -----------------------------------------------------------------------------*/
+
+// 🧬 Dália — Image Helpers
+import { toPublicImageUrl } from '/assets/js/feedback/board/image/dalia-image-helpers.js';
 
 /* -----------------------------------------------------------------------------*/
 // 🧬 Nádia — Core da API (infra de rede)
@@ -21,28 +28,23 @@ import { toPublicImageUrl } from '/assets/js/feedback/feedbackHelpers.js';
 import { ApiCore } from '/assets/js/feedback/board/api/rede/nadia-api-core-helpers.js';
 
 /* -----------------------------------------------------------------------------*/
+// 🔹 Helper interno: garante um endpoint válido para as operações da Naomi.
+// PT: Centraliza a leitura segura do endpoint para uso nos cards.
+// EN: Centralizes safe endpoint read for card operations.
+/* -----------------------------------------------------------------------------*/
 
-// ========= Endpoint da Naomi =========
-let ENDPOINT = (typeof window !== 'undefined' && window.FEEDBACK_ENDPOINT) || '';
-
-export function setBase(url) {
-  if (typeof url === 'string' && /^https?:\/\//.test(url)) {
-    ENDPOINT = url;
-    if (typeof window !== 'undefined') {
-      window.FEEDBACK_ENDPOINT = url;
-    }
+function ensureEndpoint() {
+  const endpoint = getEndpoint();
+  if (!endpoint) {
+    throw new error('FEEDBACK_ENDPOINT não definido.');
   }
-}
-
-export function getBase() {
-  if (ENDPOINT) return ENDPOINT;
-  if (typeof window !== 'undefined') {
-    return window.FEEDBACK_ENDPOINT || '';
-  }
-  return '';
+  return endpoint;
 }
 
 // ========= Helpers de domínio (CARD) =========
+// PT: Funções auxiliares específicas para o domínio dos cards.
+// EN: Helper functions specific to the card domain.
+/* -----------------------------------------------------------------------------*/
 function toISO(d) {
   if (!d) return '';
   const m = String(d).trim();
@@ -88,10 +90,10 @@ export async function list(plat, page = 1, limit = 1, opts = { fast: 1 }) {
   const pg = clampInt(page, 1, 1_000_000, 1);
   const lim = clampInt(limit, 1, 50, 1);
 
-  const base = getBase();
-  if (!base) throw new Error('FEEDBACK_ENDPOINT não definido.');
+  const endpoint = ensureEndpoint();
+  if (!endpoint) throw new Error('FEEDBACK_ENDPOINT não definido.');
 
-  const url = new URL(base);
+  const url = new URL(endpoint);
   url.searchParams.set('mode', 'list');
   url.searchParams.set('plat', plat);
   url.searchParams.set('page', String(pg));
@@ -115,16 +117,16 @@ export async function listMeta(plat, page = 1, limit = 5, opts = { fast: 1 }) {
   const pg = clampInt(page, 1, 1_000_000, 1);
   const lim = clampInt(limit, 1, 50, 5);
 
-  const base = getBase();
-  if (!base) throw new Error('FEEDBACK_ENDPOINT não definido.');
+  const endpoint = ensureEndpoint();
+  if (!endpoint) throw new Error('FEEDBACK_ENDPOINT não definido.');
 
-  const url = new URL(base);
+  const url = new URL(endpoint);
   url.searchParams.set('mode', 'list');
   url.searchParams.set('plat', plat);
   url.searchParams.set('page', String(pg));
   url.searchParams.set('limit', String(lim));
 
-  const data = await fetchJsonCached(url.toString(), opts);
+  const data = await ApiCore.fetchJsonCached(url.toString(), opts);
 
   const itemsArr = Array.isArray(data) ? data : Array.isArray(data.items) ? data.items : [];
 
@@ -143,24 +145,22 @@ export async function latest(plat, limit = 1) {
 
 // ========= Proxy de config (Naomi → Nádia) =========
 export function setTimeoutMs(ms) {
-  coreSetTimeoutMs(ms);
+  ApiCore.setTimeoutMs(ms);
 }
 
 export function setRetries(n) {
-  coreSetRetries(n);
+  ApiCore.setRetries(n);
 }
 
 export function setCacheTtl(ms) {
-  coreSetCacheTtl(ms);
+  ApiCore.setCacheTtl(ms);
 }
 
-// ========= Agregador =========
-export const FeedbackAPI = {
+// ========= Agregador do import =========
+export const FeedbackCardAPI = {
   list,
   listMeta,
   latest,
-  setBase,
-  getBase,
   setTimeoutMs,
   setRetries,
   setCacheTtl,
@@ -168,5 +168,5 @@ export const FeedbackAPI = {
 
 // Compatibilidade com legado, se ainda tiver algo usando window.FeedbackAPI
 if (typeof window !== 'undefined') {
-  window.FeedbackAPI = FeedbackAPI;
+  window.FeedbackAPI = FeedbackCardAPI;
 }
