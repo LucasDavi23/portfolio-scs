@@ -8,9 +8,11 @@
 //     format.
 /* -----------------------------------------------------------------------------*/
 
-// PT: Usa a função oficial do sistema para pegar o endpoint.
-// EN: Uses the system's official function to obtain the endpoint.
-import { getEndpoint } from '/assets/js/feedback/core/config/feedback-endpoint.js';
+// EndpointConfig — Configuração do Endpoint (Camada de Infra)
+// Fornece:
+// - set(url)
+// - get()
+import { EndpointConfig } from '/assets/js/feedback/core/config/feedback-endpoint.js';
 
 /* -----------------------------------------------------------------------------*/
 
@@ -19,13 +21,13 @@ import { toPublicImageUrl } from '/assets/js/feedback/board/image/dalia-image-he
 
 /* -----------------------------------------------------------------------------*/
 // 🧬 Nádia — Core da API (infra de rede)
-// ApiCore fornece:
+// NadiaAPICore fornece:
 // - fetchJsonCached()
 // - setTimeoutMs()
 // - setRetries()
 // - setCacheTtl()
 /* -----------------------------------------------------------------------------*/
-import { ApiCore } from '/assets/js/feedback/board/api/rede/nadia-api-core-helpers.js';
+import { NadiaAPICore } from '/assets/js/feedback/board/api/rede/nadia-api-core-helpers.js';
 
 /* -----------------------------------------------------------------------------*/
 // 🔹 Helper interno: garante um endpoint válido para as operações da Naomi.
@@ -34,7 +36,7 @@ import { ApiCore } from '/assets/js/feedback/board/api/rede/nadia-api-core-helpe
 /* -----------------------------------------------------------------------------*/
 
 function ensureEndpoint() {
-  const endpoint = getEndpoint();
+  const endpoint = EndpointConfig.get();
   if (!endpoint) {
     throw new error('FEEDBACK_ENDPOINT não definido.');
   }
@@ -105,7 +107,7 @@ export async function list(plat, page = 1, limit = 1, opts = { fast: 1 }) {
     url.searchParams.set('fast', '1');
   }
 
-  const data = await ApiCore.fetchJsonCached(url.toString(), opts);
+  const data = await NadiaAPICore.fetchJsonCached(url.toString(), opts);
   const arr = Array.isArray(data) ? data : Array.isArray(data.items) ? data.items : [];
 
   return arr.map(normalizeItem).filter(Boolean);
@@ -126,7 +128,7 @@ export async function listMeta(plat, page = 1, limit = 5, opts = { fast: 1 }) {
   url.searchParams.set('page', String(pg));
   url.searchParams.set('limit', String(lim));
 
-  const data = await ApiCore.fetchJsonCached(url.toString(), opts);
+  const data = await NadiaAPICore.fetchJsonCached(url.toString(), opts);
 
   const itemsArr = Array.isArray(data) ? data : Array.isArray(data.items) ? data.items : [];
 
@@ -145,15 +147,15 @@ export async function latest(plat, limit = 1) {
 
 // ========= Proxy de config (Naomi → Nádia) =========
 export function setTimeoutMs(ms) {
-  ApiCore.setTimeoutMs(ms);
+  NadiaAPICore.setTimeoutMs(ms);
 }
 
 export function setRetries(n) {
-  ApiCore.setRetries(n);
+  NadiaAPICore.setRetries(n);
 }
 
 export function setCacheTtl(ms) {
-  ApiCore.setCacheTtl(ms);
+  NadiaAPICore.setCacheTtl(ms);
 }
 
 // ========= Agregador do import =========

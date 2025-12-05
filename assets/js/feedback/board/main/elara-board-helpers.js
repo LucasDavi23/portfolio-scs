@@ -8,11 +8,11 @@
 
 // 🌿 Dalia — lógica de imagem (helpers)
 // EN 🌿 Dalia — image logic (helpers)
-import {
-  sanitizeUrl,
-  imgProxyUrl,
-  extractDriveId,
-} from '/assets/js/feedback/board/image/dalia-image-helpers.js';
+// Fornece:
+// - SanitizeUrl
+// - imgProxyUrl
+// - extractDriveId
+import { DaliaImageHelpers } from '/assets/js/feedback/board/image/dalia-image-helpers.js';
 
 // ------------------------------------------------------------
 // Config de resiliência de rede (compartilhada)
@@ -27,7 +27,7 @@ export const NET = {
 // ------------------------------------------------------------
 // Estrelas (rating)
 // ------------------------------------------------------------
-export function renderEstrelas(n = 0) {
+export function renderStar(n = 0) {
   const val = Math.max(0, Math.min(+n || 0, 5));
   return `
       <span class="inline-flex items-center gap-1" aria-label="${val} de 5 estrelas">
@@ -40,7 +40,7 @@ export function renderEstrelas(n = 0) {
 // ------------------------------------------------------------
 // Formata data ISO para dd/mm/aaaa
 // ------------------------------------------------------------
-export function formatarData(isoStr) {
+export function formatDate(isoStr) {
   if (!isoStr) return '';
   const d = new Date(isoStr);
   if (isNaN(d)) return isoStr;
@@ -77,7 +77,7 @@ export function backoff(attempt) {
  * ------------------------------------------------------------
  * 🇧🇷 Escolhe a melhor fonte de imagem do objeto `item` e
  * retorna { thumbUrl, fullUrl } já normalizados:
- * - Se for Google Drive (link ou ID), converte para proxy do GAS (imgProxyUrl).
+ * - Se for Google Drive (link ou ID), converte para proxy do GAS (DaliaImageHelpers.imgProxyUrl).
  * - Se for http(s) comum (jpg/png/etc.), usa direto.
  * - Se já for o próprio proxy do GAS, mantém (não duplica).
  *
@@ -160,14 +160,14 @@ export function pickImagePair(item) {
 
   // ----------------------------------------------------------
   // Caso 2: é Drive (link/ID) → sempre usar o proxy do GAS
-  // - extractDriveId: aceita formatos diversos (/file/d/ID, ?id=ID, ID puro…)
-  // - imgProxyUrl: gera …/exec?action=img&id=<ID>&v=<cacheHint>
+  // - DaliaImageHelpers.extractDriveId: aceita formatos diversos (/file/d/ID, ?id=ID, ID puro…)
+  // - DaliaImageHelpers.imgProxyUrl: gera …/exec?action=img&id=<ID>&v=<cacheHint>
   // ----------------------------------------------------------
 
-  const driveId = extractDriveId(raw);
+  const driveId = DaliaImageHelpers.extractDriveId(raw);
   if (driveId) {
-    const proxied = imgProxyUrl(driveId, cacheHint);
-    const safe = sanitizeUrl(proxied);
+    const proxied = DaliaImageHelpers.imgProxyUrl(driveId, cacheHint);
+    const safe = DaliaImageHelpers.sanitizeUrl(proxied);
     return { thumbUrl: safe, fullUrl: safe };
   }
 
@@ -175,6 +175,15 @@ export function pickImagePair(item) {
   // Caso 3: http(s) comum → usar direto como thumb e full
   // - Ex.: CDN própria, imagens absolutas do site, etc.
   // ----------------------------------------------------------
-  const httpSafe = sanitizeUrl(raw);
+  const httpSafe = DaliaImageHelpers.sanitizeUrl(raw);
   return { thumbUrl: httpSafe, fullUrl: httpSafe };
 }
+
+export const ElaraBoardHelpers = {
+  NET,
+  renderStar,
+  formatDate,
+  skeletonLines,
+  backoff,
+  pickImagePair,
+};

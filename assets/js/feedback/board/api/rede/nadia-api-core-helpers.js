@@ -206,7 +206,7 @@ export function setCacheTtl(ms) {
 //     easy to import and use. Works as a “toolbox”, providing cached fetch,
 //     timeout, retry and dynamic configuration controls.
 // -----------------------------------------------------------------------------
-export const ApiCore = {
+export const NadiaAPICore = {
   fetchJsonCached,
   setTimeoutMs,
   setRetries,

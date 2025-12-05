@@ -15,9 +15,15 @@
 //       • automatic retry with backoff,
 //       • validation of the received response,
 //       • conversion of raw data (items[]) into the final summary object.
+/* -----------------------------------------------------------------------------*/
 
-// import endpoint
-import { getEndpoint } from '/assets/js/feedback/feedback-endpoint.js';
+/* -----------------------------------------------------------------------------*/
+// EndpointConfig — Configuração do Endpoint (Camada de Infra)
+// Fornece:
+// - set(url)
+// - get()
+import { EndpointConfig } from '/assets/js/feedback/core/config/feedback-endpoint.js';
+/* -----------------------------------------------------------------------------*/
 
 // ============================================================
 // 1. CONFIGURAÇÕES INTERNAS (CACHE, TIMEOUT, RETRY)
@@ -117,7 +123,7 @@ export function fetchWithTimeout(url, timeoutMs) {
 // EN: Performs the request to GAS with extra retries.
 export async function fetchSummaryWithRetry() {
   // ENDPOINT oficial do sistema — obtido via módulo base
-  const ENDPOINT = getEndpoint();
+  const ENDPOINT = EndpointConfig.get();
 
   if (!ENDPOINT) {
     console.warn('summary-helpers.js: FEEDBACK_ENDPOINT não definido / not defined.');
@@ -207,3 +213,14 @@ export function buildSummaryFromResponse(data) {
 
   return { avg, total, buckets }; // PT: Retorna o resumo.
 }
+
+export const AthenaisSummaryHelpers = {
+  loadSummaryFromCache,
+  saveSummarytoCache,
+  fetchSummaryWithRetry,
+  buildSummaryFromResponse,
+};
+
+// ============================================================
+// FIM DO ARQUIVO
+// ============================================================

@@ -4,9 +4,11 @@
 // EN: Pure image logic: Drive/GAS, proxy, URLs, validation.
 // ============================================================
 
-// PT: Usa a função oficial do sistema para pegar o endpoint.
-// EN: Uses the system's official function to obtain the endpoint.
-import { getEndpoint } from '/assets/js/feedback/core/config/feedback-endpoint.js';
+// EndpointConfig — Configuração do Endpoint (Camada de Infra)
+// Fornece:
+// - set(url)
+// - get()
+import { EndpointConfig } from '/assets/js/feedback/core/config/feedback-endpoint.js';
 
 /* ------------------------------------------------------------
  * parseDrive(raw, item?)
@@ -106,7 +108,7 @@ export function imgProxyUrl(anyUrlOrId, cacheBust = '') {
   const id = extractDriveId(anyUrlOrId);
   if (!id) return '';
   const v = cacheBust ? `&v=${encodeURIComponent(cacheBust)}` : '';
-  return `${getEndpoint()}?action=img&id=${encodeURIComponent(id)}${v}`;
+  return `${EndpointConfig.get()}?action=img&id=${encodeURIComponent(id)}${v}`;
 }
 
 /* ------------------------------------------------------------
@@ -345,3 +347,35 @@ export function isLikely1x1(dataUrl) {
   // (um base64 curtinho, tipo 100 caracteres)
   return dataUrl.length < 200; // pequena demais → 1x1
 }
+
+export const DaliaImageHelpers = {
+  // ----------------------------------------------------------
+  // 🔹 1. Parsers & Extractors
+  // ----------------------------------------------------------
+  parseDrive, // extrai {id, rk} de qualquer link/ID
+  isDriveId, // valida ID puro
+  extractDriveId, // extrai ID plausível de URL ou ID
+
+  // ----------------------------------------------------------
+  // 🔹 2. URL Builders (Drive → Proxy GAS)
+  // ----------------------------------------------------------
+  imgProxyUrl, // constrói URL do proxy
+  ensureDriveUrl, // força conversão confiável
+  DRIVE_FULL, // proxy versão "full"
+  DRIVE_THUMB, // proxy versão "thumb"
+
+  // ----------------------------------------------------------
+  // 🔹 3. Heurísticas & Pré-Carregamento
+  // ----------------------------------------------------------
+  tryBestDriveThumb, // tenta melhor miniatura
+  preloadImage, // pré-carrega imagem
+  sanitizeUrl, // sanitização básica
+  toPublicImageUrl, // compatibilidade legada
+
+  // ----------------------------------------------------------
+  // 🔹 4. Proxy GAS: DataURL Helpers (Base64)
+  // ----------------------------------------------------------
+  FALLBACK_IMG, // imagem padrão quando falha tudo
+  fetchDataURL, // busca DataURL no GAS
+  isLikely1x1, // detecta 1x1 transparente (erro)
+};

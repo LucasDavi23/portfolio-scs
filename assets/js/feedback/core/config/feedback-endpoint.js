@@ -17,7 +17,7 @@ window.FEEDBACK_ENDPOINT = endpoint;
  *
  * @param {string} url
  */
-export function setEndpoint(url) {
+export function set(url) {
   if (typeof url === 'string' && /^https?:\/\//.test(url)) {
     endpoint = url;
     window.FEEDBACK_ENDPOINT = url;
@@ -29,6 +29,11 @@ export function setEndpoint(url) {
  *
  * @returns {string}
  */
-export function getEndpoint() {
+export function get() {
   return endpoint || window.FEEDBACK_ENDPOINT || DEFAULT_ENDPOINT;
 }
+
+export const EndpointConfig = {
+  get,
+  set,
+};
