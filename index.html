@@ -1675,6 +1675,7 @@
       <!-- … section #feedback termina aqui … -->
 
       <!-- 🖼️ Modal imagem -->
+
       <div
         id="modalImg"
         class="fixed inset-0 z-[100] hidden items-center justify-center bg-black/70 p-4"
@@ -1689,11 +1690,13 @@
           ✕
         </button>
         <!-- imagem ampliada -->
-        <img
-          id="modalImgSrc"
-          class="max-w-[92vw] max-h-[90vh] rounded-xl shadow-2xl ring-1 ring-white/20 object-contain"
-          alt="Pré-visualização"
-        />
+        <div class="flex items-center justify-center">
+          <img
+            id="modalImgSrc"
+            class="max-w-[92vw] max-h-[90vh] rounded-xl shadow-2xl ring-1 ring-white/20 object-contain"
+            alt="Pré-visualização"
+          />
+        </div>
       </div>
 
       <!-- 💬 Modal lista de feedback -->
@@ -2547,7 +2550,7 @@
 
           <div class="mt-16 border-t border-gray-200 pt-8 text-center sm:col-span-2 space-y-3">
             <p class="text-[11px] text-gray-500 tracking-wider">
-              © <span id="ano"></span> SCS Molduras • SCS Comércio em Geral
+              © <span id="year"></span> SCS Molduras • SCS Comércio em Geral
             </p>
 
             <p class="text-[11px] text-gray-400 tracking-wider italic">Celine Studio — D.</p>
@@ -2608,19 +2611,19 @@
     <!-- <script type="module" src="assets/js/feedback/board/feedbackCardAPI.js"></script> -->
 
     <!-- Abigail (Summary UI) -->
-    <script type="module" src="/assets/js/feedback/board/summary/abigail-summary-ui.js"></script>
+    <!-- <script type="module" src="/assets/js/feedback/board/summary/abigail-summary-ui.js"></script> -->
 
     <!-- Livia (Avatar UI) -->
-    <script type="module" src="/assets/js/feedback/board/avatar/livia-avatar-ui.js"></script>
+    <!-- <script type="module" src="/assets/js/feedback/board/avatar/livia-avatar-ui.js"></script> -->
 
     <!-- Petra  (Image UI)-->
-    <script type="module" src="/assets/js/feedback/board/image/petra-image-ui.js"></script>
+    <!-- <script type="module" src="/assets/js/feedback/board/image/petra-image-ui.js"></script> -->
 
     <!-- Mira (LIST Modal-Board) -->
-    <script type="module" src="/assets/js/feedback/board/list/mira-list-ui.js"></script>
+    <!-- <script type="module" src="/assets/js/feedback/board/list/mira-list-ui.js"></script> -->
 
     <!-- Bootstrap -->
-    <script defer type="module" src="/assets/js/feedback/board/system/bootstrap.js"></script>
+    <!-- <script defer type="module" src="/assets/js/feedback/board/system/bootstrap.js"></script> -->
 
     <!-- Feedback Form -->
     <script type="module" src="assets/js/feedback/feedbackForm/feedbackfunction.js"></script>
@@ -2631,7 +2634,10 @@
     <script type="module" src="assets/js/feedback/feedbackForm/feedbackForm.core.js"></script>
     <!-- <script src="assets/js/feedback/board/feedbackAvatar.js"></script> -->
 
-    <script src="assets/js/base.js"></script>
+    <!-- Sistema (Morgana – Diretora Geral) -->
+    <script type="module" src="/assets//js//system//director/morgana-system-director.js"></script>
+
+    <!-- <script src="assets/js/base.js"></script> -->
     <script type="module" src="/main.js"></script>
   </body>
 </html>

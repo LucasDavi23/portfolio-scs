@@ -159,7 +159,7 @@ export function setCacheTtl(ms) {
 }
 
 // ========= Agregador do import =========
-export const FeedbackCardAPI = {
+export const NaomiFeedbackCardAPI = {
   list,
   listMeta,
   latest,
@@ -170,5 +170,5 @@ export const FeedbackCardAPI = {
 
 // Compatibilidade com legado, se ainda tiver algo usando window.FeedbackAPI
 if (typeof window !== 'undefined') {
-  window.FeedbackAPI = FeedbackCardAPI;
+  window.FeedbackAPI = NaomiFeedbackCardAPI;
 }

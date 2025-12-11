@@ -61,6 +61,8 @@ She is the first piece of the infrastructure; nothing works before the path is e
   locates DOM elements, applies the average and star distribution computed by
   Athenais, manages the visual fallback and orchestrates the cache → network → UI flow.
 
+  ***
+
 ## 🌟 Athenais — Helpers do Summary
 
 **Arquivo:** `athenais-summary-helpers.js`
