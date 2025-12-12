@@ -18,22 +18,18 @@
 //  - Dara (Helpers): getPlatformLabel, getPlatformLink, isTimeoutError
 //  - Talita / FeedbackAPI: global.FeedbackAPI.listMeta(...)
 //  - Petra (imagem): no futuro pode assumir a lógica de thumb/full.
+//
+// API pública / Public API (opcional):
+//  - global.FeedbackLista.open(plat)
+//  - global.FeedbackLista.close()
 //------------------------------------------------------------
 
-// Dara — Assistente lógica da Mira (Helpers)
-// PT: Centraliza a lógica "pura" do modal LISTA (sem DOM):
-// EN: Centralizes the "pure" logic for the LIST modal (no DOM):
-// Fornece / Provides:
-// - getPlatformLabel()
-// - getPlatformLink()
-// - isTimeoutError()
-// - hasRealPhoto
-import { DaraListHelpers } from './dara-list-helpers.js';
-
-// Juniper — Utilitários de Data/Hora
-// PT: Usado para formatar datas de avaliações.
-// EN: Used to format review dates.
-import { JuniperDateTime } from '/assets/js/system/utils/juniper-date-time.js';
+import {
+  getPlatformLabel,
+  getPlatformLink,
+  isTimeoutError,
+  hasRealPhoto,
+} from './dara-list-helpers.js';
 
 // ==========================
 // 1) HELPERS BÁSICOS DE DOM
@@ -45,6 +41,17 @@ const qs = (selector, root = document) => root.querySelector(selector); // root 
 /** PT: Atalho para querySelectorAll em array. EN: Shorthand to get an array. */
 const qsa = (selector, root = document) => Array.from(root.querySelectorAll(selector)); // root opcional
 
+/**
+ * PT: Executa a função quando o DOM estiver pronto.
+ * EN: Runs the function when DOM is ready.
+ */
+
+function onReady(fn) {
+  // PT: fn a executar / EN: fn to run
+  if (document.readyState !== 'loading') fn(); // Já carregado / Already loaded
+  else document.addEventListener('DOMContentLoaded', fn); // Espera o DOM / Wait for DOM
+}
+
 // ==========================
 // 2) ESTADO DO MODAL
 // ==========================
@@ -55,7 +62,7 @@ const state = {
   page: 1, // pagina atual
   limit: 5, // itens por página
   hasMore: false, // se há mais páginas
-  loading: false, // se há requisição em andamento
+  carregando: false, // se há requisição em andamento
   total: undefined, // total real (fast:0), opcional
 };
 
@@ -64,25 +71,20 @@ const state = {
 let fetchingTotal = false; // false = não está buscando / not fetching
 
 // ==========================
-// 3) DOM STATE (Bound at init)
+// 3) REFERÊNCIAS DE DOM
 // ==========================
 
-let els = null; // refs de DOM (inicializado no init)
-
-function bindElements(root = document) {
-  els = {
-    // objeto para guardar refs de DOM / object to hold DOM refs
-    modal: qs('#modalFeedback'), // modal container
-    titulo: qs('#modalFeedbackTitulo'), // título do modal
-    sub: qs('#modalFeedbackSub'), // subtítulo do modal
-    list: qs('#modalFeedbackList'), // <ul> da list
-    info: qs('#modalFeedbackInfo'), // info de total/erro
-    btnMore: qs('#modalFeedbackLoadMore'), // botão "Carregar mais"
-    btnClose: qs('#modalFeedbackClose'), // botão fechar
-    btnPlat: qs('#modalFeedbackLink'), // "ver na plataforma"
-  };
-  return els;
-}
+const els = {
+  // objeto para guardar refs de DOM / object to hold DOM refs
+  modal: qs('#modalFeedback'), // modal container
+  titulo: qs('#modalFeedbackTitulo'), // título do modal
+  sub: qs('#modalFeedbackSub'), // subtítulo do modal
+  lista: qs('#modalFeedbackLista'), // <ul> da lista
+  info: qs('#modalFeedbackInfo'), // info de total/erro
+  btnMore: qs('#modalFeedbackLoadMore'), // botão "Carregar mais"
+  btnClose: qs('#modalFeedbackClose'), // botão fechar
+  btnPlat: qs('#modalFeedbackLink'), // "ver na plataforma"
+};
 
 // ==========================
 // 4) RENDERIZAÇÕES
@@ -100,12 +102,12 @@ function renderItem(it) {
   const li = document.createElement('li'); // cria <li>
   li.className = 'py-4'; // classe base
 
-  const line = document.createElement('div'); // cria div linha
-  line.className = 'grid grid-cols-[auto,1fr,auto] items-start gap-3'; // classes
+  const linha = document.createElement('div'); // cria div linha
+  linha.className = 'grid grid-cols-[auto,1fr,auto] items-start gap-3'; // classes
 
   // 🟣 DARA — Responsável por decidir se uma foto é válida.
   // Mira usa esta decisão para exibir ou esconder a thumbnail.
-  const hasPhoto = DaraListHelpers.hasRealPhoto(it.foto_url); // se há foto
+  const hasPhoto = hasRealPhoto(it.foto_url); // se há foto
   // --- Coluna da foto ---
   if (hasPhoto) {
     const btn = document.createElement('button'); // botão p/ abrir imagem
@@ -116,39 +118,30 @@ function renderItem(it) {
 
     const img = document.createElement('img'); // cria <img>
 
-    img.src = 'it.foto_url'; // atribui src
+    img.src = it.foto_url; // atribui src
     img.alt = 'Foto enviada pelo cliente'; // alt genérico
     img.loading = 'lazy'; // lazy load
     img.className = 'h-full w-full object-cover'; // classes
 
     btn.appendChild(img); // adiciona img ao botão
-    line.appendChild(btn); // adiciona botão ao <li>
+    linha.appendChild(btn); // adiciona botão ao <li>
   } else {
     // PT: Espaçador pra manter o grid alinhado. EN: Spacer to keep layout aligned.
     const spacer = document.createElement('div'); // cria div espaçadora
     spacer.className = 'w-16 h-12'; // classes
-    line.appendChild(spacer); // adiciona ao <li>
+    linha.appendChild(spacer); // adiciona ao <li>
   }
 
   // --- Corpo do texto ---
-  const body = document.createElement('div'); // cria div do corpo
-  body.className = 'min-w-0'; // classes
+  const corpo = document.createElement('div'); // cria div do corpo
+  corpo.className = 'min-w-0'; // classes
 
   const meta = document.createElement('div'); // cria div meta
-  meta.className = 'flex items-center justify-beetween gap-2 text-sm';
-
-  // ⭐ stars
-  const rating = document.createElement('span');
-  rating.className = 'text-yellow-500 shrink-0';
-  rating.textContent = '★'.repeat(+it.estrelas || 0);
-
-  // 🕒 date / time (Juniper)
-  const when = JuniperDateTime.format(it.data);
-  const time = document.createElement('time');
-  time.className = 'text-xs text-gray-500 whitespace-nowrap';
-  time.textContent = when || '';
-  meta.appendChild(rating); // ⭐
-  meta.appendChild(time); // 🕒 (Juniper)
+  meta.className = 'flex items-center justify-beetween gap-2 text-sm'; // classes
+  meta.innerHTML = `
+  <span class="text-yellow-500">${'★'.repeat(+it.estrelas || 0)}</span>
+    <time class="text-xs text-gray-500">${it.data || ''}</time>
+    `;
 
   const txt = document.createElement('p'); // cria parágrafo
   txt.className = 'mt-1 text-gray-900 leading-6'; // classes
@@ -158,17 +151,17 @@ function renderItem(it) {
   autor.className = 'mt-1 text-xs text-gray-500'; // classes
   autor.textContent = it.autor ? `-${it.autor}` : ''; // atribui autor
 
-  body.appendChild(meta); // adiciona meta ao corpo
-  body.appendChild(txt); // adiciona texto ao corpo
-  body.appendChild(autor); // adiciona autor ao corpo
-  line.appendChild(body); // adiciona corpo ao <li>
+  corpo.appendChild(meta); // adiciona meta ao corpo
+  corpo.appendChild(txt); // adiciona texto ao corpo
+  corpo.appendChild(autor); // adiciona autor ao corpo
+  linha.appendChild(corpo); // adiciona corpo ao <li>
 
   // --- Coluna direita reservada para futuro ---
   const right = document.createElement('div'); // cria div direita
   right.className = 'text-right text-xs text-gray-400'; // classes
-  line.appendChild(right); // adiciona ao <li>
+  linha.appendChild(right); // adiciona ao <li>
 
-  li.appendChild(line); // adiciona linha ao <li>
+  li.appendChild(linha); // adiciona linha ao <li>
   return li; // retorna o <li> pronto
 }
 
@@ -182,7 +175,7 @@ function renderEmpty(plat, msg = 'Ainda não há avaliações.') {
   li.innerHTML = `
  <p class="text-sm text-gray-500">${msg}</p> `; // conteúdo
 
-  const link = DaraListHelpers.getPlatformLink(plat); // link da plataforma
+  const link = getPlatformLink(plat); // link da plataforma
   if (plat !== 'scs' && link) {
     const a = document.createElement('a'); // cria <a>
     a.href = link; // atribui href
@@ -234,7 +227,7 @@ async function searchTotalIfNecessary() {
     if (Number.isFinite(meta.total) && meta.total >= 0) {
       if (state.total == null || meta.total > state.total) {
         state.total = meta.total; // atualiza total se maior / update total if bigger
-        const shown = els.list.chieldElementCount; // itens mostrados / shown items
+        const shown = els.lista.chieldElementCount; // itens mostrados / shown items
         updateHeader(shown, state.total, state.hasMore); // atualiza header / update header
       }
     }
@@ -259,13 +252,13 @@ export function open(plat) {
   state.total = undefined; // total desconhecido
 
   // header + limpar UI
-  els.titulo.textContent = DaraListHelpers.getPlatformLabel(state.plat);
-  els.sub.textContent = 'Loading…';
-  els.list.innerHTML = '';
+  els.titulo.textContent = getPlatformLabel(state.plat);
+  els.sub.textContent = 'Carregando…';
+  els.lista.innerHTML = '';
   els.info.textContent = '—';
 
   // botão "ver na plataforma"
-  const link = DaraListHelpers.getPlatformLink(state.plat); // link da plataforma
+  const link = getPlatformLink(state.plat); // link da plataforma
   if (state.plat === 'scs' || !link) {
     els.btnPlat?.classList.add('hidden', 'opacity-0', 'pointer-events-none');
     els.btnPlat?.removeAttribute('href');
@@ -288,7 +281,7 @@ export function open(plat) {
   // carregar 1ª página com tratamento de erro/retry
   load(true).catch(async (err) => {
     console.warn('Erro ao carregar inicial:', err);
-    if (DaraListHelpers.isTimeoutError(err)) {
+    if (isTimeoutError(err)) {
       els.sub.textContent = '⏳ Servidor lento, tentando novamente...';
       await new Promise((r) => setTimeout(r, 2000));
       try {
@@ -304,7 +297,7 @@ export function open(plat) {
     }
 
     // fallback visual
-    els.list.appendChild(renderEmpty(state.plat));
+    els.lista.appendChild(renderEmpty(state.plat));
 
     // liberar botão para usuário tentar manualmente
     if (els.btnMore) {
@@ -323,7 +316,7 @@ export function close() {
   document.body.style.overflow = '';
 
   setTimeout(() => {
-    els.list.innerHTML = '';
+    els.lista.innerHTML = '';
   }, 100);
 }
 
@@ -336,7 +329,7 @@ async function load(first = false) {
   state.load = true;
 
   try {
-    if (first) els.sub.textContent = 'Loading...';
+    if (first) els.sub.textContent = 'Carregando...';
 
     const bust = Date.now();
 
@@ -351,12 +344,12 @@ async function load(first = false) {
 
     if (first && items.length === 0) {
       els.sub.textContent = 'Sem avaliações por aqui.'; // subtítulo
-      els.list.appendChild(renderEmpty(state.plat)); // render vazio
+      els.lista.appendChild(renderEmpty(state.palt)); // render vazio
       state.hasMore = false; // sem mais páginas
     } else {
       const frag = document.createDocumentFragment(); // fragmento p/ otimizar
       items.forEach((it) => frag.appendChild(renderItem(it))); // renderiza itens
-      els.list.appendChild(frag); // adiciona fragmento à lista
+      els.lista.appendChild(frag); // adiciona fragmento à lista
 
       if (Number.isFinite(total) && total >= 0) {
         if (state.total == null || total > state.total) {
@@ -364,7 +357,7 @@ async function load(first = false) {
         }
       }
 
-      const shown = els.list.childElementCount; // itens mostrados
+      const shown = els.lista.childElementCount; // itens mostrados
       state.hasMore = hasMore; // atualiza hasMore
       updateHeader(shown, state.total, state.hasMore); // atualiza header
 
@@ -386,7 +379,7 @@ async function load(first = false) {
           .then(({ total: t }) => {
             if (Number.isFinite(t) && t > 0 && (state.total == null || t > state.total)) {
               state.total = t;
-              const shownNow = els.list.childElementCount;
+              const shownNow = els.lista.childElementCount;
               updateHeader(shownNow, state.total, state.hasMore);
             }
           })
@@ -398,14 +391,14 @@ async function load(first = false) {
   } catch (err) {
     console.error(err); // log do erro
 
-    if (DaraListHelpers.isTimeoutError(err)) {
+    if (isTimeoutError(err)) {
       els.sub.textContent = '⏳ Servidor lento. Tente novamente.';
     } else {
       els.sub.textContent = '⚠️ Falha ao carregar. Clique em "Tentar novamente".';
     }
 
     if (first) {
-      els.list.appendChild(renderEmpty(state.plat));
+      els.lista.appendChild(renderEmpty(state.plat));
     }
 
     if (els.btnMore) {
@@ -418,56 +411,34 @@ async function load(first = false) {
 }
 
 // ==========================
-// 7) INIT (SEM AUTOEXEC)
+// 7) LISTENERS GLOBAIS
 // ==========================
-
-let initialized = false; // flag para init único
-
-function ListModal(root = document) {
-  if (initialized) return; // já inicializado
-  initialized = true;
-
-  bindElements(); // vincula refs de DOM
-
-  // Delegação para abrir o modal via [data-action="ver-mais"]
-  root.addEventListener('click', (e) => {
-    const trigger = e.target?.closest?.('[data-action="ver-mais"]');
-
-    if (!trigger) return; // não é o alvo
-    e.preventDefault();
-
-    const plat =
-      trigger.dataset.platform ||
-      trigger.dataset.plat ||
-      trigger.getAttribute('data-platform') ||
-      trigger.getAttribute('data-plat') ||
-      'scs';
-
-    open(plat);
+onReady(() => {
+  // Abrir (links “Ver mais” nos cards/hero)
+  qsa('[data-action="ver-mais"]').forEach((a) => {
+    // para cada link
+    a.addEventListener('click', (e) => {
+      // click handler
+      e.preventDefault(); // previne navegação
+      open(a.getAttribute('data-platform') || 'scs'); // abre modal
+    });
   });
 
-  els.btnClose?.addEventListener('click', close); // fechar botão
-
+  els.btnClose?.addEventListener('click', () => close());
   els.modal?.addEventListener('click', (e) => {
     if (e.target === els.modal) close(); // backdrop
   });
-
   window.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') close();
   });
 
   // Paginar
   els.btnMore?.addEventListener('click', () => load(false));
-}
+});
 
 // ==========================
-// 8) EXPORT PADRÃO (PERSONA)
+// 8) EXPOR GLOBAL (OPCIONAL)
 // ==========================
-export const MiraListUI = {
-  ListModal,
-  open,
-  close,
-
-  // opcional p/ debug
-  _state: state,
-};
+// PT: Mantém compatibilidade se algum outro lugar usar window.FeedbackLista.
+// EN: Keeps compatibility if anywhere uses window.FeedbackLista.
+window.FeedbackLista = { open, close };

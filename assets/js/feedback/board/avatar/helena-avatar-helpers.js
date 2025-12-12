@@ -14,3 +14,7 @@ export function getInitials(name) {
   const last = words[words.length - 1][0];
   return (first + last).toUpperCase();
 }
+
+export const HelenaAvatarHelpers = {
+  getInitials,
+};

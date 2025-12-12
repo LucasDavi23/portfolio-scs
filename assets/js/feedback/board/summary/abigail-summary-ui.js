@@ -41,25 +41,23 @@ import { AthenaisSummaryHelpers } from './athenais-summary-helpers.js';
 // -----------------------------------------------------------------------------
 console.log('summary.js: carregado / loaded. (Abigaíl entrou em ação)');
 
-// PT: Endpoint global definido em feedbackAPI.js (exposto no window).
-// EN: Global endpoint defined in feedbackAPI.js (exposed on window).
-const ENDPOINT = EndpointConfig.get();
-
-// PT: Se por algum motivo o endpoint não existir, avisamos e abortamos.
-// EN: If for some reason the endpoint is missing, we warn and abort.
-if (!ENDPOINT) {
-  console.warn('summary.js: FEEDBACK_ENDPOINT não definido / not defined.');
-} else {
-  // PT: Esperamos o DOM ficar pronto.
-  // EN: We wait for the DOM to be ready.
-  document.addEventListener('DOMContentLoaded', () => {
-    initSummaryUI();
-  });
-}
-
 // PT: Função principal de inicialização da UI do summary.
 // EN: Main initialization function for the summary UI.
 function initSummaryUI() {
+  // -------------------------------------------------------------------
+  // 0. Verifica se o endpoint está definido
+  // -------------------------------------------------------------------
+  // PT: Endpoint global definido em feedbackAPI.js (exposto no window).
+  // EN: Global endpoint defined in feedbackAPI.js (exposed on window).
+  const ENDPOINT = EndpointConfig.get();
+
+  // PT: Se por algum motivo o endpoint não existir, avisamos e abortamos.
+  // EN: If for some reason the endpoint is missing, we warn and abort.
+  if (!ENDPOINT) {
+    console.warn('summary.js: FEEDBACK_ENDPOINT não definido / not defined.');
+    return;
+  }
+
   // ============================================================
   // 1. CAPTURA DOS ELEMENTOS DO DOM
   // ============================================================

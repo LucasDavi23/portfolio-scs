@@ -88,3 +88,10 @@ export function isTimeoutError(err) {
   const msg = String(err?.message || err || '').toLowerCase();
   return msg.includes('timeout') || msg.includes('tempo esgotado');
 }
+
+export const DaraListHelpers = {
+  getPlatformLabel,
+  getPlatformLink,
+  hasRealPhoto,
+  isTimeoutError,
+};

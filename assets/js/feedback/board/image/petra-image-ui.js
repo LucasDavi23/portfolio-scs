@@ -50,7 +50,7 @@ export async function applyImageWithFallback(imgEl, btnThumbEl, proxyUrl, fullUr
 
     // 🔹 4) Tornar o botão visível e habilitar o modal
     btnThumbEl.classList.remove('hidden');
-    btnThumbEl.classList.remove('js-open-modal');
+    btnThumbEl.classList.add('js-open-modal');
     imgEl.setAttribute('data-full', fullUrl);
     btnThumbEl.setAttribute('data-full', fullUrl);
   } catch (err) {

@@ -40,7 +40,7 @@ import { AbigailSummaryUI } from '/assets/js/feedback/board/summary/abigail-summ
   *   - initAvatar()
   -------------------------------------------------- */
 
-import { initAvatar } from '/assets/js/feedback/board/avatar/livia-avatar-ui.js';
+import { LiviaAvatarUI } from '/assets/js/feedback/board/avatar/livia-avatar-ui.js';
 
 /* --------------------------------------------------
  * 🌱 Lia — Preload Helpers
@@ -150,7 +150,7 @@ function initAbigailSummary() {
  */
 function initLiviaAvatar() {
   try {
-    initAvatar(document);
+    LiviaAvatarUI.initAvatar(document);
   } catch (err) {
     console.warn('[Kendra] Erro ao inicializar o avatar da Livia:', err);
   }
@@ -207,7 +207,7 @@ function initSelahBoard() {
 
 function initMiraListModal() {
   try {
-    MiraListUI.initListModal(document);
+    MiraListUI.ListModal(document);
   } catch (err) {
     console.warn('[Kendra] Erro ao inicializar o modal de lista da Mira:', err);
   }
@@ -236,12 +236,7 @@ function bootstrapFeedback() {
   initSelahBoard();
 
   // 6) Mira (modal LISTA) continua cuidando de si mesma neste momento.
-  //    Ela ainda usa o próprio onReady interno, então o bootstrap
-  //    não precisa chamar nada diretamente aqui por enquanto.
-  // EN:
-  // 6) Mira (LIST modal) still handles its own startup internally.
-  //    It uses its own onReady, so the bootstrap does not need to
-  //    call anything directly here for now.
+  initMiraListModal();
 }
 
 export const KendraFeedbackLeader = {
