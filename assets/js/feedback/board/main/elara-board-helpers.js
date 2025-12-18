@@ -25,17 +25,36 @@ export const NET = {
 };
 
 // ------------------------------------------------------------
-// Estrelas (rating)
+// Render Estrelas (rating)
 // ------------------------------------------------------------
-export function renderStar(n = 0) {
-  const val = Math.max(0, Math.min(+n || 0, 5));
-  return `
-      <span class="inline-flex items-center gap-1" aria-label="${val} de 5 estrelas">
-        <span class="text-yellow-500 text-sm">${'★'.repeat(Math.round(val))}</span>
-        <span class="text-neutral-800 font-semibold text-sm">${val.toFixed(1)}</span>
-      </span>
-    `;
-}
+// ------------------------------------------------------------
+// Estrelas (rating) — 5 sempre, preenchimento proporcional
+// ------------------------------------------------------------
+// export function renderStar(n = 0) {
+//   const val = Math.max(0, Math.min(+n || 0, 5));
+//   const pct = (val / 5) * 100;
+
+//   return `
+//     <span class="inline-flex items-center gap-1" aria-label="${val.toFixed(1)} de 5 estrelas">
+//       <span class="relative inline-block leading-none">
+//         <!-- estrelas vazias -->
+//         <span class="text-neutral-300 text-sm">★★★★★</span>
+
+//         <!-- estrelas preenchidas -->
+//         <span
+//           class="absolute left-0 top-0 overflow-hidden text-yellow-500 text-sm"
+//           style="width:${pct}%"
+//         >
+//           ★★★★★
+//         </span>
+//       </span>
+
+//       <span class="text-neutral-800 font-semibold text-sm">
+//         ${val.toFixed(1)}
+//       </span>
+//     </span>
+//   `;
+// }
 
 // ------------------------------------------------------------
 // Formata data ISO para dd/mm/aaaa
@@ -181,7 +200,6 @@ export function pickImagePair(item) {
 
 export const ElaraBoardHelpers = {
   NET,
-  renderStar,
   formatDate,
   skeletonLines,
   backoff,

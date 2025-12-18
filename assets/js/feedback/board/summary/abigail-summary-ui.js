@@ -18,6 +18,10 @@
 //       • orchestrates the overall flow (cache → network → DOM),
 //       • and allows manual refreshes.
 
+// -------------------------------------------------------------
+// imports / importações
+// -------------------------------------------------------------
+
 // EndpointConfig — Configuração do Endpoint (Camada de Infra)
 // Fornece:
 // - set(url)
@@ -31,14 +35,24 @@ import { EndpointConfig } from '/assets/js/feedback/core/config/feedback-endpoin
 // - saveSummarytoCache()
 // - fetchSummaryWithRetry()
 // - buildSummaryFromResponse()
-/* -----------------------------------------------------------------------------*/
-import { AthenaisSummaryHelpers } from './athenais-summary-helpers.js';
+
+import { AthenaisSummaryHelpers } from '/assets/js/feedback/board/summary/athenais-summary-helpers.js';
+
+// -----------------------------------------------------------------------------
+// ⭐ Zoe — rating UI do system (avaliações por estrelas)
+// EN ⭐ Zoe — system rating UI (star-based ratings)
+// Fornece:
+//  - renderRating()
+//  - normalizeRating()
+//  - mountInput()
+
+import { ZoeRating } from '/assets/js/system/ui/rating/zoe-rating.js';
 
 // -----------------------------------------------------------------------------
 // AbigailSummaryUI — Summary UI (Presentation Layer)
 // Provides:
 // - initSummaryUI()
-// -----------------------------------------------------------------------------
+
 console.log('summary.js: carregado / loaded. (Abigaíl entrou em ação)');
 
 // PT: Função principal de inicialização da UI do summary.
@@ -130,12 +144,19 @@ function initSummaryUI() {
     // EN: We display the average with 1 decimal place, using comma.
     avgEl.textContent = avg.toFixed(1).replace('.', ','); // PT: Exibe média.
 
-    // PT: Calcula estrelas cheias (arredondadas).
-    // EN: Computes filled stars (rounded).
-    const fullStars = Math.round(avg); // PT: Arredonda média para estrelas.
-    const clamped = Math.max(0, Math.min(5, fullStars)); // PT: Garante entre 0 e 5.
+    // // PT: Calcula estrelas cheias (arredondadas).
+    // // EN: Computes filled stars (rounded).
+    // const fullStars = Math.round(avg); // PT: Arredonda média para estrelas.
+    // const clamped = Math.max(0, Math.min(5, fullStars)); // PT: Garante entre 0 e 5.
 
-    starsEl.textContent = '★★★★★'.slice(0, clamped) + '☆☆☆☆☆'.slice(clamped, 5); // PT: Exibe estrelas.
+    // starsEl.textContent = '★★★★★'.slice(0, clamped) + '☆☆☆☆☆'.slice(clamped, 5); // PT: Exibe estrelas.
+
+    // PT: Estrelas são responsabilidade do System UI (Zoe)
+    // EN: Stars are owned by the System UI (Zoe)
+    starsEl.innerHTML = ZoeRating.renderRating(avg, {
+      showValue: false, // PT: a média já aparece no avgEl
+      size: 'lg', // PT: tamanho maior no summary
+    });
 
     // PT: Total de avaliações.
     // EN: Total number of reviews.
@@ -162,7 +183,11 @@ function initSummaryUI() {
   // EN: Fully empty and safe state (when literally nothing works).
   function applyEmptyFallbackToDom() {
     avgEl.textContent = '-'; // PT: Média vazia.
-    starsEl.textContent = '★★★★★'; // PT: Estrelas vazias.
+    starsEl.innerHTML = ZoeRating.renderRating(0, {
+      showValue: false,
+      size: 'lg',
+    }); // PT: Estrelas vazias.
+
     totalEl.textContent = '0'; // PT: Total zero.
 
     for (let star = 1; star <= 5; star++) {

@@ -84,8 +84,19 @@ Selah responde a Morgana apenas quando a diretora geral inicializa o setor compl
 
 ## 3) 🜁 Núcleo do Sistema (Direção Geral: Morgana)
 
-/system/director
-└── Morgana 🜁 — inicialização global
+/system
+|
+| director/
+| └── Morgana 🜁 — inicialização global
+|
+| utils/
+| └── Juniper 🌿 — Date/Time Utilities (funções puras)
+|
+| ui/
+| └── Luma (Loading) 🍃 — Loading UI global (spinner / botão / ensurePaint)
+| └── Zoe (rating) ⭐ — representação visual de avaliações por estrelas
+|
+
 Morgana:
 
 - chama Aurora (Layout)
@@ -93,6 +104,17 @@ Morgana:
 - depois chamará Pedidos, Orçamento, etc.
 - define a ordem de carregamento do sistema
 - mantém o sistema modular e escalável
+
+Juniper:
+
+- utilitário puro de data/hora
+- usado por qualquer setor (sem DOM)
+
+Luma:
+
+- UI global de loading (DOM)
+- usada por qualquer UI (Mira, Selah, etc.)
+- garante “pintura” do loading antes de fetch pesado (ensurePaint)
 
 ---
 
@@ -107,7 +129,8 @@ Morgana
 │ ├── Nami
 │ └── Yume
 │
-├── Selah (Feedback) ← futuro próximo
+├── Kendra (Feedback)
+| ├── Selah / Lia / Elara
 │ ├── Nádia / Naomi
 │ ├── Abigaíl / Athenais
 │ ├── Petra / Dália

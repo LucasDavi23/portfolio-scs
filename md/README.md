@@ -143,7 +143,66 @@ Exemplo:
 
 ## 🪶 7. Princípio Final
 
-**O sistema é vivo, espiritualizado e organizado como um corpo real.  
-Cada persona cuida de um pedaço.  
-Cada ferramenta serve silenciosamente em apoio.  
-Tudo existe para manter clareza, beleza e manutenção simples.**
+- O sistema é vivo, espiritualizado e organizado como um corpo real.
+- Cada persona cuida de um pedaço.
+- Cada ferramenta serve silenciosamente em apoio.
+- Tudo existe para manter clareza, beleza e manutenção simples.\*\*
+
+## Definição dos niveis
+
+## 📐 Definição clara (que funciona no teu system)
+
+## 🟢 Aprendiz
+
+## “Está aprendendo, testando ou apoiando algo maior.”
+
+- Características
+- Escopo pequeno
+- Pode mudar ou ser removido
+- Pode depender de outros
+- Não é fonte de verdade
+- Pode ser substituído facilmente
+- Exemplos típicos
+- helper experimental
+- função nova ainda instável
+- algo criado para resolver um caso específico
+- 👉 Não é base do sistema.
+
+## 🔵 Jovem
+
+## “Já funciona, mas ainda não governa.”
+
+- Características
+- Função clara
+- Já é reutilizável
+- Pode evolui
+- Ainda pode mudar de forma
+- Não é crítico para tudo quebrar
+
+## Exemplos
+
+- componente que só uma área usa
+- UI que pode ser refatorada depois
+- módulo que ainda não é padrão global
+
+## 👉 Útil, mas não estrutural.
+
+# 🟣 Adulta
+
+## “Estável, confiável e parte da estrutura.”
+
+- Características
+- Responsabilidade bem definida
+- Reutilizada por várias partes
+- Fonte única de verdade
+- Não depende de contexto
+- Mudanças são raras e conscientes
+
+# Exemplos
+
+- Luma (loading)
+- Zoe (rating)
+- qualquer UI atom do system
+- helpers que todo o system consome
+
+# 👉 Se ela quebrar, o sistema sente.

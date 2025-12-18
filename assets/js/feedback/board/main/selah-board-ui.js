@@ -4,11 +4,16 @@
 // EN: Symbolizes contemplation. Renders the review board with smooth transitions.
 /* -----------------------------------------------------------------------------*/
 
+// Imports / Dependências
+// -----------------------------------------------------------------------------
+
 // 🌿 Dalia — lógica de imagem (helpers)
 // EN 🌿 Dalia — image logic (helpers)
 // Fornece:
 // - FALLBACK_IMG
+
 import { DaliaImageHelpers } from '/assets/js/feedback/board/image/dalia-image-helpers.js';
+
 /* -----------------------------------------------------------------------------*/
 
 // 🎨 Petra — UI da imagem (thumb + auto-recover)
@@ -17,18 +22,31 @@ import { DaliaImageHelpers } from '/assets/js/feedback/board/image/dalia-image-h
 // - LoadThumbWithRetries,
 // - smartAutoRecover,
 // - markHasPhoto
+
 import { PetraImageUI } from '/assets/js/feedback/board/image/petra-image-ui.js';
 /* -----------------------------------------------------------------------------*/
 
 // ✨ Elara — helpers do board (estrelas, datas, imagens)
 // EN ✨ Elara — board helpers (stars, dates, images)
 // Fornece:
-//  - renderStars()
 //  - formatDate()
 //  - skeletonLines()
 //  - pickImagePair()
 //  - NET (retry/backoff config)
+
 import { ElaraBoardHelpers } from '/assets/js/feedback/board/main/elara-board-helpers.js';
+
+// ------------------------------------------------------------
+// ⭐ Zoe — rating UI do system (avaliações por estrelas)
+// EN ⭐ Zoe — system rating UI (star-based ratings)
+// Fornece:
+//  - renderRating()
+//  - normalizeRating()
+//  - mountInput()
+
+import { ZoeRating } from '/assets/js/system/ui/rating/zoe-rating.js';
+
+// ------------------------------------------------------------
 
 // Módulo do Board de feedbacks (Hero SCS + Shopee, ML, Google)
 // Carrega apenas quando chamar FeedbackMural.init() (mantido por compat)
@@ -72,8 +90,7 @@ function renderHeroInPlace(root, item) {
     if (elTexto) elTexto.textContent = '';
   } else {
     if (elAutor) elAutor.textContent = item.autor ?? 'Cliente';
-    if (elEstrelas)
-      elEstrelas.innerHTML = ElaraBoardHelpers.renderStar(item.estrelas ?? item.rating);
+    if (elEstrelas) elEstrelas.innerHTML = ZoeRating.renderRating(item.estrelas ?? item.rating);
     if (elData) elData.textContent = ElaraBoardHelpers.formatDate(item.data ?? item.data_iso);
     if (elTexto) elTexto.textContent = item.texto ?? item.comentario ?? '';
   }
@@ -233,7 +250,7 @@ async function fillCardFixed(root, item) {
   // Estrelas (rating/estrelas)
   const headStars = root.querySelector('[data-c-estrelas]');
   const ratingVal = Number(item.estrelas ?? item.rating) || 0;
-  if (headStars) headStars.innerHTML = ElaraBoardHelpers.renderStar(ratingVal);
+  if (headStars) headStars.innerHTML = ZoeRating.renderRating(ratingVal);
 
   const miniStars = lista.querySelector('[data-c-item-stars]');
   if (miniStars) {
@@ -409,7 +426,7 @@ function renderCardFallback(root, itens) {
           <div class="font-medium truncate">${it.autor ?? 'Cliente'}</div>
           <div class="text-xs text-neutral-500">${ElaraBoardHelpers.formatDate(it.data)}</div>
         </div>
-        <div class="text-sm mb-1">${ElaraBoardHelpers.renderStar(it.estrelas)}</div>
+        <div class="text-sm mb-1">${ZoeRating.renderRating(it.estrelas)}</div>
         <p class="text-sm text-neutral-700 line-clamp-3">${it.texto ?? ''}</p>
       </article>`;
 }

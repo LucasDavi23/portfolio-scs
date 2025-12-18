@@ -1,6 +1,4 @@
 // ✨ Mira — Guardiã do Modal LISTA (UI - ESModule)
-// Nível: Adulta
-//------------------------------------------------------------
 // PT: Controla tudo que é DOM/visual do modal LISTA (“Ver mais”):
 //     - abrir/fechar o modal
 //     - carregar páginas de avaliações (via FeedbackAPI)
@@ -20,25 +18,7 @@
 //  - Dara (Helpers): getPlatformLabel, getPlatformLink, isTimeoutError
 //  - Talita / FeedbackAPI: global.FeedbackAPI.listMeta(...)
 //  - Petra (imagem): no futuro pode assumir a lógica de thumb/full.
-//  - Dalia (imagem): lógica pura de thumb/full (sem DOM).
-// -----------------------------------------------------------------------------
-
-// Importações / Imports
-
-// -----------------------------------------------------------------------------
-
-// Petra — Image UI Helpers
-// PT: Lida com thumbs, fallback e observação de imagem
-//  EN: Manages thumbs, fallback and DOM observers for images.
-// Fornece / Provides:
-//   - initThumbSystem()
-//   - applyThumb()
-//   - scanThumbs()
-//   - observeThumbs()
-
-import { PetraImageUI } from '/assets/js/feedback/board/image/petra-image-ui.js';
-
-// -----------------------------------------------------------------------------
+//------------------------------------------------------------
 
 // Dara — Assistente lógica da Mira (Helpers)
 // PT: Centraliza a lógica "pura" do modal LISTA (sem DOM):
@@ -47,56 +27,13 @@ import { PetraImageUI } from '/assets/js/feedback/board/image/petra-image-ui.js'
 // - getPlatformLabel()
 // - getPlatformLink()
 // - isTimeoutError()
-// - isUsableUrl()
-
-import { DaraListHelpers } from '/assets/js/feedback/board/list/dara-list-helpers.js';
-
-// -----------------------------------------------------------------------------
-
-// Elara — Assistente lógica do Mural (Helpers)
-// PT: Centraliza a lógica "pura" do Mural (sem DOM):
-// EN: Centralizes the "pure" logic for the Board (no DOM):
-// Fornece / Provides:
-// - pickImagePair()
-// - isValidImageURL()
-
-import { ElaraBoardHelpers } from '/assets/js/feedback/board/main/elara-board-helpers.js';
-
-// -----------------------------------------------------------------------------
+// - hasRealPhoto
+import { DaraListHelpers } from './dara-list-helpers.js';
 
 // Juniper — Utilitários de Data/Hora
 // PT: Usado para formatar datas de avaliações.
 // EN: Used to format review dates.
-// Fornece / Provides:
-// - formatDateTime()
-// - parseDateTime()
-
 import { JuniperDateTime } from '/assets/js/system/utils/juniper-date-time.js';
-
-// -----------------------------------------------------------------------------
-
-// Luma — UI de Loading Reutilizável
-// PT: Usado para mostrar loading em botões, etc.
-// EN: Used to show loading in buttons, etc.
-// Fornece / Provides:
-// - ensurePaint()
-// - spinnerHTML()
-// - renderLoading()
-// - clearLoading()
-// - setButtonLoading()
-
-import { LumaLoading } from '/assets/js/system/ui/loading/luma-loading';
-
-// -----------------------------------------------------------------------------
-
-// Zoe — rating UI do system (avaliações por estrelas)
-// EN Zoe — system rating UI (star-based ratings)
-// Fornece:
-//  - renderRating()
-//  - normalizeRating()
-//  - mountInput()
-
-import { ZoeRating } from '/assets/js/system/ui/rating/zoe-rating.js';
 
 // ==========================
 // 1) HELPERS BÁSICOS DE DOM
@@ -154,131 +91,85 @@ function bindElements(root = document) {
 /**
  * PT: Monta 1 item de avaliação como <li>.
  * EN: Builds 1 review item (<li>).
+ *
+ * it: { estrelas, data, autor, texto, url?, foto_url? }
  */
 
 function renderItem(it) {
   // it = item de review
-  const li = document.createElement('li');
-  li.className = 'py-4';
+  const li = document.createElement('li'); // cria <li>
+  li.className = 'py-4'; // classe base
 
-  const line = document.createElement('div');
-  line.className = 'grid grid-cols-[auto,1fr,auto] items-start gap-3';
+  const line = document.createElement('div'); // cria div linha
+  line.className = 'grid grid-cols-[auto,1fr,auto] items-start gap-3'; // classes
 
-  /* ==================================================
-   * 🪨 PETRA SLOT — imagem (Mira cria, Petra manda)
-   * ================================================== */
+  // 🟣 DARA — Responsável por decidir se uma foto é válida.
+  // Mira usa esta decisão para exibir ou esconder a thumbnail.
+  const hasPhoto = DaraListHelpers.hasRealPhoto(it.foto_url); // se há foto
+  // --- Coluna da foto ---
+  if (hasPhoto) {
+    const btn = document.createElement('button'); // botão p/ abrir imagem
+    btn.type = 'button';
+    btn.className =
+      'js-open-modal relative w-16 h-12 rounded-md overflow-hidden border border-gray-200 bg-white shrink-0';
+    btn.setAttribute('data-full', it.foto_url); // atributo p/ Petra
 
-  const btnThumb = document.createElement('button');
-  btnThumb.type = 'button';
-  btnThumb.className =
-    'thumb-container relative w-16 h-12 rounded-md overflow-hidden border border-gray-200 bg-white shrink-0 hidden';
-  btnThumb.setAttribute('data-owner', 'mira-list');
+    const img = document.createElement('img'); // cria <img>
 
-  const img = document.createElement('img');
-  img.alt = 'Foto enviada pelo cliente';
-  img.className = 'h-full w-full object-cover';
-  img.loading = 'eager';
-  img.decoding = 'async';
-  img.referrerPolicy = 'no-referrer';
+    img.src = 'it.foto_url'; // atribui src
+    img.alt = 'Foto enviada pelo cliente'; // alt genérico
+    img.loading = 'lazy'; // lazy load
+    img.className = 'h-full w-full object-cover'; // classes
 
-  // ✅ Reset total (igual Selah)
-  btnThumb.classList.add('hidden');
-  btnThumb.classList.remove('js-open-modal');
-  img.onload = img.onerror = null;
-  img.removeAttribute('data-full');
-  btnThumb.removeAttribute('data-full');
-  img.removeAttribute('src');
-
-  btnThumb.appendChild(img);
-  line.appendChild(btnThumb);
-
-  // --------------------------------------------------
-  // ✅ PIPELINE CORRETO (igual Selah):
-  // use pickImagePair para normalizar/proxy
-  // --------------------------------------------------
-  {
-    // Se Mira não importa ElaraBoardHelpers, pode chamar o helper equivalente que vocês já usam.
-    // O importante é NÃO usar it.photo_url direto.
-    const { thumbUrl, fullUrl } = ElaraBoardHelpers.pickImagePair(it);
-
-    const sourceForThumb = (thumbUrl || fullUrl || '').trim(); // ✅ entra no "moedor"
-    const rawBigUrl = (fullUrl || thumbUrl || '').trim(); // guardado (futuro HD)
-
-    // DEBUG certeiro (depois remove)
-    // console.log('[MIRA] sourceForThumb:', sourceForThumb, { thumbUrl, fullUrl, it });
-
-    if (DaraListHelpers.isUsableUrl(sourceForThumb)) {
-      PetraImageUI.loadThumbWithRetries(img, btnThumb, sourceForThumb, rawBigUrl, 2)
-        .then(() => {
-          const ok = !btnThumb.classList.contains('hidden');
-          if (!ok) return;
-
-          // ✅ SRC FINAL vira fonte do modal (igual Selah)
-          const finalUrlForModal = img.src;
-          if (finalUrlForModal) {
-            img.dataset.full = finalUrlForModal;
-            btnThumb.dataset.full = finalUrlForModal;
-            btnThumb.classList.add('js-open-modal');
-            btnThumb.setAttribute('role', 'button');
-            btnThumb.setAttribute('tabindex', '0');
-          }
-
-          // ✅ auto-recover com a fonte do moedor (não a raw)
-          PetraImageUI.smartAutoRecover(img, sourceForThumb, 60000, 10000);
-        })
-        .catch((err) => {
-          console.warn('[MIRA thumb] falhou após retries', { err, sourceForThumb, it });
-          img.src = DaliaImageHelpers.FALLBACK_IMG;
-          btnThumb.classList.remove('js-open-modal');
-          // opcional: tenta recuperar mesmo assim
-          PetraImageUI.smartAutoRecover(img, sourceForThumb, 60000, 10000);
-        });
-    }
+    btn.appendChild(img); // adiciona img ao botão
+    line.appendChild(btn); // adiciona botão ao <li>
+  } else {
+    // PT: Espaçador pra manter o grid alinhado. EN: Spacer to keep layout aligned.
+    const spacer = document.createElement('div'); // cria div espaçadora
+    spacer.className = 'w-16 h-12'; // classes
+    line.appendChild(spacer); // adiciona ao <li>
   }
 
-  /* ==================================================
-   * 📝 TEXTO — Mira continua dona
-   * ================================================== */
+  // --- Corpo do texto ---
+  const body = document.createElement('div'); // cria div do corpo
+  body.className = 'min-w-0'; // classes
 
-  const body = document.createElement('div');
-  body.className = 'min-w-0';
+  const meta = document.createElement('div'); // cria div meta
+  meta.className = 'flex items-center justify-beetween gap-2 text-sm';
 
-  const meta = document.createElement('div');
-  meta.className = 'inline-flex items-center gap-2 text-sm';
-
+  // ⭐ stars
   const rating = document.createElement('span');
-  rating.className = 'shrink-0';
-  rating.innerHTML = ZoeRating.renderRating(it.estrelas || 0, {
-    size: 'sm', // lista/modal → discreto
-    showValue: false, // só estrelas
-  });
+  rating.className = 'text-yellow-500 shrink-0';
+  rating.textContent = '★'.repeat(+it.estrelas || 0);
 
+  // 🕒 date / time (Juniper)
   const when = JuniperDateTime.format(it.data);
   const time = document.createElement('time');
   time.className = 'text-xs text-gray-500 whitespace-nowrap';
   time.textContent = when || '';
-  meta.appendChild(rating);
-  meta.appendChild(time);
+  meta.appendChild(rating); // ⭐
+  meta.appendChild(time); // 🕒 (Juniper)
 
-  const txt = document.createElement('p');
-  txt.className = 'mt-1 text-gray-900 leading-6';
-  txt.textContent = it.texto || '';
+  const txt = document.createElement('p'); // cria parágrafo
+  txt.className = 'mt-1 text-gray-900 leading-6'; // classes
+  txt.textContent = it.texto || ''; // atribui texto
 
-  const autor = document.createElement('p');
-  autor.className = 'mt-1 text-xs text-gray-500';
-  autor.textContent = it.autor ? `- ${it.autor}` : '';
+  const autor = document.createElement('p'); // cria parágrafo autor
+  autor.className = 'mt-1 text-xs text-gray-500'; // classes
+  autor.textContent = it.autor ? `-${it.autor}` : ''; // atribui autor
 
-  body.appendChild(meta);
-  body.appendChild(txt);
-  body.appendChild(autor);
-  line.appendChild(body);
+  body.appendChild(meta); // adiciona meta ao corpo
+  body.appendChild(txt); // adiciona texto ao corpo
+  body.appendChild(autor); // adiciona autor ao corpo
+  line.appendChild(body); // adiciona corpo ao <li>
 
-  const right = document.createElement('div');
-  right.className = 'text-right text-xs text-gray-400';
-  line.appendChild(right);
+  // --- Coluna direita reservada para futuro ---
+  const right = document.createElement('div'); // cria div direita
+  right.className = 'text-right text-xs text-gray-400'; // classes
+  line.appendChild(right); // adiciona ao <li>
 
-  li.appendChild(line);
-  return li;
+  li.appendChild(line); // adiciona linha ao <li>
+  return li; // retorna o <li> pronto
 }
 
 /**
@@ -312,23 +203,14 @@ function renderEmpty(plat, msg = 'Ainda não há avaliações.') {
  * EN: Updates header/footer based on current counters.
  */
 function updateHeader(shown, total, hasMore) {
-  const shownSafe = Number.isFinite(shown) && shown >= 0 ? shown : 0;
-  const totalSafe = Number.isFinite(total) && total > 0 ? total : null;
+  const totalOk = Number.isFinite(total) && total > 0; // total válido
 
-  // 🔹 Subtítulo
-  if (totalSafe !== null) {
-    els.sub.textContent = `${shownSafe} / ${totalSafe} avaliações`;
+  if (totalOk) {
+    els.sub.textContent = `${shown} / ${total} avaliações`; // subtítulo
+    els.info.textContent = hasMore ? `Mostrando ${shown} / ${total}` : `Exibindo todas (${total})`; // info rodapé
   } else {
-    els.sub.textContent = `${shownSafe} avaliações`;
-  }
-
-  // 🔹 Linha de info (rodapé)
-  if (totalSafe !== null) {
-    els.info.textContent = hasMore
-      ? `Mostrando ${shownSafe} de ${totalSafe}`
-      : `Exibindo todas (${totalSafe})`;
-  } else {
-    els.info.textContent = hasMore ? `Mostrando ${shownSafe} (há mais…)` : `Exibindo ${shownSafe}`;
+    els.sub.textContent = `${shown} avaliações`;
+    els.info.textContent = hasMore ? `Mostrando ${shown} (há mais…)` : `Exibindo ${shown}`; // info rodapé
   }
 }
 
@@ -352,10 +234,8 @@ async function searchTotalIfNecessary() {
     if (Number.isFinite(meta.total) && meta.total >= 0) {
       if (state.total == null || meta.total > state.total) {
         state.total = meta.total; // atualiza total se maior / update total if bigger
-        const shown = els.list.querySelectorAll('li:not([data-luma-loading="1"])').length; // itens mostrados / shown items
-        if (shown > 0) {
-          updateHeader(shown, state.total, state.hasMore); // atualiza header / update header
-        }
+        const shown = els.list.chieldElementCount; // itens mostrados / shown items
+        updateHeader(shown, state.total, state.hasMore); // atualiza header / update header
       }
     }
   } catch (e) {
@@ -380,14 +260,8 @@ export function open(plat) {
 
   // header + limpar UI
   els.titulo.textContent = DaraListHelpers.getPlatformLabel(state.plat);
-
-  // Loading inicial
-  els.sub.innerHTML = LumaLoading.spinnerHTML('Loading evaluations...');
-
-  // ✅ Placeholder de loading na lista (marcado para remoção no 1º payload)
-  els.list.innerHTML = `<li data-luma-loading="1" class="py-12 flex justify-center">
-  ${LumaLoading.spinnerHTML('Loading...')} </li>`;
-
+  els.sub.textContent = 'Loading…';
+  els.list.innerHTML = '';
   els.info.textContent = '—';
 
   // botão "ver na plataforma"
@@ -404,8 +278,6 @@ export function open(plat) {
   els.modal.classList.remove('hidden'); // mostra modal
   els.modal.classList.add('flex'); // mostra modal
   document.body.style.overflow = 'hidden'; // trava scroll body
-
-  console.log('[Mira List] open()', { plat: state.plat });
 
   // desativar "Carregar mais" até terminar 1ª carga
   if (els.btnMore) {
@@ -460,20 +332,11 @@ export function close() {
 // ==========================
 
 async function load(first = false) {
-  if (state.loading) return;
-  state.loading = true;
-
-  // ✅ Luma no botão só no "Carregar mais"
-  if (!first && els?.btnMore) {
-    LumaLoading.setButtonLoading(els.btnMore, true, 'Loading more...');
-    await LumaLoading.ensurePaint(); // garante que o loading aparece
-  }
+  if (state.load) return;
+  state.load = true;
 
   try {
-    if (first) {
-      els.sub.innerHTML = LumaLoading.spinnerHTML('Loading evaluations...');
-      await LumaLoading.ensurePaint(); // ✅ PT: garante que o loading aparece | EN: ensures loading appears
-    }
+    if (first) els.sub.textContent = 'Loading...';
 
     const bust = Date.now();
 
@@ -486,14 +349,8 @@ async function load(first = false) {
       _bust: bust,
     });
 
-    console.log('[MIRA LIST] payload listMeta:', { items, first: items?.[0] });
-
-    // ✅ remove body placeholder loading (prevents "6 items" and stuck loading)
-    const liLoading = els.list.querySelector('li[data-luma-loading="1"]');
-    if (liLoading) liLoading.remove();
-
     if (first && items.length === 0) {
-      els.sub.textContent = 'No reviews yet.'; // subtítulo
+      els.sub.textContent = 'Sem avaliações por aqui.'; // subtítulo
       els.list.appendChild(renderEmpty(state.plat)); // render vazio
       state.hasMore = false; // sem mais páginas
     } else {
@@ -501,18 +358,15 @@ async function load(first = false) {
       items.forEach((it) => frag.appendChild(renderItem(it))); // renderiza itens
       els.list.appendChild(frag); // adiciona fragmento à lista
 
-      // ✅ update total only when API provides it (never sum)
       if (Number.isFinite(total) && total >= 0) {
         if (state.total == null || total > state.total) {
           state.total = total; // atualiza total se maior / update total if bigger
         }
       }
 
-      const shown = els.list.querySelectorAll('li:not([data-luma-loading="1"])').length; // itens mostrados
+      const shown = els.list.childElementCount; // itens mostrados
       state.hasMore = hasMore; // atualiza hasMore
-      // ✅ prevent undefined in header
-      const totalSafe = Number.isFinite(state.total) ? state.total : shown;
-      updateHeader(shown, totalSafe, state.hasMore); // atualiza header
+      updateHeader(shown, state.total, state.hasMore); // atualiza header
 
       if (state.hasMore) {
         els.btnMore?.removeAttribute('disabled'); // ativa botão
@@ -524,7 +378,6 @@ async function load(first = false) {
 
       state.page += 1; // próxima página
 
-      // keep your parallel full total fetch (fast:0) if needed
       if (first && (state.total == null || state.total === 0)) {
         window.FeedbackAPI.listMeta(state.plat, 1, 1, {
           fast: 0,
@@ -551,24 +404,16 @@ async function load(first = false) {
       els.sub.textContent = '⚠️ Falha ao carregar. Clique em "Tentar novamente".';
     }
 
-    // ✅ remove placeholder even on error, so it won't stay stuck
-    const liLoading = els.list.querySelector('li[data-luma-loading="1"]');
-    if (liLoading) liLoading.remove();
-
     if (first) {
       els.list.appendChild(renderEmpty(state.plat));
     }
 
     if (els.btnMore) {
-      els.btnMore.disabled = false; // ativa botão
+      els.btnMore.disable = false; // ativa botão
       els.btnMore.classList.remove('opacity-50', 'cursor-not-allowed'); // estilo ativo
     }
   } finally {
-    // ✅ sempre desfaz o loading do botão no final (se não for 1ª carga)
-    if (!first && els?.btnMore) {
-      LumaLoading.setButtonLoading(els.btnMore, false);
-    }
-    state.loading = false;
+    state.load = false;
   }
 }
 

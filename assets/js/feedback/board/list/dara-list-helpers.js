@@ -57,32 +57,42 @@ export function getPlatformLink(plat) {
   return PLATFORM_LINKS[plat] || null;
 }
 
-// ============================================================
-// 🟣 Validação de foto (usada pela Mira)
-// ============================================================
-export function hasRealPhoto(url) {
-  // Verifica se a URL da foto é "real" (não genérica)
-  if (!url) return false; // vazio ou nulo
-  if (typeof url !== 'string') return false; // não é string
+// ==============================
+// 3)Validation (API data)
+// ==============================
 
-  const safeUrl = url.trim().toLowerCase(); // segura e minúscula
-
-  if (!safeUrl) return false; // string vazia
-  if (safeUrl === 'null') return false; // string "null"
-  if (safeUrl === 'undefined') return false; // string "undefined"
-  if (safeUrl === '#') return false;
-
-  return true; // parece uma URL válida
-}
+/**
+ * PT: Verifica se a URL de imagem é válida antes de enviar para o pipeline da Petra.
+ * EN: Checks if the image URL is valid before sending it to Petra's pipeline.
+ */
 
 // ==========================
-// 3) HELPERS DE ERRO
+// 4) HELPERS DE ERRO
 // ==========================
 
 /**
  * PT: Verifica se o erro parece ser de timeout.
  * EN: Checks if the error seems to be a timeout error.
  */
+
+export function isUsableUrl(u = '') {
+  const s = String(u).trim();
+  if (!s) return false;
+
+  // placeholders / truncados
+  if (s === 'https://.../' || s.includes('://...')) return false;
+
+  // dataUrl ok
+  if (s.startsWith('data:image/')) return true;
+
+  // Valida URL absoluta
+  try {
+    new URL(s);
+    return true;
+  } catch {
+    return false;
+  }
+}
 
 export function isTimeoutError(err) {
   const msg = String(err?.message || err || '').toLowerCase();
@@ -92,6 +102,6 @@ export function isTimeoutError(err) {
 export const DaraListHelpers = {
   getPlatformLabel,
   getPlatformLink,
-  hasRealPhoto,
   isTimeoutError,
+  isUsableUrl,
 };
