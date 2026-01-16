@@ -1,0 +1,574 @@
+.pattern {
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  /* remove completamente o height fixo */
+}
+
+.custom-font-1 {
+  font-family: 'Raleway', sans-serif;
+}
+
+.custom-font-2 {
+  font-family: 'Urbanist', sans-serif;
+}
+
+#backToTopBtn {
+  display: none;
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: 50%;
+  background: #000;
+  color: #fff;
+  font-size: 0;
+  cursor: pointer;
+  opacity: 0.6;
+  transition: opacity 0.3s;
+}
+
+#backToTopBtn:hover {
+  opacity: 1;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+/* evita que o título da seção fique escondido sob a nav fixa */
+section[id],
+header[id],
+footer[id] {
+  scroll-margin-top: 88px;
+}
+
+/* evita rolagem lateral no mobile */
+html,
+body {
+  overflow-x: hidden;
+}
+
+/* mantém p/ imagens e vídeos */
+img,
+video {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* iframe preenche o card quando o card define altura/aspect */
+iframe {
+  width: 100%;
+  display: block;
+  height: 100%;
+}
+
+/* faz o iframe preencher o card apesar do seu "iframe { height:auto }" global */
+#localizacao .map-card iframe {
+  height: 100% !important;
+}
+
+/* seta não cobre o mapa */
+#backToTopBtn {
+  z-index: 30;
+  bottom: 72px;
+  right: 16px;
+}
+
+/* (opcional) header com id para podermos desativar clique quando o mapa está visível */
+#siteHeader.pe-none {
+  pointer-events: none;
+}
+
+/* css img form */
+/* Força a imagem a caber no quadrado do preview */
+#foto-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* use object-fit: contain; se não quiser cortar */
+  border-radius: 0.5rem;
+}
+
+/* estilo estrelas avaliação form */
+.star {
+  position: relative;
+  width: 1.25em;
+  height: 1.25em;
+  cursor: pointer;
+  display: inline-block;
+  user-select: none;
+  transition: transform 0.15s ease;
+}
+.star::before {
+  content: '☆'; /* estrela vazia */
+  color: #cbd5e1; /* slate-300 (cinza claro) */
+  font-size: 1em;
+  line-height: 1;
+  display: block;
+}
+.star:hover {
+  transform: scale(1.1);
+}
+.star--ativa::before {
+  content: '★'; /* estrela cheia */
+  color: #f59e0b; /* amber-500 (igual aos cards) */
+}
+
+#rating-badge {
+  background: rgba(245, 158, 11, 0.12);
+  color: #92400e;
+  padding: 0.15rem 0.35rem;
+  border-radius: 0.35rem;
+  margin-left: 0.25rem;
+  font-size: 0.75rem;
+}
+
+/* ===========================
+      FEEDBACK – UTILITÁRIOS
+      =========================== */
+
+/* Clamp de linhas */
+.clamp-1,
+.clamp-2,
+.clamp-3,
+.clamp-4 {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.clamp-1 {
+  -webkit-line-clamp: 1;
+}
+.clamp-2 {
+  -webkit-line-clamp: 2;
+}
+.clamp-3 {
+  -webkit-line-clamp: 3;
+}
+.clamp-4 {
+  -webkit-line-clamp: 4;
+}
+
+/* ==========================================
+      0) BASE (comum a todos os cards) + CTA
+      ========================================== */
+[data-feedback-card] {
+  display: block; /* permite alinhar CTA no rodapé */
+  flex: none; /* impede que o card cresça além do conteúdo */
+}
+
+/* CTA no rodapé do card (só funciona se flex estiver ativo em outros layouts) */
+[data-feedback-card][data-variant='media'] {
+  display: flex; /* modo “media” continua flex */
+  flex-direction: column;
+}
+
+/* CTA no rodapé do card */
+[data-feedback-card] > a[data-action='ver-mais'] {
+  margin-top: auto;
+}
+
+/* Fallback da thumb: mostra um OU outro (nunca os dois) */
+[data-feedback-card] .thumb-container:not(.hidden) + .thumb-fallback {
+  display: none;
+}
+[data-feedback-card] .thumb-container.hidden + .thumb-fallback {
+  display: grid;
+}
+
+/* Segurança: thumb não ganha margens acidentais */
+[data-feedback-card] .thumb-container,
+[data-feedback-card] .thumb-fallback {
+  margin: 0 !important;
+}
+
+/* ======================================================
+      1) LAYOUT PADRÃO (não-media: Shopee / Mercado Livre)
+      — Miniatura lateral
+      ====================================================== */
+[data-feedback-card]:not([data-variant='media']) [data-c-list] {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+[data-feedback-card]:not([data-variant='media']) .thumb-slot {
+  width: 80px;
+  height: 80px;
+  flex: 0 0 auto;
+}
+@media (min-width: 640px) {
+  [data-feedback-card]:not([data-variant='media']) .thumb-slot {
+    width: 100px;
+    height: 100px;
+  }
+}
+
+/* ==========================================
+      2) VARIANTE "media" (SCS)
+      topo (autor+data) → texto → linha → foto
+      ========================================== */
+
+/* 2.0 — KNOBS (tamanhos fáceis de ajustar) */
+:root {
+  --media-photo: 60px; /* miniatura base */
+  --media-photo-md: 60px; /* >=640px (72~80px se quiser maior) */
+}
+
+/* 2.1 — Article cinza + respiro até o CTA (card enxuto) */
+section[data-feedback-card][data-variant='media'] {
+  height: 100%; /* card ocupa a altura da coluna (grade uniforme) */
+  row-gap: 0.6rem; /* respiro entre cinza e CTA */
+}
+section[data-feedback-card][data-variant='media'] article[data-c-list] {
+  flex: 1; /* cinza ocupa todo o restante */
+  display: flex;
+  flex-direction: column;
+  padding: 0.7rem 0.85rem 0.8rem; /* topo | laterais | base */
+}
+
+/* 2.2 — Meta (autor + data) */
+section[data-feedback-card][data-variant='media'] .header-author {
+  font-size: 14px;
+  font-weight: 600;
+  color: #111827;
+}
+section[data-feedback-card][data-variant='media'] .header-date {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+/* 2.3 — TEXTO GLOBAL (todos os cards) */
+[data-feedback-card] [data-c-texto] {
+  font-size: 15.5px; /* tamanho confortável */
+  line-height: 1.75; /* altura ideal */
+  letter-spacing: 0.005em; /* leve espaçamento */
+  color: #1f2937; /* gray-800 */
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  hyphens: auto;
+  overflow-wrap: anywhere;
+}
+/* Respiro entre parágrafos */
+[data-feedback-card] [data-c-texto] + [data-c-texto] {
+  margin-top: 0.6rem;
+}
+/* Desktop levemente maior */
+@media (min-width: 768px) {
+  [data-feedback-card] [data-c-texto] {
+    font-size: 16px;
+    line-height: 1.78;
+  }
+}
+
+/* 2.3a — Respiro entre cabeçalho e o 1º parágrafo */
+section[data-feedback-card][data-variant='media']
+  article[data-c-list]
+  .media-grid
+  [data-c-texto]:first-child {
+  margin-top: 0.35rem; /* ~5–6px em mobile */
+}
+@media (min-width: 768px) {
+  section[data-feedback-card][data-variant='media']
+    article[data-c-list]
+    .media-grid
+    [data-c-texto]:first-child {
+    margin-top: 0.45rem; /* ~7px em telas maiores */
+  }
+}
+
+/* 2.4 — Linha separadora (entre texto e foto) */
+section[data-feedback-card][data-variant='media'] .photo-sep {
+  border-top: 1px solid #e5e7eb; /* gray-200 */
+  margin: 0.75rem 0;
+}
+
+/* 2.5 — Foto (miniatura e estados) */
+section[data-feedback-card][data-variant='media'] .photo-wrap {
+  width: var(--media-photo);
+  aspect-ratio: 1/1;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e5e7eb;
+}
+@media (min-width: 640px) {
+  section[data-feedback-card][data-variant='media'] .photo-wrap {
+    width: var(--media-photo-md);
+  }
+}
+section[data-feedback-card][data-variant='media'] .photo-wrap .thumb-container,
+section[data-feedback-card][data-variant='media'] .photo-wrap .thumb-fallback {
+  width: 100%;
+  height: 100%;
+  aspect-ratio: 1/1;
+}
+section[data-feedback-card][data-variant='media'] .photo-wrap .thumb-container img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.25s ease;
+}
+section[data-feedback-card][data-variant='media'] .photo-wrap .thumb-container:hover img {
+  transform: scale(1.03);
+}
+section[data-feedback-card][data-variant='media'] .photo-wrap .thumb-fallback {
+  display: grid;
+  place-items: center;
+  font-size: 10px;
+  color: #9ca3af;
+  background: #fff;
+  border: 1px dashed #e5e7eb;
+}
+
+/* 2.6 — Esconder linha + foto quando NÃO houver imagem real */
+section[data-feedback-card][data-variant='media']
+  .media-grid:has(.photo-wrap .thumb-container.hidden)
+  .photo-sep,
+section[data-feedback-card][data-variant='media']
+  .media-grid:has(.photo-wrap .thumb-container.hidden)
+  .photo-wrap {
+  display: none !important;
+}
+
+/* 2.7 — Avatar com iniciais (ao lado do nome) */
+section[data-feedback-card][data-variant='media'] .author-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+}
+section[data-feedback-card][data-variant='media'] .author-wrap [data-c-autor] {
+  font-size: 14px;
+  font-weight: 600;
+  color: #111827;
+}
+section[data-feedback-card][data-variant='media'] .avatar-iniciais {
+  width: 28px;
+  height: 28px;
+  display: inline-grid;
+  place-items: center;
+  border-radius: 9999px;
+  font-weight: 700;
+  font-size: 11px;
+  line-height: 1;
+  color: #111827;
+  background: #e5e7eb;
+  border: 1px solid #e5e7eb;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  flex-shrink: 0;
+}
+
+/* ==========================================
+      3) BADGES & RATING
+      ========================================== */
+
+/* Chips de plataforma (SCS, Shopee, etc.) — APENAS o badge */
+[data-feedback-card] header > span.inline-flex.rounded-full {
+  font-size: 11px; /* antes ~10px */
+  font-weight: 600;
+  padding: 2px 6px; /* antes 1.5px 5px */
+  border-radius: 9999px;
+  line-height: 1.3;
+}
+
+/* Rating (estrelinhas + nota) — não distorcer */
+[data-feedback-card] [data-c-rating] {
+  font-size: 0.95rem; /* ~15px */
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: #fbbf24; /* amarelo das estrelas */
+}
+[data-feedback-card] [data-c-rating] i,
+[data-feedback-card] [data-c-rating] svg {
+  font-size: 1rem;
+  line-height: 1;
+  vertical-align: middle;
+}
+
+/* ==========================================
+      4) UTILIDADES & OPCIONAIS
+      ========================================== */
+/* Ex.: .photo-sep.light { border-top:1px solid rgba(0,0,0,.05); } */
+
+/* Fallback sem :has() (opcional)
+      section[data-feedback-card][data-variant="media"]:not(.has-photo) .photo-sep,
+      section[data-feedback-card][data-variant="media"]:not(.has-photo) .photo-wrap{
+        display:none !important;
+      }
+      */
+
+/* 2.8 – CHIP SCS (fora do cinza) – opcional */
+.scs-chip {
+  margin-bottom: 4px;
+}
+
+/* DEBUG (opcional)
+      section[data-feedback-card][data-variant="media"] article[data-c-list] > .media-row{
+        outline:2px dashed magenta;
+      }
+      */
+
+/* ==========================================================
+    === FEEDBACK: compacto com qualidade (preserva tipografia)
+    ========================================================== */
+
+/* Texto confortável (não reduzir demais) */
+#feedback [data-c-texto] {
+  font-size: 16px !important; /* segura a leitura */
+  line-height: 1.6 !important; /* um pouco menor que 1.75 */
+  letter-spacing: 0 !important;
+}
+
+/* Article cinza: aparar levemente os paddings */
+#feedback section[data-feedback-card][data-variant='media'] article[data-c-list] {
+  padding: 0.55rem 0.75rem 0.6rem !important; /* antes ~0.7/0.85/0.8 */
+}
+
+/* Separador de texto/foto menor */
+#feedback section[data-feedback-card][data-variant='media'] .photo-sep {
+  margin: 0.45rem 0 !important; /* antes .75rem */
+}
+
+/* Thumb um pouco menor (sem “sumir”) */
+#feedback section[data-feedback-card][data-variant='media'] .photo-wrap {
+  --media-photo: 68px; /* antes 60px */
+  --media-photo-md: 74px; /* em sm+ */
+}
+
+/* Botão “Ver mais” com menos respiro */
+#feedback [data-action='ver-mais'] {
+  margin-top: 0.45rem !important;
+  padding-top: 0.4rem !important;
+  padding-bottom: 0.4rem !important;
+}
+
+/* Espaços verticais globais da seção (sem tocar no conteúdo dos cards) */
+#feedback > .mx-auto.max-w-screen-2xl {
+  padding-block: 3rem !important; /* antes ~3rem */
+}
+#feedback .rounded-2xl > div {
+  padding-block: 1rem !important; /* antes ~1.5rem */
+}
+#feedback .feedback-topo {
+  margin-top: 12px !important;
+}
+#feedback .rounded-2xl > div > .grid {
+  margin-top: 12px !important;
+}
+#feedback .rounded-2xl > div > p.text-gray-400 {
+  margin-top: 10px !important;
+}
+
+/* Âncora/rolagem: compensa o header fixo e enquadra melhor o topo da seção */
+#feedback {
+  scroll-margin-top: 72px;
+} /* ajuste se seu header mudar de altura */
+
+/* Enquadrar um pouco melhor em telas baixas (ex.: 768p/800p) */
+@media (max-height: 800px) and (min-width: 1024px) {
+  #feedback > .mx-auto {
+    padding-block: 10px;
+  } /* leve ajuste top/bottom */
+  #feedback .feedback-topo {
+    margin-top: 8px;
+  } /* aproxima resumo dos cards */
+}
+
+/* --------------------------------------------------
+   Notebook scale (faixas 1280–1440 e 1441–1600)
+   Sem width fixo. Zoom (preferencial) + fallback scale.
+-------------------------------------------------- */
+
+:root {
+  --nb-scale-1: 0.8; /* 1280–1440 */
+  --nb-scale-2: 0.86; /* 1441–1600 */
+}
+
+/* Alvos (ajuste a lista se quiser incluir/retirar seções) */
+.nb-target > .mx-auto {
+  transform-origin: top center;
+  transition: transform 0.2s ease;
+}
+
+/* 1280–1440 */
+@media (min-width: 1280px) and (max-width: 1440px) {
+  /* Chrome/Edge: usa zoom (melhor, recalcula layout) */
+  @supports (zoom: 0.8) {
+    #sobre > .mx-auto,
+    #producao > .mx-auto,
+    #contato > .mx-auto,
+    #pos-vendas > .mx-auto,
+    #galeria > .mx-auto,
+    #feedback > .mx-auto {
+      zoom: var(--nb-scale-1);
+      transform: none;
+    }
+  }
+  /* Firefox: fallback em scale */
+  @supports not (zoom: 0.8) {
+    #sobre > .mx-auto,
+    #producao > .mx-auto,
+    #contato > .mx-auto,
+    #pos-vendas > .mx-auto,
+    #galeria > .mx-auto,
+    #feedback > .mx-auto {
+      transform: scale(var(--nb-scale-1));
+    }
+  }
+}
+
+/* 1441–1600 */
+@media (min-width: 1441px) and (max-width: 1600px) {
+  @supports (zoom: 0.8) {
+    #sobre > .mx-auto,
+    #producao > .mx-auto,
+    #contato > .mx-auto,
+    #pos-vendas > .mx-auto,
+    #galeria > .mx-auto,
+    #feedback > .mx-auto {
+      zoom: var(--nb-scale-2);
+      transform: none;
+    }
+  }
+  @supports not (zoom: 0.86) {
+    #sobre > .mx-auto,
+    #producao > .mx-auto,
+    #contato > .mx-auto,
+    #pos-vendas > .mx-auto,
+    #galeria > .mx-auto,
+    #feedback > .mx-auto {
+      transform: scale(var(--nb-scale-2));
+    }
+  }
+}
+
+/* ≥ 1601px: normal */
+@media (min-width: 1601px) {
+  #sobre > .mx-auto,
+  #producao > .mx-auto,
+  #contato > .mx-auto,
+  #pos-vendas > .mx-auto,
+  #galeria > .mx-auto,
+  #feedback > .mx-auto {
+    zoom: 1;
+    transform: none;
+  }
+}
+
+/* Opcional: leve respiro ao usar fallback scale (só quando NÃO há zoom) */
+@supports not (zoom: 1) {
+  #sobre,
+  #producao,
+  #contato,
+  #pos-vendas,
+  #galeria,
+  #feedback {
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+  }
+}

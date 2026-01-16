@@ -52,6 +52,12 @@ import { IrisImageViewer } from '/assets/js/layout/modal/iris-image-viewer.js';
 
 import { NamiCarouselLayout } from '/assets/js/layout/carousel/nami-carousel-layout.js';
 
+// 📝 Lyra — modal de formulário (contato, feedback etc.
+// EN 📝 Lyra — form modal (contact, feedback etc.
+// Fornece:
+// - initLyraFormModal()
+import { LyraFormModal } from '/assets/js/layout/modal/lyra-form-modal.js';
+
 // (Opcional, futuro)
 // 🎐 Yume — animações do carrossel (futuro)
 // import { YumeCarouselAnimations } from '/assets/js/layout/hero/carousel/yume-carousel-animations.js';
@@ -79,6 +85,9 @@ function initLayout() {
 
   // 6) Futuro: animações extras da Yume
   // YumeCarouselAnimations?.attach?.();
+
+  // 7) Modal de formulário (Lyra)
+  LyraFormModal.initLyraFormModal();
 }
 
 export const AuroraLayoutLeader = {

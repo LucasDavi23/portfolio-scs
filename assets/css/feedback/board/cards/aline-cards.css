@@ -1,0 +1,310 @@
+/* /assets/css/feedback/board/cards/aline-cards.css
+ * 🎴 Aline — Cards do Feedback (CSS)
+ * Nível: Jovem
+ *
+ * PT: Aline é responsável pela estrutura visual dos cards de feedback.
+ *     Ela define contêineres, bordas, fundos, sombras e variações de layout
+ *     (media, compacto, lista), garantindo consistência e legibilidade.
+ *
+ * EN: Aline is responsible for the visual structure of feedback cards.
+ *     She defines containers, borders, backgrounds, shadows and layout
+ *     variants (media, compact, list), ensuring consistency and readability.
+ * -----------------------------------------------------------------------------*/
+
+/* Clamp base */
+.clamp-1,
+.clamp-2,
+.clamp-3,
+.clamp-4 {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Quantidade de linhas */
+.clamp-1 {
+  -webkit-line-clamp: 1;
+}
+.clamp-2 {
+  -webkit-line-clamp: 2;
+}
+.clamp-3 {
+  -webkit-line-clamp: 3;
+}
+.clamp-4 {
+  -webkit-line-clamp: 4;
+}
+
+/* ==========================================
+      0) BASE (comum a todos os cards) + CTA
+      ========================================== */
+[data-feedback-card] {
+  display: block; /* permite alinhar CTA no rodapé */
+  flex: none; /* impede que o card cresça além do conteúdo */
+}
+
+/* CTA no rodapé do card (só funciona se flex estiver ativo em outros layouts) */
+[data-feedback-card][data-variant='media'] {
+  display: flex; /* modo “media” continua flex */
+  flex-direction: column;
+}
+
+/* CTA no rodapé do card */
+[data-feedback-card] > a[data-action='ver-mais'] {
+  margin-top: auto;
+}
+
+/* Fallback da thumb: mostra um OU outro (nunca os dois) */
+/* Segurança: thumb não ganha margens acidentais */
+[data-feedback-card] .thumb-container,
+[data-feedback-card] .thumb-fallback {
+  margin: 0 !important;
+}
+
+/* ======================================================
+  1) LAYOUT PADRÃO (não-media: Shopee / Mercado Livre)
+  — Miniatura lateral
+====================================================== */
+[data-feedback-card]:not([data-variant='media']) [data-c-list] {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+[data-feedback-card]:not([data-variant='media']) .thumb-slot {
+  width: 80px;
+  height: 80px;
+  flex: 0 0 auto;
+}
+@media (min-width: 640px) {
+  [data-feedback-card]:not([data-variant='media']) .thumb-slot {
+    width: 100px;
+    height: 100px;
+  }
+}
+
+/* ==========================================
+  2) VARIANTE "media" (SCS)
+  topo (autor+data) → texto → linha → foto
+========================================== */
+
+/* 2.0 — KNOBS (tamanhos fáceis de ajustar) */
+/* KNOBS só do card media (não depende do :root global) */
+section[data-feedback-card][data-variant='media'] {
+  --media-photo: 84px; /* total */
+  --media-photo-md: 92px; /* >=640px */
+  --media-inset: 4px; /* 82 - (2*1 border) - (2*4 padding) = 72 úteis */
+}
+
+/* 2.1 — Article cinza + respiro até o CTA (card enxuto) */
+section[data-feedback-card][data-variant='media'] {
+  height: 100%; /* card ocupa a altura da coluna (grade uniforme) */
+  row-gap: 0.6rem; /* respiro entre cinza e CTA */
+}
+section[data-feedback-card][data-variant='media'] article[data-c-list] {
+  flex: 1; /* cinza ocupa todo o restante */
+  display: flex;
+  flex-direction: column;
+  padding: 0.7rem 0.85rem 0.8rem; /* topo | laterais | base */
+}
+
+/* 2.1b — Fixar foto no rodapé do cinza
+   PT: Texto curto ou longo = foto sempre no mesmo lugar (embaixo).
+   EN: Short or long text = thumb always anchored at the bottom. */
+section[data-feedback-card][data-variant='media'] article[data-c-list] .media-grid {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+section[data-feedback-card][data-variant='media'] article[data-c-list] .text-wrap {
+  flex: 1;
+  min-height: 0;
+  padding-bottom: 0.65rem; /* dá o “ar” mesmo com texto grande */
+}
+
+section[data-feedback-card][data-variant='media'] article[data-c-list] .photo-wrap {
+  margin-top: auto;
+  margin: 0.9rem 0 0.75rem; /* mais acima, e um pouco abaixo */
+}
+
+/* 2.2 — Meta (autor + data) */
+section[data-feedback-card][data-variant='media'] .header-author {
+  font-size: 14px;
+  font-weight: 600;
+  color: #111827;
+}
+section[data-feedback-card][data-variant='media'] .header-date {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+/* 2.3 — Texto do feedback (global para cards)
+   PT: tipografia confortável + quebra segura.
+   EN: comfortable typography + safe wrapping. */
+
+[data-feedback-card] [data-c-texto] {
+  font-size: 15.5px; /* tamanho confortável */
+  line-height: 1.75; /* altura ideal */
+  letter-spacing: 0.005em; /* leve espaçamento */
+  color: #1f2937; /* gray-800 */
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  hyphens: auto;
+  overflow-wrap: anywhere;
+}
+/* Respiro entre parágrafos */
+[data-feedback-card] [data-c-texto] + [data-c-texto] {
+  margin-top: 0.6rem;
+}
+/* Desktop levemente maior */
+@media (min-width: 768px) {
+  [data-feedback-card] [data-c-texto] {
+    font-size: 16px;
+    line-height: 1.78;
+  }
+}
+
+/* 2.3a — Respiro entre cabeçalho e o 1º parágrafo */
+section[data-feedback-card][data-variant='media']
+  article[data-c-list]
+  .media-grid
+  [data-c-texto]:first-child {
+  margin-top: 0.35rem; /* ~5–6px em mobile */
+}
+@media (min-width: 768px) {
+  section[data-feedback-card][data-variant='media']
+    article[data-c-list]
+    .media-grid
+    [data-c-texto]:first-child {
+    margin-top: 0.45rem; /* ~7px em telas maiores */
+  }
+}
+
+/* 2.4 — Linha separadora (entre texto e foto) */
+section[data-feedback-card][data-variant='media'] .photo-sep {
+  border-top: 1px solid #e5e7eb; /* gray-200 */
+  margin: 0.75rem 0;
+}
+
+/* 2.5 — Foto (miniatura e estados) */
+section[data-feedback-card][data-variant='media'] .photo-wrap {
+  width: var(--media-photo) !important;
+  margin: 0.9rem 0 0.75rem auto; /* ✅ zera left/right e joga pra direita */
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  overflow: visible;
+  position: relative;
+  display: block; /* ✅ figure vira bloco real */
+}
+
+@media (min-width: 640px) {
+  section[data-feedback-card][data-variant='media'] .photo-wrap {
+    width: var(--media-photo-md);
+  }
+}
+section[data-feedback-card][data-variant='media'] .photo-wrap .thumb-container,
+section[data-feedback-card][data-variant='media'] .photo-wrap .thumb-fallback {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  height: auto; /* ok */
+  border-radius: 5px;
+  border: 1px solid #e5e7eb;
+  background: #f9fafb;
+  padding: 2px;
+  overflow: hidden; /* ✅ aqui sim corta badge/overlay */
+  position: relative; /* ✅ badge absolute fica preso aqui */
+  box-shadow: none;
+  box-sizing: border-box; /* 🔒 garante que padding + border não roubem área */
+}
+
+section[data-feedback-card][data-variant='media'] .photo-wrap .thumb-container img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  transition: transform 0.25s ease;
+  padding: 0 !important;
+  margin: 0 !important;
+  display: block;
+}
+
+section[data-feedback-card][data-variant='media'] .photo-wrap .thumb-fallback {
+  place-items: center;
+  font-size: 10px;
+  color: #9ca3af;
+  background: #fff;
+  border: 1px dashed #e5e7eb;
+}
+
+/* 2.6 — Esconder linha + foto quando NÃO houver imagem real */
+/* Petra state → visual (media) */
+section[data-feedback-card][data-variant='media'].has-photo .photo-sep,
+section[data-feedback-card][data-variant='media'].has-photo .photo-wrap {
+  display: block;
+}
+
+section[data-feedback-card][data-variant='media'].no-photo .photo-sep,
+section[data-feedback-card][data-variant='media'].no-photo .photo-wrap {
+  display: none;
+}
+
+/* 2.7 — Avatar com iniciais (ao lado do nome) */
+section[data-feedback-card][data-variant='media'] .author-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+}
+section[data-feedback-card][data-variant='media'] .author-wrap [data-c-autor] {
+  font-size: 14px;
+  font-weight: 600;
+  color: #111827;
+}
+section[data-feedback-card][data-variant='media'] .avatar-iniciais {
+  width: 28px;
+  height: 28px;
+  display: inline-grid;
+  place-items: center;
+  border-radius: 9999px;
+  font-weight: 700;
+  font-size: 11px;
+  line-height: 1;
+  color: #111827;
+  background: #e5e7eb;
+  border: 1px solid #e5e7eb;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  flex-shrink: 0;
+}
+
+/* ==================================================
+   Aline — Utilidades & opcionais (documentação)
+   PT: Alternativas e dicas para manutenção/debug do layout.
+   EN: Alternatives and notes for maintenance/debug.
+   ================================================== */
+
+/* Exemplo (opcional)
+.photo-sep.light {
+  border-top: 1px solid rgba(0, 0, 0, .05);
+}
+*/
+
+/* Fallback sem :has() (opcional)
+section[data-feedback-card][data-variant="media"]:not(.has-photo) .photo-sep,
+section[data-feedback-card][data-variant="media"]:not(.has-photo) .photo-wrap {
+  display: none !important;
+}
+*/
+
+/* DEBUG (opcional)
+section[data-feedback-card][data-variant="media"] article[data-c-list] > .media-row {
+  outline: 2px dashed magenta;
+}
+*/
+
+/* ✅ TESTE NUCLEAR — se isso não aparecer, o CSS NÃO está carregando */
+/* section[data-feedback-card][data-variant='media'] .photo-wrap {
+  outline: 6px solid red !important;
+  width: 82px !important;
+} */

@@ -1,0 +1,29 @@
+/* /assets/css/feedback/board/rating/zara-rating.css
+ * ⭐ Zara — Rating do Feedback (CSS)
+ * Nível: Aprendiz
+ *
+ * PT: Zara é responsável pela exibição do rating do feedback.
+ *     Ela cuida das estrelas (cheias/vazias), alinhamento do rating
+ *     com informações de apoio (data/origem) e da leitura rápida
+ *     da nota visual.
+ *
+ * EN: Zara is responsible for displaying the feedback rating.
+ *     She handles stars (filled/empty), rating alignment with
+ *     supporting info (date/source) and quick visual score reading.
+ * -----------------------------------------------------------------------------*/
+
+/* Rating (estrelinhas + nota) — não distorcer */
+[data-feedback-card] [data-c-rating] {
+  font-size: 0.95rem; /* ~15px */
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: #fbbf24; /* amarelo das estrelas */
+}
+[data-feedback-card] [data-c-rating] i,
+[data-feedback-card] [data-c-rating] svg {
+  font-size: 1rem;
+  line-height: 1;
+  vertical-align: middle;
+}

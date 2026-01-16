@@ -7,13 +7,18 @@
 //     Este arquivo é o "ponto inicial" do sistema.
 //
 // EN: Morgana coordinates the entire system. She does not handle specific
-//     sectors, but ensures each leader runs in the correct order.
+//     sectors, but ensure s each leader runs in the correct order.
 //     This file is the system's entry point.
 
 // 🌇 Aurora — Líder do Layout
 import { AuroraLayoutLeader } from '/assets/js/layout/leader/aurora-layout-main.js';
 
-import { KendraFeedbackLeader } from '/assets/js/feedback/board/leader/kendra-feedback-main';
+// 🛡️ Kendra — Líder do Setor de Board.
+import { KendraBoardLeader } from '/assets/js/feedback/board/leader/kendra-feedback-main';
+
+// 🌙 Aura — Líder do setor Form.
+import { AuraFormLeader } from '/assets/js/feedback/form/leader/aura-form-leader-main.js';
+
 // Futuro:
 // import { initFeedback } from '/assets/js/feedback/leader/selah-feedback-board-ui.js';
 // import { initPedidos } from '/assets/js/pedidos/leader/...';
@@ -26,7 +31,12 @@ export function initSystem() {
   AuroraLayoutLeader.initLayout();
 
   // --- Feedback ---
-  KendraFeedbackLeader.initFeedback();
+
+  // --- Board ---
+  KendraBoardLeader.initBoard();
+
+  // --- Form ---mas
+  AuraFormLeader.initForm();
   // --- Futuro ---
   // initFeedback();
   // initPedidos();

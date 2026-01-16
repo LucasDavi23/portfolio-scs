@@ -1,0 +1,43 @@
+/* /assets/css/system/director/morrigan-system-director.css
+ * 🜃 Morrigan — Diretora Geral do CSS
+ * Nível: Adulta
+ *
+ * PT: Morrigan coordena o CSS do sistema como um todo. Ela não estiliza
+ *     componentes nem features, mas garante que cada líder visual
+ *     seja carregado na ordem correta. Este arquivo é o ponto inicial
+ *     do CSS do sistema.
+ *
+ * EN: Morrigan coordinates the system CSS as a whole. She does not style
+ *     components or features, but ensures each visual leader is loaded
+ *     in the correct order. This file is the CSS entry point.
+ * -----------------------------------------------------------------------------*/
+
+/* ============================================================================
+   SYSTEM — Base
+   ============================================================================ */
+
+/* Base estrutural do sistema */
+@import '/assets/css/system/foundation/foundation.css';
+
+/* 🧩 Coretta — System Leader
+   - Tipografia
+   - UI base
+*/
+@import '/assets/css/system/coretta-system-leader.css';
+
+/* ============================================================================
+   SYSTEM — Layout
+   ============================================================================ */
+
+/* 🧭 Atlas — Layout Leader */
+@import '/assets/css/system/layout/atlas-layout-leader.css';
+
+/* ============================================================================
+   FEEDBACK
+   ============================================================================ */
+
+/* 🌿 Seren — Board Leader */
+@import '/assets/css/feedback/board/seren-board-leader.css';
+
+/* ✍️ Nyla / Elisa — Form Leader */
+@import '/assets/css/feedback/form/nyla-form-leader.css';

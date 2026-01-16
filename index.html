@@ -16,584 +16,10 @@
     <!-- Tailwind compilado -->
     <!-- <link rel="stylesheet" href="dist/styles.css" /> -->
 
-    <style>
-      .pattern {
-        background-size: cover;
-        background-position: center;
-        background-repeat: no-repeat;
-        /* remove completamente o height fixo */
-      }
-
-      .custom-font-1 {
-        font-family: 'Raleway', sans-serif;
-      }
-
-      .custom-font-2 {
-        font-family: 'Urbanist', sans-serif;
-      }
-
-      #backToTopBtn {
-        display: none;
-        position: fixed;
-        bottom: 20px;
-        right: 20px;
-        width: 40px;
-        height: 40px;
-        border: none;
-        border-radius: 50%;
-        background: #000;
-        color: #fff;
-        font-size: 0;
-        cursor: pointer;
-        opacity: 0.6;
-        transition: opacity 0.3s;
-      }
-
-      #backToTopBtn:hover {
-        opacity: 1;
-      }
-
-      html {
-        scroll-behavior: smooth;
-      }
-
-      /* evita que o título da seção fique escondido sob a nav fixa */
-      section[id],
-      header[id],
-      footer[id] {
-        scroll-margin-top: 88px;
-      }
-
-      /* evita rolagem lateral no mobile */
-      html,
-      body {
-        overflow-x: hidden;
-      }
-
-      /* Css global para o texto */
-
-      /* mantém p/ imagens e vídeos */
-      img,
-      video {
-        max-width: 100%;
-        height: auto;
-        display: block;
-      }
-
-      /* iframe preenche o card quando o card define altura/aspect */
-      iframe {
-        width: 100%;
-        display: block;
-        height: 100%;
-      }
-
-      /* faz o iframe preencher o card apesar do seu "iframe { height:auto }" global */
-      #localizacao .map-card iframe {
-        height: 100% !important;
-      }
-
-      /* seta não cobre o mapa */
-      #backToTopBtn {
-        z-index: 30;
-        bottom: 72px;
-        right: 16px;
-      }
-
-      /* (opcional) header com id para podermos desativar clique quando o mapa está visível */
-      #siteHeader.pe-none {
-        pointer-events: none;
-      }
-
-      /* css img form */
-      /* Força a imagem a caber no quadrado do preview */
-      #foto-preview img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover; /* use object-fit: contain; se não quiser cortar */
-        border-radius: 0.5rem;
-      }
-
-      /* estilo estrelas avaliação form */
-      .star {
-        position: relative;
-        width: 1.25em;
-        height: 1.25em;
-        cursor: pointer;
-        display: inline-block;
-        user-select: none;
-        transition: transform 0.15s ease;
-      }
-      .star::before {
-        content: '☆'; /* estrela vazia */
-        color: #cbd5e1; /* slate-300 (cinza claro) */
-        font-size: 1em;
-        line-height: 1;
-        display: block;
-      }
-      .star:hover {
-        transform: scale(1.1);
-      }
-      .star--ativa::before {
-        content: '★'; /* estrela cheia */
-        color: #f59e0b; /* amber-500 (igual aos cards) */
-      }
-
-      #rating-badge {
-        background: rgba(245, 158, 11, 0.12);
-        color: #92400e;
-        padding: 0.15rem 0.35rem;
-        border-radius: 0.35rem;
-        margin-left: 0.25rem;
-        font-size: 0.75rem;
-      }
-
-      /* ===========================
-      FEEDBACK – UTILITÁRIOS
-      =========================== */
-
-      /* Clamp de linhas */
-      .clamp-1,
-      .clamp-2,
-      .clamp-3,
-      .clamp-4 {
-        display: -webkit-box;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-      }
-      .clamp-1 {
-        -webkit-line-clamp: 1;
-      }
-      .clamp-2 {
-        -webkit-line-clamp: 2;
-      }
-      .clamp-3 {
-        -webkit-line-clamp: 3;
-      }
-      .clamp-4 {
-        -webkit-line-clamp: 4;
-      }
-
-      /* ==========================================
-      0) BASE (comum a todos os cards) + CTA
-      ========================================== */
-      [data-feedback-card] {
-        display: block; /* permite alinhar CTA no rodapé */
-        flex: none; /* impede que o card cresça além do conteúdo */
-      }
-
-      /* CTA no rodapé do card (só funciona se flex estiver ativo em outros layouts) */
-      [data-feedback-card][data-variant='media'] {
-        display: flex; /* modo “media” continua flex */
-        flex-direction: column;
-      }
-
-      /* CTA no rodapé do card */
-      [data-feedback-card] > a[data-action='ver-mais'] {
-        margin-top: auto;
-      }
-
-      /* Fallback da thumb: mostra um OU outro (nunca os dois) */
-      [data-feedback-card] .thumb-container:not(.hidden) + .thumb-fallback {
-        display: none;
-      }
-      [data-feedback-card] .thumb-container.hidden + .thumb-fallback {
-        display: grid;
-      }
-
-      /* Segurança: thumb não ganha margens acidentais */
-      [data-feedback-card] .thumb-container,
-      [data-feedback-card] .thumb-fallback {
-        margin: 0 !important;
-      }
-
-      /* ======================================================
-      1) LAYOUT PADRÃO (não-media: Shopee / Mercado Livre)
-      — Miniatura lateral
-      ====================================================== */
-      [data-feedback-card]:not([data-variant='media']) [data-c-list] {
-        display: flex;
-        align-items: flex-start;
-        gap: 12px;
-      }
-      [data-feedback-card]:not([data-variant='media']) .thumb-slot {
-        width: 80px;
-        height: 80px;
-        flex: 0 0 auto;
-      }
-      @media (min-width: 640px) {
-        [data-feedback-card]:not([data-variant='media']) .thumb-slot {
-          width: 100px;
-          height: 100px;
-        }
-      }
-
-      /* ==========================================
-      2) VARIANTE "media" (SCS)
-      topo (autor+data) → texto → linha → foto
-      ========================================== */
-
-      /* 2.0 — KNOBS (tamanhos fáceis de ajustar) */
-      :root {
-        --media-photo: 60px; /* miniatura base */
-        --media-photo-md: 60px; /* >=640px (72~80px se quiser maior) */
-      }
-
-      /* 2.1 — Article cinza + respiro até o CTA (card enxuto) */
-      section[data-feedback-card][data-variant='media'] {
-        height: 100%; /* card ocupa a altura da coluna (grade uniforme) */
-        row-gap: 0.6rem; /* respiro entre cinza e CTA */
-      }
-      section[data-feedback-card][data-variant='media'] article[data-c-list] {
-        flex: 1; /* cinza ocupa todo o restante */
-        display: flex;
-        flex-direction: column;
-        padding: 0.7rem 0.85rem 0.8rem; /* topo | laterais | base */
-      }
-
-      /* 2.2 — Meta (autor + data) */
-      section[data-feedback-card][data-variant='media'] .header-author {
-        font-size: 14px;
-        font-weight: 600;
-        color: #111827;
-      }
-      section[data-feedback-card][data-variant='media'] .header-date {
-        font-size: 12px;
-        color: #6b7280;
-      }
-
-      /* 2.3 — TEXTO GLOBAL (todos os cards) */
-      [data-feedback-card] [data-c-texto] {
-        font-size: 15.5px; /* tamanho confortável */
-        line-height: 1.75; /* altura ideal */
-        letter-spacing: 0.005em; /* leve espaçamento */
-        color: #1f2937; /* gray-800 */
-        -webkit-font-smoothing: antialiased;
-        text-rendering: optimizeLegibility;
-        hyphens: auto;
-        overflow-wrap: anywhere;
-      }
-      /* Respiro entre parágrafos */
-      [data-feedback-card] [data-c-texto] + [data-c-texto] {
-        margin-top: 0.6rem;
-      }
-      /* Desktop levemente maior */
-      @media (min-width: 768px) {
-        [data-feedback-card] [data-c-texto] {
-          font-size: 16px;
-          line-height: 1.78;
-        }
-      }
-
-      /* 2.3a — Respiro entre cabeçalho e o 1º parágrafo */
-      section[data-feedback-card][data-variant='media']
-        article[data-c-list]
-        .media-grid
-        [data-c-texto]:first-child {
-        margin-top: 0.35rem; /* ~5–6px em mobile */
-      }
-      @media (min-width: 768px) {
-        section[data-feedback-card][data-variant='media']
-          article[data-c-list]
-          .media-grid
-          [data-c-texto]:first-child {
-          margin-top: 0.45rem; /* ~7px em telas maiores */
-        }
-      }
-
-      /* 2.4 — Linha separadora (entre texto e foto) */
-      section[data-feedback-card][data-variant='media'] .photo-sep {
-        border-top: 1px solid #e5e7eb; /* gray-200 */
-        margin: 0.75rem 0;
-      }
-
-      /* 2.5 — Foto (miniatura e estados) */
-      section[data-feedback-card][data-variant='media'] .photo-wrap {
-        width: var(--media-photo);
-        aspect-ratio: 1/1;
-        border-radius: 10px;
-        overflow: hidden;
-        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
-        border: 1px solid #e5e7eb;
-      }
-      @media (min-width: 640px) {
-        section[data-feedback-card][data-variant='media'] .photo-wrap {
-          width: var(--media-photo-md);
-        }
-      }
-      section[data-feedback-card][data-variant='media'] .photo-wrap .thumb-container,
-      section[data-feedback-card][data-variant='media'] .photo-wrap .thumb-fallback {
-        width: 100%;
-        height: 100%;
-        aspect-ratio: 1/1;
-      }
-      section[data-feedback-card][data-variant='media'] .photo-wrap .thumb-container img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        transition: transform 0.25s ease;
-      }
-      section[data-feedback-card][data-variant='media'] .photo-wrap .thumb-container:hover img {
-        transform: scale(1.03);
-      }
-      section[data-feedback-card][data-variant='media'] .photo-wrap .thumb-fallback {
-        display: grid;
-        place-items: center;
-        font-size: 10px;
-        color: #9ca3af;
-        background: #fff;
-        border: 1px dashed #e5e7eb;
-      }
-
-      /* 2.6 — Esconder linha + foto quando NÃO houver imagem real */
-      section[data-feedback-card][data-variant='media']
-        .media-grid:has(.photo-wrap .thumb-container.hidden)
-        .photo-sep,
-      section[data-feedback-card][data-variant='media']
-        .media-grid:has(.photo-wrap .thumb-container.hidden)
-        .photo-wrap {
-        display: none !important;
-      }
-
-      /* 2.7 — Avatar com iniciais (ao lado do nome) */
-      section[data-feedback-card][data-variant='media'] .author-wrap {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        min-width: 0;
-      }
-      section[data-feedback-card][data-variant='media'] .author-wrap [data-c-autor] {
-        font-size: 14px;
-        font-weight: 600;
-        color: #111827;
-      }
-      section[data-feedback-card][data-variant='media'] .avatar-iniciais {
-        width: 28px;
-        height: 28px;
-        display: inline-grid;
-        place-items: center;
-        border-radius: 9999px;
-        font-weight: 700;
-        font-size: 11px;
-        line-height: 1;
-        color: #111827;
-        background: #e5e7eb;
-        border: 1px solid #e5e7eb;
-        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6);
-        flex-shrink: 0;
-      }
-
-      /* ==========================================
-      3) BADGES & RATING
-      ========================================== */
-
-      /* Chips de plataforma (SCS, Shopee, etc.) — APENAS o badge */
-      [data-feedback-card] header > span.inline-flex.rounded-full {
-        font-size: 11px; /* antes ~10px */
-        font-weight: 600;
-        padding: 2px 6px; /* antes 1.5px 5px */
-        border-radius: 9999px;
-        line-height: 1.3;
-      }
-
-      /* Rating (estrelinhas + nota) — não distorcer */
-      [data-feedback-card] [data-c-rating] {
-        font-size: 0.95rem; /* ~15px */
-        font-weight: 600;
-        display: flex;
-        align-items: center;
-        gap: 4px;
-        color: #fbbf24; /* amarelo das estrelas */
-      }
-      [data-feedback-card] [data-c-rating] i,
-      [data-feedback-card] [data-c-rating] svg {
-        font-size: 1rem;
-        line-height: 1;
-        vertical-align: middle;
-      }
-
-      /* ==========================================
-      4) UTILIDADES & OPCIONAIS
-      ========================================== */
-      /* Ex.: .photo-sep.light { border-top:1px solid rgba(0,0,0,.05); } */
-
-      /* Fallback sem :has() (opcional)
-      section[data-feedback-card][data-variant="media"]:not(.has-photo) .photo-sep,
-      section[data-feedback-card][data-variant="media"]:not(.has-photo) .photo-wrap{
-        display:none !important;
-      }
-      */
-
-      /* 2.8 – CHIP SCS (fora do cinza) – opcional */
-      .scs-chip {
-        margin-bottom: 4px;
-      }
-
-      /* DEBUG (opcional)
-      section[data-feedback-card][data-variant="media"] article[data-c-list] > .media-row{
-        outline:2px dashed magenta;
-      }
-      */
-
-      /* ==========================================================
-   === FEEDBACK: compacto com qualidade (preserva tipografia)
-   ========================================================== */
-
-      /* Texto confortável (não reduzir demais) */
-      #feedback [data-c-texto] {
-        font-size: 15px !important; /* segura a leitura */
-        line-height: 1.6 !important; /* um pouco menor que 1.75 */
-        letter-spacing: 0 !important;
-      }
-
-      /* Article cinza: aparar levemente os paddings */
-      #feedback section[data-feedback-card][data-variant='media'] article[data-c-list] {
-        padding: 0.6rem 0.8rem 0.7rem !important; /* antes ~0.7/0.85/0.8 */
-      }
-
-      /* Separador de texto/foto menor */
-      #feedback section[data-feedback-card][data-variant='media'] .photo-sep {
-        margin: 0.5rem 0 !important; /* antes .75rem */
-      }
-
-      /* Thumb um pouco menor (sem “sumir”) */
-      #feedback section[data-feedback-card][data-variant='media'] .photo-wrap {
-        --media-photo: 52px; /* antes 60px */
-        --media-photo-md: 56px; /* em sm+ */
-      }
-
-      /* Botão “Ver mais” com menos respiro */
-      #feedback [data-action='ver-mais'] {
-        margin-top: 0.45rem !important;
-        padding-top: 0.4rem !important;
-        padding-bottom: 0.4rem !important;
-      }
-
-      /* Espaços verticais globais da seção (sem tocar no conteúdo dos cards) */
-      #feedback > .mx-auto.max-w-screen-2xl {
-        padding-block: 3rem !important; /* antes ~3rem */
-      }
-      #feedback .rounded-2xl > div {
-        padding-block: 1rem !important; /* antes ~1.5rem */
-      }
-      #feedback .feedback-topo {
-        margin-top: 12px !important;
-      }
-      #feedback .rounded-2xl > div > .grid {
-        margin-top: 12px !important;
-      }
-      #feedback .rounded-2xl > div > p.text-gray-400 {
-        margin-top: 10px !important;
-      }
-
-      /* Âncora/rolagem: compensa o header fixo e enquadra melhor o topo da seção */
-      #feedback {
-        scroll-margin-top: 72px;
-      } /* ajuste se seu header mudar de altura */
-
-      /* Enquadrar um pouco melhor em telas baixas (ex.: 768p/800p) */
-      @media (max-height: 800px) and (min-width: 1024px) {
-        #feedback > .mx-auto {
-          padding-block: 10px;
-        } /* leve ajuste top/bottom */
-        #feedback .feedback-topo {
-          margin-top: 8px;
-        } /* aproxima resumo dos cards */
-      }
-
-      /* --------------------------------------------------
-   Notebook scale (faixas 1280–1440 e 1441–1600)
-   Sem width fixo. Zoom (preferencial) + fallback scale.
--------------------------------------------------- */
-
-      :root {
-        --nb-scale-1: 0.8; /* 1280–1440 */
-        --nb-scale-2: 0.86; /* 1441–1600 */
-      }
-
-      /* Alvos (ajuste a lista se quiser incluir/retirar seções) */
-      .nb-target > .mx-auto {
-        transform-origin: top center;
-        transition: transform 0.2s ease;
-      }
-
-      /* 1280–1440 */
-      @media (min-width: 1280px) and (max-width: 1440px) {
-        /* Chrome/Edge: usa zoom (melhor, recalcula layout) */
-        @supports (zoom: 0.8) {
-          #sobre > .mx-auto,
-          #producao > .mx-auto,
-          #contato > .mx-auto,
-          #pos-vendas > .mx-auto,
-          #galeria > .mx-auto,
-          #feedback > .mx-auto {
-            zoom: var(--nb-scale-1);
-            transform: none;
-          }
-        }
-        /* Firefox: fallback em scale */
-        @supports not (zoom: 0.8) {
-          #sobre > .mx-auto,
-          #producao > .mx-auto,
-          #contato > .mx-auto,
-          #pos-vendas > .mx-auto,
-          #galeria > .mx-auto,
-          #feedback > .mx-auto {
-            transform: scale(var(--nb-scale-1));
-          }
-        }
-      }
-
-      /* 1441–1600 */
-      @media (min-width: 1441px) and (max-width: 1600px) {
-        @supports (zoom: 0.8) {
-          #sobre > .mx-auto,
-          #producao > .mx-auto,
-          #contato > .mx-auto,
-          #pos-vendas > .mx-auto,
-          #galeria > .mx-auto,
-          #feedback > .mx-auto {
-            zoom: var(--nb-scale-2);
-            transform: none;
-          }
-        }
-        @supports not (zoom: 0.86) {
-          #sobre > .mx-auto,
-          #producao > .mx-auto,
-          #contato > .mx-auto,
-          #pos-vendas > .mx-auto,
-          #galeria > .mx-auto,
-          #feedback > .mx-auto {
-            transform: scale(var(--nb-scale-2));
-          }
-        }
-      }
-
-      /* ≥ 1601px: normal */
-      @media (min-width: 1601px) {
-        #sobre > .mx-auto,
-        #producao > .mx-auto,
-        #contato > .mx-auto,
-        #pos-vendas > .mx-auto,
-        #galeria > .mx-auto,
-        #feedb > .mx-auto {
-          zoom: 1;
-          transform: none;
-        }
-      }
-
-      /* Opcional: leve respiro ao usar fallback scale (só quando NÃO há zoom) */
-      @supports not (zoom: 1) {
-        #sobre,
-        #producao,
-        #contato,
-        #pos-vendas,
-        #galeria,
-        #feedback {
-          padding-top: 2rem;
-          padding-bottom: 2rem;
-        }
-      }
-    </style>
+    <!-- CSS principal do sistema
+     Ponto de entrada: Morrigan (diretora)
+     Orquestra todos os leaders e estilos -->
+    <link rel="stylesheet" href="/assets/css/system/director/morrigan-system-director.css" />
   </head>
 
   <body>
@@ -994,7 +420,7 @@
       </section>
 
       <!-- PRODUÇÃO (compacta) -->
-      <section id="producao" class="min-h-[calc(100svh-4rem)] snap-start scroll-mt-20">
+      <section id="producao" class="min-h-[calc(100svh-4rem)] snap-start scroll-mt-10">
         <div class="mx-auto max-w-screen-2xl px-4 py-12 sm:px-6 lg:px-8">
           <div class="grid grid-cols-1 gap-2 xl:min-h-[68vh] xl:grid-cols-2 xl:gap-8">
             <!-- Texto à ESQUERDA -->
@@ -1352,7 +778,7 @@
       </section>
 
       <!-- PÓS-VENDAS -->
-      <section id="pos-vendas" class="min-h-[calc(100vh-4rem)] snap-start scroll-mt-20">
+      <section id="pos-vendas" class="min-h-[calc(60vh-4rem)] snap-start scroll-mt-20">
         <div class="mx-auto max-w-screen-2xl px-4 py-12 sm:px-6 lg:px-8">
           <div class="grid grid-cols-1 gap-6 xl:min-h-[68vh] xl:grid-cols-2 xl:gap-8">
             <!-- Imagem à ESQUERDA (uma imagem) -->
@@ -1466,7 +892,7 @@
       </section>
 
       <!-- LOCALIZAÇÃO Endereço -->
-      <section id="localizacao" class="min-h-[calc(100vh-4rem)] snap-start scroll-mt-20">
+      <section id="localizacao" class="min-h-[calc(60vh-4rem)] snap-start scroll-mt-20">
         <div class="mx-auto max-w-screen-2xl px-4 py-12 sm:px-6 lg:px-8">
           <div class="grid grid-cols-1 gap-6 items-center xl:grid-cols-2 xl:gap-8">
             <!-- TEXTO (esquerda no desktop) -->
@@ -1621,7 +1047,7 @@
       <!-- /Produtos -->
 
       <!-- Galeria -->
-      <section id="galeria" class="py-6 min-h-[calc(100vh-4rem)] snap-start scroll-mt-20">
+      <section id="galeria" class="py-6 min-h-[calc(60vh-4rem)] snap-start scroll-mt-20">
         <!-- reduzi de py-12 para py-6 -->
         <div class="max-w-screen-lg px-3 sm:px-4 lg:px-6 mx-auto">
           <!-- reduzi largura e padding -->
@@ -1671,29 +1097,24 @@
         </div>
       </section>
 
-      <!-- 💬 Modal lista de feedback -->
-      <!-- … section #feedback termina aqui … -->
-
       <!-- 🖼️ Modal imagem -->
 
-      <div
-        id="modalImg"
-        class="fixed inset-0 z-[60] hidden items-center justify-center bg-black/70 p-4"
-      >
+      <div id="modalImg" class="fixed inset-0 z-[60] hidden place-items-center bg-black/70 p-4">
         <!-- botão fechar -->
         <button
           type="button"
           id="modalClose"
-          class="absolute top-4 right-4 text-white text-3xl leading-none px-2"
+          class="fixed top-4 right-4 z-[61] text-white text-3xl leading-none px-2"
           aria-label="Fechar"
         >
           ✕
         </button>
+
         <!-- imagem ampliada -->
         <div class="flex items-center justify-center">
           <img
             id="modalImgSrc"
-            class="max-w-[92vw] max-h-[90vh] rounded-xl shadow-2xl ring-1 ring-white/20 object-contain"
+            class="max-w-[92vw] max-h-[90dvh] rounded-xl shadow-2xl ring-1 ring-white/20 object-contain"
             alt="Pré-visualização"
           />
         </div>
@@ -1767,7 +1188,7 @@
       <!-- FeedBack -->
 
       <!-- FEEDBACK (padrão do bloco "Onde estamos": 2 colunas lado a lado) -->
-      <section id="feedback" class="py-6 scroll-mt-20 min-h-[calc(100vh-4rem)] snap-start">
+      <section id="feedback" class="py-6 scroll-mt-20 min-h-[calc(60vh-4rem)] snap-start">
         <!-- Cabeçalho no estilo da galeria -->
         <div class="max-w-screen-lg px-3 sm:px-4 lg:px-6 mx-auto">
           <header class="text-center">
@@ -1939,7 +1360,7 @@
                             <span class="badge-ghost">Ver foto</span>
                           </button>
                           <div
-                            class="thumb-fallback rounded-xl border border-dashed grid place-items-center bg-white text-[10px] text-gray-400"
+                            class="thumb-fallback hidden rounded-xl border border-dashed grid place-items-center bg-white text-[10px] text-gray-400"
                           >
                             sem foto
                           </div>
@@ -2014,7 +1435,7 @@
                             <span class="badge-ghost">Ver foto</span>
                           </button>
                           <div
-                            class="thumb-fallback rounded-xl border border-dashed grid place-items-center bg-white text-[10px] text-gray-400"
+                            class="thumb-fallback hidden rounded-xl border border-dashed grid place-items-center bg-white text-[10px] text-gray-400"
                           >
                             sem foto
                           </div>
@@ -2089,7 +1510,7 @@
                             <span class="badge-ghost">Ver foto</span>
                           </button>
                           <div
-                            class="thumb-fallback rounded-xl border border-dashed grid place-items-center bg-white text-[10px] text-gray-400"
+                            class="thumb-fallback hidden rounded-xl border border-dashed grid place-items-center bg-white text-[10px] text-gray-400"
                           >
                             sem foto
                           </div>
@@ -2164,7 +1585,7 @@
                             <span class="badge-ghost">Ver foto</span>
                           </button>
                           <div
-                            class="thumb-fallback rounded-xl border border-dashed grid place-items-center bg-white text-[10px] text-gray-400"
+                            class="thumb-fallback hidden rounded-xl border border-dashed grid place-items-center bg-white text-[10px] text-gray-400"
                           >
                             sem foto
                           </div>
@@ -2194,181 +1615,260 @@
 
       <!-- /FeedBack -->
       <!-- Form do feedback Modal -->
-      <!-- FORM (esquerda no desktop) -->
-      <div class="flex bg-gray-100 rounded-2xl lg:order-1">
-        <div class="p-6 sm:p-6 lg:p-7 w-full">
-          <h2 class="text-2xl font-semibold sm:text-3xl">Deixe seu feedback</h2>
+      <!-- ==================================================
+          FEEDBACK — MODAL (Shell)
+      ================================================== -->
+      <div id="feedback-modal" class="fixed inset-0 z-[9999] hidden" aria-hidden="true">
+        <!-- Backdrop -->
+        <div
+          class="absolute inset-0 bg-black/60 backdrop-blur-[1px] z-10"
+          data-feedback-backdrop
+        ></div>
 
-          <!-- Avaliação por estrelas (HTML-only, acessível) -->
-          <fieldset class="mt-4" aria-label="Avaliação">
-            <legend class="sr-only">Avaliação</legend>
+        <!-- Panel wrapper (scroll interno) -->
+        <div
+          class="relative z-20 grid min-h-[100dvh] place-items-center p-4 sm:p-6 pointer-events-none"
+        >
+          <!-- Panel -->
+          <div
+            class="nb-modal pointer-events-auto w-[96vw] sm:w-[min(92vw,980px)] rounded-2xl bg-white shadow-xll"
+            role="dialog"
+            aria-modal="true"
+            tabindex="-1"
+          >
+            <!-- Header -->
+            <div class="flex items-center justify-between border-b px-5 py-4" data-modal-header>
+              <h2 id="feedback-title" class="text-base font-semibold text-neutral-900">
+                Avaliação
+              </h2>
 
-            <div id="rating-group" class="flex items-center gap-1 text-xl select-none">
-              <input
-                class="sr-only"
-                type="radio"
-                name="rating_star"
-                id="rate1"
-                value="1"
-                required
-              />
-              <label for="rate1" class="star" title="1 estrela"></label>
-
-              <input class="sr-only" type="radio" name="rating_star" id="rate2" value="2" />
-              <label for="rate2" class="star" title="2 estrelas"></label>
-
-              <input class="sr-only" type="radio" name="rating_star" id="rate3" value="3" />
-              <label for="rate3" class="star" title="3 estrelas"></label>
-
-              <input class="sr-only" type="radio" name="rating_star" id="rate4" value="4" />
-              <label for="rate4" class="star" title="4 estrelas"></label>
-
-              <input class="sr-only" type="radio" name="rating_star" id="rate5" value="5" />
-              <label for="rate5" class="star" title="5 estrelas"></label>
-            </div>
-            <input type="hidden" id="rating" name="rating" value="" />
-            <p class="mt-1 text-xs text-gray-500">
-              Selecione de 1 a 5 estrelas.
-              <span id="rating-badge" class="hidden">0/5</span>
-            </p>
-          </fieldset>
-
-          <!-- Formulário (HTML-only) -->
-          <form class="mt-6 space-y-4" id="feedback-form" novalidate>
-            <!-- Hidden técnicos -->
-            <input type="hidden" name="origem" value="scs" />
-            <input type="hidden" name="timestamp_cliente" id="timestamp_cliente" value="" />
-            <!-- Honeypot (anti-bot) -->
-            <div class="hidden" aria-hidden="true">
-              <label
-                >Não preencher:
-                <input type="text" id="honeypot" name="honeypot" tabindex="-1" autocomplete="off" />
-              </label>
-            </div>
-
-            <!-- Nome (obrigatório) -->
-            <div>
-              <label for="nome" class="block text-sm font-medium text-gray-700">Seu nome</label>
-              <input
-                id="nome"
-                name="nome"
-                required
-                class="mt-1 w-full rounded-lg border-gray-300"
-                placeholder="Como devemos exibir seu nome?"
-              />
-            </div>
-
-            <!-- Comentário (20–600) -->
-            <div>
-              <label for="comentario" class="block text-sm font-medium text-gray-700"
-                >Comentário</label
+              <button
+                type="button"
+                id="btn-close-feedback"
+                class="inline-flex h-9 w-9 items-center justify-center rounded-lg hover:bg-neutral-100"
+                aria-label="Fechar"
+                data-feedback-backdrop
               >
-              <textarea
-                id="comentario"
-                name="comentario"
-                rows="3"
-                required
-                minlength="20"
-                maxlength="600"
-                class="mt-1 w-full rounded-lg border-gray-300 text-sm resize-none h-24 min-h"
-                placeholder="Conte como foi sua experiência (20 a 600 caracteres)"
-              ></textarea>
-              <p class="mt-1 text-xs text-gray-500">
-                <span id="contador-comentario">0</span>/600 caracteres.
-                <!-- contador em tempo real entra depois no JS -->
-              </p>
+                ✕
+              </button>
             </div>
 
-            <!-- Foto (opcional, 1 imagem) -->
-            <div>
-              <label for="foto" class="block text-sm font-medium text-gray-700">
-                Foto da sua moldura (opcional)
-              </label>
-              <div class="relative mt-1">
-                <input
-                  type="file"
-                  id="foto"
-                  name="foto"
-                  accept="image/*"
-                  capture="environment"
-                  class="peer absolute inset-0 opacity-0 cursor-pointer z-10"
-                />
-                <div
-                  class="flex items-center justify-between rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-600 shadow-sm peer-hover:border-gray-400 peer-focus:border-gray-900 transition"
-                >
-                  <span id="foto-label" class="truncate" aria-live="polite">
-                    Nenhum arquivo selecionado</span
-                  >
+            <!-- Body -->
+            <div class="p-0" data-modal-body>
+              <!-- FORM (esquerda no desktop) -->
+              <div class="flex bg-gray-100 rounded-2xl lg:order-1">
+                <div class="p-6 sm:p-6 lg:p-7 w-full">
+                  <div data-form-sticky>
+                    <h2 class="text-2xl font-semibold sm:text-3xl">
+                      Conte pra gente como foi sua experiência
+                    </h2>
 
-                  <span
-                    class="inline-flex items-center gap-1 rounded-md bg-gray-900 text-white text-xs px-2 py-1 shadow hover:opacity-90 transition"
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      class="h-3.5 w-3.5"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M12 12V4m0 8l-3-3m3 3l3-3"
+                    <!-- Avaliação por estrelas (HTML-only, acessível) -->
+                    <fieldset class="mt-4" aria-label="Avaliação">
+                      <legend class="sr-only">Avaliação</legend>
+
+                      <div id="rating-group" class="flex items-center gap-1 text-xl select-none">
+                        <input
+                          class="sr-only"
+                          type="radio"
+                          name="rating_star"
+                          id="rate1"
+                          value="1"
+                          required
+                        />
+                        <label for="rate1" class="star" title="1 estrela"></label>
+
+                        <input
+                          class="sr-only"
+                          type="radio"
+                          name="rating_star"
+                          id="rate2"
+                          value="2"
+                        />
+                        <label for="rate2" class="star" title="2 estrelas"></label>
+
+                        <input
+                          class="sr-only"
+                          type="radio"
+                          name="rating_star"
+                          id="rate3"
+                          value="3"
+                        />
+                        <label for="rate3" class="star" title="3 estrelas"></label>
+
+                        <input
+                          class="sr-only"
+                          type="radio"
+                          name="rating_star"
+                          id="rate4"
+                          value="4"
+                        />
+                        <label for="rate4" class="star" title="4 estrelas"></label>
+
+                        <input
+                          class="sr-only"
+                          type="radio"
+                          name="rating_star"
+                          id="rate5"
+                          value="5"
+                        />
+                        <label for="rate5" class="star" title="5 estrelas"></label>
+                      </div>
+                      <input type="hidden" id="rating" name="rating" value="" />
+                      <p class="mt-1 text-xs text-gray-500">
+                        Selecione de 1 a 5 estrelas.
+                        <span id="rating-badge" class="hidden">0/5</span>
+                      </p>
+                    </fieldset>
+                  </div>
+
+                  <!-- Formulário (HTML-only) -->
+                  <form class="mt-6 space-y-4" id="feedback-form" novalidate>
+                    <!-- Hidden técnicos -->
+                    <input type="hidden" name="origem" value="scs" />
+                    <input type="hidden" name="timestamp_cliente" id="timestamp_cliente" value="" />
+                    <!-- Honeypot (anti-bot) -->
+                    <div class="hidden" aria-hidden="true">
+                      <label
+                        >Não preencher:
+                        <input
+                          type="text"
+                          id="honeypot"
+                          name="honeypot"
+                          tabindex="-1"
+                          autocomplete="off"
+                        />
+                      </label>
+                    </div>
+
+                    <!-- Nome (obrigatório) -->
+                    <div>
+                      <label for="nome" class="block text-sm font-medium text-gray-700"
+                        >Seu nome</label
+                      >
+                      <input
+                        id="nome"
+                        name="nome"
+                        required
+                        class="mt-1 w-full rounded-lg border-gray-300"
+                        placeholder="Como devemos exibir seu nome?"
                       />
-                    </svg>
-                    Selecionar
-                  </span>
+                    </div>
+
+                    <!-- Comentário (20–600) -->
+                    <div>
+                      <label for="comentario" class="block text-sm font-medium text-gray-700"
+                        >Comentário</label
+                      >
+                      <textarea
+                        id="comentario"
+                        name="comentario"
+                        rows="3"
+                        required
+                        minlength="20"
+                        maxlength="600"
+                        class="mt-1 w-full rounded-lg border-gray-300 text-sm resize-none h-24 min-h"
+                        placeholder="Conte como foi sua experiência (20 a 600 caracteres)"
+                      ></textarea>
+                      <p class="mt-1 text-xs text-gray-500">
+                        <span id="contador-comentario">0</span>/600 caracteres.
+                        <!-- contador em tempo real entra depois no JS -->
+                      </p>
+                    </div>
+
+                    <!-- Foto (opcional, 1 imagem) -->
+                    <div>
+                      <label for="foto" class="block text-sm font-medium text-gray-700">
+                        Foto da sua moldura (opcional)
+                      </label>
+                      <div id="photo-ui-row" class="relative mt-1">
+                        <input
+                          type="file"
+                          id="photo"
+                          name="photo"
+                          accept="image/*"
+                          class="peer absolute inset-0 opacity-0 cursor-pointer z-10"
+                        />
+                        <div
+                          class="flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-600 shadow-sm peer-hover:border-gray-400 peer-focus:border-gray-900 transition"
+                        >
+                          <span id="photo-label" class="truncate flex-1" aria-live="polite">
+                            Nenhum arquivo selecionado</span
+                          >
+
+                          <span
+                            class="inline-flex items-center gap-1 rounded-md bg-gray-900 text-white text-xs px-2 py-1 shadow hover:opacity-90 transition"
+                          >
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              class="h-3.5 w-3.5"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                            >
+                              <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M12 12V4m0 8l-3-3m3 3l3-3"
+                              />
+                            </svg>
+                            Selecionar
+                          </span>
+                        </div>
+                      </div>
+                      <!-- Prévia usada no UI.js -->
+                      <div
+                        id="photo-preview"
+                        class="mt-2 w-24 aspect-square overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm flex-none self-start inline-block align-top"
+                        style="width: 96px; height: 96px; flex: 0 0 96px"
+                        title="Clique para ampliar"
+                      ></div>
+                    </div>
+                    <p class="mt-2 text-xs text-gray-500">
+                      Envie 1 imagem (máx. 5 MB). Otimizaremos o tamanho depois.
+                    </p>
+
+                    <!-- Opcionais -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div>
+                        <label for="contato" class="block text-sm font-medium text-gray-700">
+                          Contato (opcional)
+                        </label>
+                        <input
+                          id="contato"
+                          name="contato"
+                          class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                          placeholder="WhatsApp ou e-mail"
+                        />
+                      </div>
+                    </div>
+
+                    <!-- Aviso -->
+                    <p class="text-xs text-gray-600">
+                      Ao enviar, você autoriza a publicação do depoimento no site. Dados de contato
+                      não são exibidos.
+                    </p>
+
+                    <!-- Botão -->
+                    <button
+                      id="btn-submit"
+                      type="submit"
+                      class="mt-4 inline-flex items-center justify-center rounded-lg bg-gray-900 px-4 py-3 text-sm font-medium text-white shadow hover:opacity-90 sm:w-auto sm:px-6 sm:py-2.5 transition"
+                    >
+                      Enviar avaliação
+                    </button>
+                    <span
+                      id="form-status"
+                      role="status"
+                      aria-live="polite"
+                      class="text-sm text-gray-600"
+                    ></span>
+                  </form>
                 </div>
               </div>
-              <!-- Prévia usada no UI.js -->
-              <div
-                id="foto-preview"
-                class="mt-2 w-24 aspect-square overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm flex-none self-start inline-block align-top"
-                style="width: 96px; height: 96px; flex: 0 0 96px"
-                title="Clique para ampliar"
-              ></div>
             </div>
-            <p class="mt-2 text-xs text-gray-500">
-              Envie 1 imagem (máx. 5 MB). Otimizaremos o tamanho depois.
-            </p>
-
-            <!-- Opcionais -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div>
-                <label for="contato" class="block text-sm font-medium text-gray-700">
-                  Contato (opcional)
-                </label>
-                <input
-                  id="contato"
-                  name="contato"
-                  class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
-                  placeholder="WhatsApp ou e-mail"
-                />
-              </div>
-            </div>
-
-            <!-- Aviso -->
-            <p class="text-xs text-gray-600">
-              Ao enviar, você autoriza a publicação do depoimento no site. Dados de contato não são
-              exibidos.
-            </p>
-
-            <!-- Botão -->
-            <button
-              id="btn-submit"
-              type="submit"
-              class="mt-4 inline-flex items-center justify-center rounded-lg bg-gray-900 px-4 py-3 text-sm font-medium text-white shadow hover:opacity-90 sm:w-auto sm:px-6 sm:py-2.5 transition"
-            >
-              Enviar feedback
-            </button>
-            <span
-              id="form-status"
-              role="status"
-              aria-live="polite"
-              class="text-sm text-gray-600"
-            ></span>
-          </form>
+          </div>
         </div>
       </div>
 
@@ -2604,35 +2104,14 @@
     <!-- 1) Base — seta window.FEEDBACK_ENDPOINT automaticamente ao carregar -->
     <script type="module" src="/assets/js//feedback//core//config/feedback-endpoint.js"></script>
 
-    <!-- Selah (Board UI) -->
-    <!-- <script type="module" src="/assets/js/feedback/board/main/selah-board-ui.js"></script> -->
-
-    <!-- FeedBack Cards -->
-    <!-- <script type="module" src="assets/js/feedback/board/feedbackCardAPI.js"></script> -->
-
-    <!-- Abigail (Summary UI) -->
-    <!-- <script type="module" src="/assets/js/feedback/board/summary/abigail-summary-ui.js"></script> -->
-
-    <!-- Livia (Avatar UI) -->
-    <!-- <script type="module" src="/assets/js/feedback/board/avatar/livia-avatar-ui.js"></script> -->
-
-    <!-- Petra  (Image UI)-->
-    <!-- <script type="module" src="/assets/js/feedback/board/image/petra-image-ui.js"></script> -->
-
-    <!-- Mira (LIST Modal-Board) -->
-    <!-- <script type="module" src="/assets/js/feedback/board/list/mira-list-ui.js"></script> -->
-
-    <!-- Bootstrap -->
-    <!-- <script defer type="module" src="/assets/js/feedback/board/system/bootstrap.js"></script> -->
-
     <!-- Feedback Form -->
-    <script type="module" src="assets/js/feedback/feedbackForm/feedbackfunction.js"></script>
+    <!-- <script type="module" src="assets/js/feedback/feedbackForm/feedbackfunction.js"></script>
     <script type="module" src="assets/js/feedback/feedbackForm/feedback.filtronome.js"></script>
     <script type="module" src="assets/js/feedback/feedbackForm/feedbackForm.ui.js"></script>
     <script type="module" src="assets/js/feedback/feedbackForm/feedbackForm.fotoLabel.js"></script>
     <script type="module" src="assets/js/feedback/feedbackForm/feedbackForm.estrelas.js"></script>
     <script type="module" src="assets/js/feedback/feedbackForm/feedbackForm.core.js"></script>
-    <!-- <script src="assets/js/feedback/board/feedbackAvatar.js"></script> -->
+    <script src="assets/js/feedback/board/feedbackAvatar.js"></script> -->
 
     <!-- Sistema (Morgana – Diretora Geral) -->
     <script type="module" src="/assets//js//system//director/morgana-system-director.js"></script>

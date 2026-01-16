@@ -1,0 +1,16 @@
+/* ==================================================
+   Foundation — Global Layout Rules
+   --------------------------------------------------
+   PT: Regras estruturais globais (viewport, scroll, base)
+   EN: Global structural rules (viewport, scroll, base)
+================================================== */
+
+/* --------------------------------------------------
+   Global scroll lock (used by modals)
+   PT: Trava o scroll global quando modal está aberto
+   EN: Locks global scroll when modal is open
+-------------------------------------------------- */
+html.no-scroll,
+html.no-scroll body {
+  overflow: hidden !important;
+}

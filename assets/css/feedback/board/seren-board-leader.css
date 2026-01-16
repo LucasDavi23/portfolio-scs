@@ -1,0 +1,70 @@
+/* /assets/css/feedback/board/seren-board-leader.css
+ * 🌿 Seren — Líder do Board de Avaliações (CSS)
+ * Nível: Adulta
+ *
+ * PT: Seren coordena visualmente o Board de Avaliações. Ela não estiliza
+ *     componentes individuais, mas define o ritmo, o espaçamento e a
+ *     organização geral do board, garantindo que as especialistas
+ *     trabalhem em harmonia.
+ *
+ * EN: Seren visually coordinates the Reviews Board. She does not style
+ *     individual components, but defines rhythm, spacing and overall
+ *     board structure, ensuring specialists work in harmony.
+ * -----------------------------------------------------------------------------*/
+
+/* 
+   Imports / Dependências
+ */
+
+/* -----------------------------------------------------------------------------*/
+
+/* 🏷️ Marka — Badges de Plataforma
+   EN: 🏷️ Marka — Platform badges
+   Fornece:
+   - Chips de origem (SCS, Shopee, ML)
+*/
+
+@import '/assets/css/feedback/board/badges/marka-badges.css';
+
+/* -----------------------------------------------------------------------------*/
+
+/* 🎴 Aline — Cards de Feedback (estrutura e layout)
+   EN: 🎴 Aline — Feedback cards (structure and layout)
+   Fornece:
+   - Estrutura base dos cards
+   - Layout interno (media / list)
+*/
+@import '/assets/css/feedback/board/cards/aline-cards.css';
+
+/* -----------------------------------------------------------------------------*/
+
+/* 🖼️ Tessa — Image Preview
+   EN: 🖼️ Tessa — Image Preview
+   Fornece:
+   - Preview visual de imagem (upload)
+   - Enquadramento e ajuste da imagem no container
+   - Estados visuais do preview (exibição / fallback)
+*/
+@import '/assets/css/feedback/board/image/tessa-image.css';
+
+/* -----------------------------------------------------------------------------*/
+
+/* ⭐ Zara — Rating
+   EN: ⭐ Zara — Rating
+   Fornece:
+   - Exibição de avaliação (estrelas e nota)
+   - Alinhamento e proporção do rating
+   - Aparência consistente em cards e listas
+*/
+@import '/assets/css/feedback/board/rating/zara-rating.css';
+
+/* -----------------------------------------------------------------------------*/
+
+/* Variant: Compact
+   EN: Variant: Compact
+   Fornece:
+   - Modo compacto do board de feedback
+   - Redução de espaçamentos e densidade dos cards
+   - Melhor enquadramento vertical em telas menores
+*/
+@import '/assets/css/feedback/board/variants/compact.css';

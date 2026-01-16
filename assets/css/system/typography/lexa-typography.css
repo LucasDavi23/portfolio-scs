@@ -1,0 +1,27 @@
+/* /assets/css/system/typography/lexa-typography.css
+ * 🅰️ Lexa — Typography do Sistema (CSS)
+ * Nível: Adulta
+ *
+ * PT: Lexa define a base tipográfica do sistema. Ela estabelece
+ *     fontes, hierarquia textual, pesos e line-height, garantindo
+ *     consistência, legibilidade e linguagem visual unificada
+ *     em todas as seções e componentes.
+ *
+ * EN: Lexa defines the system typography foundation. She establishes
+ *     fonts, textual hierarchy, weights and line-height, ensuring
+ *     consistency, readability and a unified visual language
+ *     across all sections and components.
+ * -----------------------------------------------------------------------------*/
+
+/* Helpers tipográficos
+ * .custom-font-1 → títulos, destaques
+ * .custom-font-2 → textos longos, UI
+ */
+
+.custom-font-1 {
+  font-family: 'Raleway', sans-serif;
+}
+
+.custom-font-2 {
+  font-family: 'Urbanist', sans-serif;
+}

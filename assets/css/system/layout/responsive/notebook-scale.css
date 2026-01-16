@@ -1,0 +1,117 @@
+/* --------------------------------------------------
+   Notebook scale (faixas 1280–1440 e 1441–1600)
+   Sem width fixo. Zoom (preferencial) + fallback scale.
+-------------------------------------------------- */
+
+:root {
+  --nb-scale-1: 0.8; /* 1280–1440 */
+  --nb-scale-2: 0.86; /* 1441–1600 */
+}
+
+/* Alvos (ajuste a lista se quiser incluir/retirar seções) */
+.nb-target > .mx-auto {
+  transform-origin: top center;
+  transition: transform 0.2s ease;
+}
+
+/* 1280–1440 */
+@media (min-width: 1280px) and (max-width: 1440px) {
+  /* Chrome/Edge: usa zoom (melhor, recalcula layout) */
+  @supports (zoom: 0.8) {
+    #sobre > .mx-auto,
+    #producao > .mx-auto,
+    #contato > .mx-auto,
+    #pos-vendas > .mx-auto,
+    #galeria > .mx-auto,
+    #feedback > .mx-auto {
+      zoom: var(--nb-scale-1);
+      transform: none;
+    }
+  }
+  /* Firefox: fallback em scale */
+  @supports not (zoom: 0.8) {
+    #sobre > .mx-auto,
+    #producao > .mx-auto,
+    #contato > .mx-auto,
+    #pos-vendas > .mx-auto,
+    #galeria > .mx-auto,
+    #feedback > .mx-auto {
+      transform: scale(var(--nb-scale-1));
+    }
+  }
+}
+
+/* 1441–1600 */
+@media (min-width: 1441px) and (max-width: 1600px) {
+  @supports (zoom: 0.8) {
+    #sobre > .mx-auto,
+    #producao > .mx-auto,
+    #contato > .mx-auto,
+    #pos-vendas > .mx-auto,
+    #galeria > .mx-auto,
+    #feedback > .mx-auto {
+      zoom: var(--nb-scale-2);
+      transform: none;
+    }
+  }
+  @supports not (zoom: 0.86) {
+    #sobre > .mx-auto,
+    #producao > .mx-auto,
+    #contato > .mx-auto,
+    #pos-vendas > .mx-auto,
+    #galeria > .mx-auto,
+    #feedback > .mx-auto {
+      transform: scale(var(--nb-scale-2));
+    }
+  }
+}
+
+/* ≥ 1601px: normal */
+@media (min-width: 1601px) {
+  #sobre > .mx-auto,
+  #producao > .mx-auto,
+  #contato > .mx-auto,
+  #pos-vendas > .mx-auto,
+  #galeria > .mx-auto,
+  #feedback > .mx-auto {
+    zoom: 1;
+    transform: none;
+  }
+}
+
+/* Opcional: leve respiro ao usar fallback scale (só quando NÃO há zoom) */
+@supports not (zoom: 1) {
+  #sobre,
+  #producao,
+  #contato,
+  #pos-vendas,
+  #galeria,
+  #feedback {
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+  }
+}
+
+/* --------------------------------------------------
+   Modal scale por altura (notebook)
+   PT: Evita cortar conteúdo em telas baixas sem criar scroll desnecessário
+   EN: Prevents content cut on short viewports without forcing inner scroll
+-------------------------------------------------- */
+
+.nb-modal {
+  transform-origin: top center;
+}
+
+/* notebooks / alturas menores */
+@media (max-height: 820px) {
+  .nb-modal {
+    transform: scale(0.88);
+  }
+}
+
+/* ainda menor (alguns notes) */
+@media (max-height: 720px) and (min-width: 768px) {
+  .nb-modal {
+    transform: scale(0.78);
+  }
+}

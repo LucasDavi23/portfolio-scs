@@ -1,0 +1,32 @@
+/* /assets/css/system/coretta-system-leader.css
+ * 🧩 Coretta — System Leader (CSS)
+ * Nível: Adulta
+ *
+ * PT: Coretta coordena os imports base do sistema. Ela não define
+ *     estilos visuais nem layout; apenas centraliza dependências e
+ *     garante a ordem correta de carregamento das especialistas
+ *     do System (ex.: tipografia e UI).
+ *
+ * EN: Coretta coordinates the system base imports. She does not
+ *     define visual styles or layout; she only centralizes
+ *     dependencies and ensures correct load order for System
+ *     specialists (e.g., typography and UI).
+ * -----------------------------------------------------------------------------*/
+
+/* 🅰️ Lexa — Typography
+   EN: 🅰️ Lexa — Typography
+   Fornece:
+   - Fontes e famílias tipográficas
+   - Base de leitura e hierarquia textual
+*/
+@import '/assets/css/system/typography/lexa-typography.css';
+
+/* -----------------------------------------------------------------------------*/
+
+/* ⭐ Vega — UI
+   EN: ⭐ Vega — UI
+   Fornece:
+   - Padrões de UI reutilizáveis
+   - Microcomponentes e estados (hover/focus/disabled)
+*/
+@import '/assets/css/system/ui/vega-ui.css';

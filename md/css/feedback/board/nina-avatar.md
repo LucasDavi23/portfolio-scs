@@ -1,0 +1,13 @@
+## 👤 Nina — Identidade do Autor (Avatar)
+
+**Arquivo:** `nina-avatar.css`  
+**Nível:** Jovem
+
+- **PT:** Nina representa a identidade de quem escreve o feedback. Ela cuida
+  do avatar textual (iniciais), do nome do autor, do selo de origem e da
+  relação visual direta entre autor e conteúdo do comentário.
+- **EN:** Nina represents the identity of the feedback author. She handles
+  the textual avatar (initials), author name, source badge and the direct
+  visual relationship between author and comment content.
+
+---

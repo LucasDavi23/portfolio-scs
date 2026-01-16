@@ -236,10 +236,15 @@ function applyThumb(container, opts) {
   if (!container) return;
   if (!o.allowModal && isInFeedbackModal(container)) return;
 
+  // ✅ pega a raiz do card 1 vez (mais limpo / consistent)
+  const card = container.closest('[data-feedback-card]');
+
   const img = container.querySelector('img');
   if (!img) {
     container.classList.add('hidden');
     container.classList.remove('js-open-modal');
+    // ✅ marca estado no card
+    markHasPhoto(card, false);
     return;
   }
 
@@ -253,13 +258,18 @@ function applyThumb(container, opts) {
     container.setAttribute('data-full', fullSrc);
   }
 
-  if (isValidSrc(thumbSrc)) {
+  const hasPhoto = isValidSrc(thumbSrc);
+
+  if (hasPhoto) {
     container.classList.remove('hidden');
-    container.classList.add('js-open-modal'); // usa o modal global de imagem
+    container.classList.add('js-open-modal');
   } else {
     container.classList.add('hidden');
     container.classList.remove('js-open-modal');
   }
+
+  // ✅ marca estado no card
+  markHasPhoto(card, hasPhoto);
 }
 
 /**

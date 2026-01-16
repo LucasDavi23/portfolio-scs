@@ -232,7 +232,7 @@ async function fillCardFixed(root, item) {
     lista.innerHTML = `
       <div class="grid grid-cols-[3.5rem_1fr_auto] items-start gap-3">
     <button type="button"
-            class="thumb-container hidden w-14 h-14 rounded-lg overflow-hidden border border-gray-200 bg-white shrink-0"
+            class="thumb-container hidden relative w-[84px] aspect-square rounded-md overflow-hidden border border-gray-200 bg-gray-50 p-1 shrink-0"
             aria-label="Ver foto">
       <img alt="" class="w-full h-full object-cover object-center" />
     </button>
@@ -426,7 +426,10 @@ function renderCardFallback(root, itens) {
           <div class="font-medium truncate">${it.autor ?? 'Cliente'}</div>
           <div class="text-xs text-neutral-500">${ElaraBoardHelpers.formatDate(it.data)}</div>
         </div>
-        <div class="text-sm mb-1">${ZoeRating.renderRating(it.estrelas)}</div>
+        <div class="mb-1">
+          ${ZoeRating.renderRating(it.estrelas, { size: 'text-sm sm:text-base' })}
+        </div>
+
         <p class="text-sm text-neutral-700 line-clamp-3">${it.texto ?? ''}</p>
       </article>`;
 }

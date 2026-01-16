@@ -13,6 +13,45 @@ export function ImageViewer() {
 
   if (!modal || !modalImg || !btnClose) return;
 
+  // PT: trava scroll sem shift (robusto)
+  // EN: locks scroll without layout shift (robust)
+  let _scrollY = 0;
+
+  function lockScrollFixed() {
+    _scrollY = window.scrollY || document.documentElement.scrollTop || 0;
+
+    document.body.style.position = 'fixed';
+    document.body.style.top = `-${_scrollY}px`;
+    document.body.style.left = '0';
+    document.body.style.right = '0';
+    document.body.style.width = '100%';
+  }
+
+  function unlockScrollFixed() {
+    const y = _scrollY;
+
+    // PT: salva e força scroll sem animação (se estiver scroll-smooth)
+    // EN: temporarily disable smooth scrolling during restore
+    const html = document.documentElement;
+    const prevBehavior = html.style.scrollBehavior;
+    html.style.scrollBehavior = 'auto';
+
+    document.body.style.position = '';
+    document.body.style.top = '';
+    document.body.style.left = '';
+    document.body.style.right = '';
+    document.body.style.width = '';
+
+    // PT: restaura no próximo frame para evitar "jump"
+    // EN: restore on next frame to avoid jump
+    requestAnimationFrame(() => {
+      window.scrollTo(0, y);
+
+      // PT/EN: devolve comportamento anterior
+      html.style.scrollBehavior = prevBehavior;
+    });
+  }
+
   function openModal(src, altText = '') {
     if (!src) {
       console.warn('[Iris] src vazio, não vou abrir a imagem.');
@@ -22,71 +61,108 @@ export function ImageViewer() {
     modalImg.src = src;
     modalImg.alt = altText;
     modal.classList.remove('hidden');
-    document.body.style.overflow = 'hidden';
+    modal.classList.add('grid');
+    modal.setAttribute('aria-hidden', 'false');
+    lockScrollFixed();
   }
 
   function closeModal() {
+    modal.classList.remove('grid');
     modal.classList.add('hidden');
-    modal.classList.remove('flex');
-    document.body.style.overflow = '';
-    modalImg.src = '';
-    modalImg.alt = '';
+    modal.setAttribute('aria-hidden', 'true');
+
+    // PT/EN: deixa o DOM aplicar hidden primeiro
+    requestAnimationFrame(() => {
+      unlockScrollFixed();
+      modalImg.src = '';
+      modalImg.alt = '';
+    });
   }
 
   // Delegação global — funciona inclusive para elementos injetados depois
-  document.addEventListener('click', (e) => {
-    const opener = e.target.closest('.js-open-modal');
-    if (!opener) return;
+  // PT: delegação global para abrir o modal (mais estável que click)
+  // EN: global delegation to open the modal (more stable than click)
+  document.addEventListener(
+    'pointerdown',
+    (e) => {
+      // PT: se modal aberto, não processa openers
+      // EN: if modal is open, ignore openers
+      if (!modal.classList.contains('hidden')) return;
 
-    let src = '';
-    let altText = '';
+      const opener = e.target.closest('.js-open-modal');
+      if (!opener) return;
 
-    // 1) Tenta data-full no próprio botão
-    src = opener.getAttribute('data-full') || opener.dataset.full || '';
+      // PT: evita navegação (ex: <a href="#">) e evita "click-through"
+      // EN: prevents navigation (e.g., <a href="#">) and click-through
+      e.preventDefault();
+      e.stopPropagation();
 
-    // 2) Se não achou, tenta <img> interna
-    if (!src) {
-      const innerImg = opener.querySelector('img');
-      if (innerImg) {
-        src = innerImg.getAttribute('data-full') || innerImg.dataset.full || innerImg.src || '';
-        altText = innerImg.alt || altText;
+      let src = '';
+      let altText = '';
+
+      // 1) data-full no opener
+      src = opener.dataset.full || '';
+
+      // 2) fallback: img interna
+      if (!src) {
+        const innerImg = opener.querySelector('img');
+        if (innerImg) {
+          src = innerImg.dataset.full || innerImg.src || '';
+          altText = innerImg.alt || '';
+        }
       }
-    }
 
-    // 3) Se o opener em si é uma <img>
-    if (!src && opener.tagName === 'IMG') {
-      src = opener.src || '';
-      altText = opener.alt || altText;
-    }
+      // 3) se o opener em si é IMG
+      if (!src && opener.tagName === 'IMG') {
+        src = opener.src || '';
+        altText = opener.alt || '';
+      }
 
-    // 4) Fallback de alt: aria-label do botão
-    if (!altText) {
-      altText = opener.getAttribute('aria-label') || '';
-    }
+      // 4) fallback alt
+      if (!altText) {
+        altText = opener.getAttribute('aria-label') || '';
+      }
 
-    if (!src) {
-      console.warn('[Iris] src não encontrado, não vou abrir a imagem.');
-      return;
-    }
+      if (!src) {
+        console.warn('[Iris] src não encontrado, não vou abrir a imagem.');
+        return;
+      }
 
-    openModal(src, altText);
-  });
+      openModal(src, altText);
+    },
+    true // capture: pega antes de handlers/navegação
+  );
 
-  btnClose.addEventListener('click', closeModal);
-
-  modal.addEventListener('click', (e) => {
-    const clickedImage = e.target.closest('#modalImgSrc');
-    const clickedClose = e.target.closest('#modalClose');
-
-    // se NÃO clicou na imagem e NÃO clicou no botão de fechar,
-    // consideramos que foi clique no fundo/backdrop
-    if (!clickedImage && !clickedClose) {
+  btnClose.addEventListener(
+    'pointerdown',
+    (e) => {
+      e.preventDefault();
+      e.stopPropagation();
       closeModal();
-    }
-  });
+    },
+    true
+  );
+
+  // PT: fecha no pointerdown (antes do click) para evitar "click-through"
+  // EN: close on pointerdown (before click) to avoid click-through
+  modal.addEventListener(
+    'pointerdown',
+    (e) => {
+      // só fecha se clicou no overlay (fora do conteúdo)
+      if (e.target !== modal) return;
+
+      e.preventDefault();
+      e.stopPropagation();
+
+      closeModal();
+    },
+    true // capture: pega antes do restante
+  );
 
   window.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') closeModal();
+    if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
+      closeModal();
+    }
   });
 }
 

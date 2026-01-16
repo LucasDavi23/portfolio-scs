@@ -1,0 +1,45 @@
+/* ==================================================
+   Seren — Board Variant: Compact
+   PT: Modo compacto do board de feedback. Reduz
+       espaçamentos e densidade dos cards para
+       otimizar leitura e uso de espaço vertical.
+   EN: Compact/dense mode for the feedback board,
+       reducing spacing and card density to optimize
+       readability and vertical space.
+   ================================================== */
+
+/* ==========================================================
+    === FEEDBACK: compacto com qualidade (preserva tipografia)
+    ========================================================== */
+
+/* Espaços verticais globais da seção (sem tocar no conteúdo dos cards) */
+#feedback > .mx-auto.max-w-screen-2xl {
+  padding-block: 3rem !important; /* antes ~3rem */
+}
+#feedback .rounded-2xl > div {
+  padding-block: 1rem !important; /* antes ~1.5rem */
+}
+#feedback .feedback-topo {
+  margin-top: 12px !important;
+}
+#feedback .rounded-2xl > div > .grid {
+  margin-top: 12px !important;
+}
+#feedback .rounded-2xl > div > p.text-gray-400 {
+  margin-top: 10px !important;
+}
+
+/* Âncora/rolagem: compensa o header fixo e enquadra melhor o topo da seção */
+#feedback {
+  scroll-margin-top: 72px;
+} /* ajuste se seu header mudar de altura */
+
+/* Enquadrar um pouco melhor em telas baixas (ex.: 768p/800p) */
+@media (max-height: 800px) and (min-width: 1024px) {
+  #feedback > .mx-auto {
+    padding-block: 10px;
+  } /* leve ajuste top/bottom */
+  #feedback .feedback-topo {
+    margin-top: 8px;
+  } /* aproxima resumo dos cards */
+}

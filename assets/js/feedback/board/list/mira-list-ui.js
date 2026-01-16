@@ -40,6 +40,16 @@ import { PetraImageUI } from '/assets/js/feedback/board/image/petra-image-ui.js'
 
 // -----------------------------------------------------------------------------
 
+// Dalia — Image Helpers (Lógica pura, sem DOM)
+// PT: Centraliza a lógica "pura" de imagem (sem DOM):
+// EN: Centralizes the "pure" image logic (no DOM):
+// Fornece / Provides:
+// - FALLBACK_IMG
+
+import { DaliaImageHelpers } from '/assets/js/feedback/board/image/dalia-image-helpers.js';
+
+// -----------------------------------------------------------------------------
+
 // Dara — Assistente lógica da Mira (Helpers)
 // PT: Centraliza a lógica "pura" do modal LISTA (sem DOM):
 // EN: Centralizes the "pure" logic for the LIST modal (no DOM):
@@ -162,7 +172,7 @@ function renderItem(it) {
   li.className = 'py-4';
 
   const line = document.createElement('div');
-  line.className = 'grid grid-cols-[auto,1fr,auto] items-start gap-3';
+  line.className = 'flex flex-col gap-2';
 
   /* ==================================================
    * 🪨 PETRA SLOT — imagem (Mira cria, Petra manda)
@@ -171,12 +181,13 @@ function renderItem(it) {
   const btnThumb = document.createElement('button');
   btnThumb.type = 'button';
   btnThumb.className =
-    'thumb-container relative w-16 h-12 rounded-md overflow-hidden border border-gray-200 bg-white shrink-0 hidden';
+    'thumb-container relative w-[84px] aspect-[2/2] rounded-md overflow-hidden border border-gray-200 bg-gray-50 p-1 hidden';
+
   btnThumb.setAttribute('data-owner', 'mira-list');
 
   const img = document.createElement('img');
   img.alt = 'Foto enviada pelo cliente';
-  img.className = 'h-full w-full object-cover';
+  img.className = 'h-full w-full object-contain';
   img.loading = 'eager';
   img.decoding = 'async';
   img.referrerPolicy = 'no-referrer';
@@ -213,6 +224,10 @@ function renderItem(it) {
           const ok = !btnThumb.classList.contains('hidden');
           if (!ok) return;
 
+          // ✅ mostra divisor + media quando thumb está ok
+          divider.classList.remove('hidden');
+          mediaRow.classList.remove('hidden');
+
           // ✅ SRC FINAL vira fonte do modal (igual Selah)
           const finalUrlForModal = img.src;
           if (finalUrlForModal) {
@@ -228,6 +243,12 @@ function renderItem(it) {
         })
         .catch((err) => {
           console.warn('[MIRA thumb] falhou após retries', { err, sourceForThumb, it });
+
+          // mantém oculto (sem imagem)
+          btnThumb.classList.add('hidden');
+          divider.classList.add('hidden');
+          mediaRow.classList.add('hidden');
+
           img.src = DaliaImageHelpers.FALLBACK_IMG;
           btnThumb.classList.remove('js-open-modal');
           // opcional: tenta recuperar mesmo assim
@@ -261,11 +282,11 @@ function renderItem(it) {
   meta.appendChild(time);
 
   const txt = document.createElement('p');
-  txt.className = 'mt-1 text-gray-900 leading-6';
+  txt.className = 'mt-0 text-gray-900 leading-6';
   txt.textContent = it.texto || '';
 
   const autor = document.createElement('p');
-  autor.className = 'mt-1 text-xs text-gray-500';
+  autor.className = 'mt-0 text-xs text-gray-500';
   autor.textContent = it.autor ? `- ${it.autor}` : '';
 
   body.appendChild(meta);
@@ -273,10 +294,20 @@ function renderItem(it) {
   body.appendChild(autor);
   line.appendChild(body);
 
-  const right = document.createElement('div');
-  right.className = 'text-right text-xs text-gray-400';
-  line.appendChild(right);
+  // Linha divisória
+  const divider = document.createElement('div');
+  divider.className = 'mt-0 pt-2 hidden';
 
+  // Linha da imagem
+  const mediaRow = document.createElement('div');
+  mediaRow.className = 'mt-0 hidden';
+
+  // adiciona a imagem à linha
+  mediaRow.appendChild(btnThumb);
+  divider.appendChild(mediaRow);
+  line.appendChild(divider);
+
+  // adiciona linha ao <li>
   li.appendChild(line);
   return li;
 }

@@ -1,8 +1,8 @@
 // /assets/js/feedback/leader/kendra-feedback-leader.js
-// 🛡️ Kendra — Líder do Setor de Feedback
+// 🛡️ Kendra — Líder do Setor de Feedback Board
 // Nível: Adulta
 //
-// PT: Kendra coordena o setor de Feedback. Ela não lida com detalhes como
+// PT: Kendra coordena o setor de Feedback board. Ela não lida com detalhes como
 //     thumbs, preload ou UI diretamente — isso é responsabilidade de Lia,
 //     Petra, Selah e Mira. Sua função é garantir que cada especialista
 //     execute seu papel no momento certo, mantendo o módulo estável,
@@ -219,7 +219,7 @@ function initMiraListModal() {
  * EN: Main Kendra function: this is where everything is wired
  *     once the DOM is ready.
  */
-function bootstrapFeedback() {
+function bootstrapBoard() {
   // 1) Lia — preload/cache de feedback
   initLiaPreload();
 
@@ -239,17 +239,17 @@ function bootstrapFeedback() {
   initMiraListModal();
 }
 
-export const KendraFeedbackLeader = {
+export const KendraBoardLeader = {
   /**
    * PT: Inicializa o setor de Feedback. Deve ser chamada pela Morgana.
    * EN: Initializes the Feedback sector. Should be called by Morgana.
    */
-  initFeedback(root = document) {
+  initBoard(root = document) {
     // // Dispara o bootstrap quando o DOM estiver pronto.
     // // Fire bootstrap once the DOM is ready.
-    onDomReady(() => bootstrapFeedback());
+    onDomReady(() => bootstrapBoard());
   },
 
   // Opcional — expõe a função bruta para debug
-  bootstrapFeedback,
+  bootstrapBoard,
 };

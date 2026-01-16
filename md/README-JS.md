@@ -1,3 +1,6 @@
+Documentação exclusiva da lógica JavaScript do módulo Feedback.
+Estados, eventos, fluxo de dados e integrações.
+
 # ✨ Celine Dev — Núcleo de Identidade e Hierarquia
 
 Este ambiente pertence exclusivamente ao desenvolvedor Davi.

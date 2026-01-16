@@ -50,7 +50,7 @@ function renderRating(value = 0, opts = {}) {
     '2xl': 'text-2xl',
   };
 
-  const sizeClass = SIZE_MAP[size] || SIZE_MAP.sm;
+  const sizeClass = SIZE_MAP[size] || (typeof size === 'string' ? size : SIZE_MAP.sm);
 
   const val = normalizeRating(value, max);
   const pct = (val / max) * 100;

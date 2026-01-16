@@ -1,0 +1,75 @@
+/* ==================================================
+   Modal — Mobile adjustments
+   PT: Ajustes específicos para mobile
+   EN: Mobile-specific modal adjustments
+================================================== */
+
+@media (max-width: 640px) {
+  /* --------------------------------------------------
+     1) Wrapper / Centralização
+     PT: Evita “centralização rígida” no mobile (que pode causar vazamento/recorte).
+     EN: Avoids rigid vertical centering on mobile (can cause overflow/cropping).
+  -------------------------------------------------- */
+  #feedback-modal .place-items-center {
+    align-content: start !important; /* PT: começa do topo / EN: start from top */
+  }
+
+  /* --------------------------------------------------
+     2) Card do modal (container principal)
+     PT: Define largura boa no mobile + limita altura e cria layout em coluna.
+     EN: Sets a good mobile width + limits height and uses a column layout.
+  -------------------------------------------------- */
+  #feedback-modal .nb-modal {
+    width: 88vw !important; /* PT: ajuste fino de largura / EN: fine-tuned width */
+    max-width: 460px !important; /* PT: teto no mobile / EN: mobile max width cap */
+    max-height: 92dvh !important; /* PT: garante caber na tela / EN: always fits screen */
+    display: flex !important; /* PT: necessário p/ header + body / EN: needed for header + body */
+    flex-direction: column !important;
+    overflow: hidden !important; /* PT: quem rola é o body / EN: body will scroll */
+    margin: 0 auto; /* PT/EN: centraliza horizontalmente */
+    border-radius: 1rem; /* PT/EN: arredondado consistente */
+    transform: none !important; /* PT: anula qualquer scale antigo / EN: cancels any old scaling */
+  }
+
+  /* --------------------------------------------------
+     3) Sticky do topo do formulário (título + estrelas)
+     PT: Mantém o contexto da avaliação sempre visível ao rolar.
+     EN: Keeps rating context visible while scrolling.
+     Obs: Esse sticky é dentro do body rolável (data-modal-body).
+  -------------------------------------------------- */
+  #feedback-modal [data-form-sticky] {
+    position: sticky;
+    top: 0; /* PT: gruda no topo do conteúdo rolável / EN: sticks to scroll container top */
+    z-index: 10; /* PT: fica acima dos campos / EN: stays above form fields */
+    background: rgb(
+      243 244 246
+    ); /* PT: mesmo fundo do bloco (bg-gray-100) / EN: matches section background */
+    padding-top: 0.25rem;
+    padding-bottom: 0.75rem;
+  }
+
+  /* --------------------------------------------------
+     4) Área rolável principal (Body)
+     PT: Apenas o body rola; header do modal e sticky ficam estáveis.
+     EN: Only the body scrolls; modal header and sticky remain stable.
+  -------------------------------------------------- */
+  #feedback-modal [data-modal-body] {
+    flex: 1 1 auto; /* PT: ocupa o restante da altura / EN: fills remaining height */
+    overflow-y: auto; /* PT/EN: scroll vertical */
+    -webkit-overflow-scrolling: touch; /* PT: rolagem suave iOS / EN: smooth iOS scrolling */
+  }
+
+  /* --------------------------------------------------
+     5) Botão de envio (full width no mobile)
+     PT: Grande e fácil de clicar no celular.
+     EN: Large and easy to tap on mobile.
+     Obs: Aqui ele não está “sticky”; só fica largo e confortável.
+  -------------------------------------------------- */
+  #btn-submit {
+    bottom: 0; /* PT: mantém compatível se virar fixed/sticky depois / EN: future-proof */
+    width: 100%;
+    padding: 0.95rem 1rem;
+    font-size: 1rem;
+    border-radius: 0.75rem;
+  }
+}

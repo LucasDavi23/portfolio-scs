@@ -1,0 +1,30 @@
+/* /assets/css/feedback/form/nyla-form-leader.css
+ * 🌾 Nyla — Líder do Formulário de Feedback (CSS)
+ * Nível: Adulta
+ *
+ * PT: Nyla coordena o módulo do formulário de feedback.
+ *     Ela organiza a camada de estilos do form e importa
+ *     as especialistas responsáveis pela interface e
+ *     pelos detalhes visuais.
+ *
+ * EN: Nyla coordinates the feedback form module. She
+ *     organizes the form styling layer and imports
+ *     specialists responsible for UI and details.
+ * -----------------------------------------------------------------------------*/
+
+/* ============================================================================
+   Imports / Dependências
+   ----------------------------------------------------------------------------
+   🌾 Nyla — Formulário de Feedback (Leader)
+   ============================================================================ */
+
+/* ✍️ Elisa — UI do Formulário
+   EN: ✍️ Elisa — Form UI
+   Fornece:
+   - Campos, labels e mensagens
+   - Estados visuais
+   - Rating interativo
+   - Preview de imagem
+*/
+
+@import '/assets/css/feedback/form/elisa-form.css';

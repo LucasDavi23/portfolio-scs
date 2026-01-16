@@ -1,0 +1,109 @@
+/* /assets/css/system/ui/vega-ui.css
+ * ⭐ Vega — UI do Sistema (CSS)
+ * Nível: Adulta
+ *
+ * PT: Vega define os componentes visuais base do sistema. Ela cuida
+ *     de botões, links, estados de interação (hover, focus, disabled),
+ *     microcomponentes reutilizáveis e padrões de UI compartilhados
+ *     entre todas as seções.
+ *
+ * EN: Vega defines the system base UI components. She handles buttons,
+ *     links, interaction states (hover, focus, disabled), reusable
+ *     microcomponents and shared UI patterns across all sections.
+ * -----------------------------------------------------------------------------*/
+
+/* Background helper */
+.pattern {
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+/* ==================================================
+   Back to top — base
+   ================================================== */
+#backToTopBtn {
+  display: none;
+  position: fixed;
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: 50%;
+  background: #000;
+  color: #fff;
+  font-size: 0;
+  cursor: pointer;
+  opacity: 0.6;
+  transition: opacity 0.3s;
+  z-index: 30;
+
+  /* posição padrão */
+  bottom: 20px;
+  right: 20px;
+}
+
+#backToTopBtn:hover {
+  opacity: 1;
+}
+
+/* ==================================================
+   Back to top — map safe area
+   Evita que a seta cubra o mapa
+   ================================================== */
+body.has-map #backToTopBtn {
+  bottom: 72px;
+  right: 16px;
+}
+
+/* ==================================================
+   Global behaviors
+   ================================================== */
+
+/* Scroll suave */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Evita que âncoras fiquem sob o header fixo */
+section[id],
+header[id],
+footer[id] {
+  scroll-margin-top: 88px;
+}
+
+/* Evita rolagem lateral no mobile */
+html,
+body {
+  overflow-x: hidden;
+}
+
+/* ==================================================
+   Media normalization
+   ================================================== */
+
+img,
+video {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+iframe {
+  width: 100%;
+  display: block;
+  height: 100%;
+}
+
+/* Contextual override — map embed */
+#localizacao .map-card iframe {
+  height: 100% !important;
+}
+
+/* ==================================================
+   Header interaction states
+   ================================================== */
+
+/* Desativa interações quando necessário (ex: mapa visível) */
+#siteHeader.pe-none {
+  pointer-events: none;
+}
