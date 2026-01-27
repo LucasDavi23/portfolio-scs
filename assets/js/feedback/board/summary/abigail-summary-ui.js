@@ -32,6 +32,7 @@ import { EndpointConfig } from '/assets/js/feedback/core/config/feedback-endpoin
 // Athenais — Summary Helpers (Logic Layer)
 // Athenais fornece:
 // - loadSummaryFromCache()
+// - loadSummarySnapshot()
 // - saveSummarytoCache()
 // - fetchSummaryWithRetry()
 // - buildSummaryFromResponse()
@@ -241,13 +242,25 @@ function initSummaryUI() {
       console.error('summary.js: falha ao atualizar summary / update failed:', err);
 
       if (!usedCache) {
-        // PT: Se não usamos cache, aplicamos fallback vazio.
-        // PT: Se não tínhamos cache, mostramos fallback totalmente vazio.
-        // EN: If there was no cache, we show a fully empty fallback.
-        applyEmptyFallbackToDom();
+        const snapshot = AthenaisSummaryHelpers.loadSummarySnapshot();
+        // PT: Se não usamos cache, tentamos restaurar o último estado válido
+        //     via snapshot. Só exibimos o fallback vazio se nunca houve dados.
+        // EN: If cache was not used, we try to restore the last known valid
+        //     state via snapshot. Only show empty fallback if no data ever existed.
+        if (snapshot) {
+          // PT: Usa o último estado válido conhecido (snapshot),
+          //     evitando UI vazia por falha transitória de rede.
+          // EN: Uses the last known valid state (snapshot),
+          //     preventing empty UI due to transient network failure.
+          applySummaryToDOM(snapshot);
+        } else {
+          // Nunca carregou nada na vida
+          // nem cache, nem snapshot
+          applyEmptyFallbackToDom();
+        }
       }
-      // PT: Se já havia cache aplicado, simplesmente mantemos o que está.
-      // EN: If cache was already applied, we silently keep it.
+      // PT: Se o cache já foi aplicado, mantém o estado atual sem alterar a UI.
+      // EN: If cache was already applied, keep the current UI state unchanged.
     }
   }
 

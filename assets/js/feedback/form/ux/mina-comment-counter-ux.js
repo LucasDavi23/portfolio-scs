@@ -41,7 +41,7 @@ function updateCounterText() {
 // ------------------------------
 
 function attachCommentCounterUX(options = {}) {
-  const { commentId = 'comentario', counterId = 'contador-comentario' } = options;
+  const { commentId = 'commentInput', counterId = 'counter-comment' } = options;
 
   commentEl = document.getElementById(commentId);
   counterEl = document.getElementById(counterId);

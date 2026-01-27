@@ -30,3 +30,12 @@
    - Microcomponentes e estados (hover/focus/disabled)
 */
 @import '/assets/css/system/ui/vega-ui.css';
+
+/* -----------------------------------------------------------------------------*/
+/* 🌫️ Veil — Message Box Skin (CSS)
+   EN: 🌫️ Veil — Message Box Skin (CSS)
+   Fornece:
+   - Camada visual da MessageBox
+   - Define cores, animações e suavidade
+*/
+@import '/assets/js/system/ui/notifications/messagebox/veil-message-box.css';

@@ -25,6 +25,21 @@ const LEVELS = {
  * -------------------------------------------- */
 function detectEnvMode() {
   try {
+    // --------------------------------------------------
+    // PT: Override manual por querystring (?log=debug|prod)
+    // EN: Manual override via querystring (?log=debug|prod)
+    // --------------------------------------------------
+    if (typeof window !== 'undefined' && window.location?.search) {
+      const qs = new URLSearchParams(window.location.search);
+      const force = qs.get('log');
+      if (force === 'debug') return 'development';
+      if (force === 'prod') return 'production';
+    }
+
+    // --------------------------------------------------
+    // PT: Vite / bundler env detection
+    // EN: Vite / bundler env detection
+    // --------------------------------------------------
     if (typeof import.meta !== 'undefined' && import.meta.env) {
       if (import.meta.env.MODE) return String(import.meta.env.MODE);
       if (import.meta.env.DEV === true) return 'development';
@@ -32,11 +47,22 @@ function detectEnvMode() {
     }
   } catch (_) {}
 
+  // --------------------------------------------------
+  // PT: Fallback por hostname (browser)
+  // EN: Hostname-based fallback (browser)
+  // --------------------------------------------------
   const hostname = typeof window !== 'undefined' && window.location ? window.location.hostname : '';
+
+  // PT/EN: Common local network IP ranges
+  const isLocalIP =
+    /^192\.168\.\d{1,3}\.\d{1,3}$/.test(hostname) ||
+    /^10\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(hostname) ||
+    /^172\.(1[6-9]|2\d|3[0-1])\.\d{1,3}\.\d{1,3}$/.test(hostname);
 
   const isLocal =
     hostname === 'localhost' ||
     hostname === '127.0.0.1' ||
+    isLocalIP ||
     hostname.endsWith('.local') ||
     hostname.endsWith('.test');
 

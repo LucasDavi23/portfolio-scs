@@ -39,7 +39,7 @@ const CACHE_TTL_MS = 60_000;
 
 // PT: Timeout para cada requisição ao GAS (em milissegundos).
 // EN: Timeout for each GAS request (in milliseconds).
-const FETCH_TIMEOUT_MS = 8_000;
+const FETCH_TIMEOUT_MS = 4_000;
 
 // PT: Quantas tentativas extras além da primeira (0 = só uma tentativa).
 // EN: How many extra retries besides the first attempt (0 = only once).
@@ -75,27 +75,6 @@ export function loadSummaryFromCache() {
     return parsed; // PT: Retorna o resumo válido.
   } catch (err) {
     console.warn('summary.js: erro ao ler cache / error reading cache.', err);
-    return null;
-  }
-}
-
-// PT: Carrega um snapshot do resumo salvo (sem validar).
-// EN: Loads a saved summary snapshot (without validation).
-export function loadSummarySnapshot() {
-  try {
-    const raw = localStorage.getItem(CACHE_KEY); // PT: Lê do localStorage.
-    if (!raw) return null; // PT: Sem cache.
-
-    const parsed = JSON.parse(raw); // PT: Converte de JSON.
-    const { avg, total, buckets } = parsed || {}; // PT: Extrai dados.
-
-    if (typeof avg !== 'number' || typeof total !== 'number' || typeof buckets !== 'object') {
-      return null;
-    }
-    //PT: Snapshot não respeita TTL. Serve só como fallback.
-    return parsed;
-  } catch (err) {
-    console.warn('summary.js: erro ao ler snapshot / snapshot read error.', err);
     return null;
   }
 }
@@ -147,7 +126,8 @@ export async function fetchSummaryWithRetry() {
   const ENDPOINT = EndpointConfig.get();
 
   if (!ENDPOINT) {
-    throw new Error('summary-helpers.js: FEEDBACK_ENDPOINT não definido / not defined.');
+    console.warn('summary-helpers.js: FEEDBACK_ENDPOINT não definido / not defined.');
+    return;
   }
 
   // PT: Retorna uma Promise.

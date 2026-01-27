@@ -75,6 +75,16 @@ import { IrenePhotoPreviewUX } from '/assets/js/feedback/form/ux/irene-photo-pre
 import { MinaCommentCounterUX } from '/assets/js/feedback/form/ux/mina-comment-counter-ux.js';
 
 /* ------------------------------------------------------------------
+/* --------------------------------------------------
+ * 🧠 Sofia — Form Validation & UX State
+ * PT: Validação básica + estado visual + auto-clear.
+ * EN: Basic validation + visual state + auto-clear wiring.
+ * Provides:
+ *  - attachAutoClearFieldErrors()
+ * -------------------------------------------------- */
+import { SofiaFormValidationUI } from '/assets/js/feedback/form/validation/sofia-form-validation-ui.js';
+
+/* ------------------------------------------------------------------
  * Small runtime helper
  * ------------------------------------------------------------------ */
 
@@ -146,6 +156,18 @@ function initAylaRatingStarsUI() {
 }
 
 /**
+ * PT: Sofia — auto-clear de erros e UX state base.
+ * EN: Sofia — auto-clear field errors and base UX state.
+ */
+function initSofiaFormValidationUI() {
+  try {
+    SofiaFormValidationUI.attachAutoClearFieldErrors();
+  } catch (err) {
+    console.warn('[Aura] Error initializing SofiaFormValidationUI:', err);
+  }
+}
+
+/**
  * PT: Liora — Controller do FORM (apenas eventos).
  *     Liora não "controla" especialistas. Ela apenas liga o submit
  *     e delega para Selene (submit flow).
@@ -180,7 +202,10 @@ function bootstrapForm() {
   // 4) Ayla — UI das estrelas (rating)
   initAylaRatingStarsUI();
 
-  // 5) Liora — controller (apenas eventos + submit)
+  // 5) Sofia — auto-clear de erros e UX state base
+  initSofiaFormValidationUI();
+
+  // 6) Liora — controller (apenas eventos + submit)
   initLioraController();
 }
 
@@ -193,10 +218,7 @@ export const AuraFormLeader = {
    * PT: Inicializa o setor FORM do feedback. Deve ser chamada pela Morgana.
    * EN: Initializes the feedback FORM sector. Should be called by Morgana.
    */
-  initForm(root = document) {
-    onDomReady(() => bootstrapForm(root));
+  initForm() {
+    onDomReady(() => bootstrapForm());
   },
-
-  // Optional: expose raw bootstrap for debugging
-  bootstrapForm,
 };

@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-BR" class="snap-y snap-mandatory scroll-smooth">
   <head>
     <meta charset="UTF-8" />
@@ -934,7 +934,11 @@
                   <button
                     type="button"
                     class="inline-flex items-center justify-center rounded-lg border border-gray-300 px-4 py-2 text-gray-700 hover:bg-gray-50"
-                    onclick="navigator.clipboard.writeText('Rua Tasso Fragoso, 105 - Parque das Nações, Guarulhos/SP - 07243-570')"
+                    onclick="
+                      navigator.clipboard.writeText(
+                        'Rua Tasso Fragoso, 105 - Parque das Nações, Guarulhos/SP - 07243-570'
+                      )
+                    "
                   >
                     Copiar endereço
                   </button>
@@ -1743,12 +1747,12 @@
 
                     <!-- Nome (obrigatório) -->
                     <div>
-                      <label for="nome" class="block text-sm font-medium text-gray-700"
+                      <label for="nameInput" class="block text-sm font-medium text-gray-700"
                         >Seu nome</label
                       >
                       <input
-                        id="nome"
-                        name="nome"
+                        id="nameInput"
+                        name="name"
                         required
                         class="mt-1 w-full rounded-lg border-gray-300"
                         placeholder="Como devemos exibir seu nome?"
@@ -1757,12 +1761,12 @@
 
                     <!-- Comentário (20–600) -->
                     <div>
-                      <label for="comentario" class="block text-sm font-medium text-gray-700"
+                      <label for="commentInput" class="block text-sm font-medium text-gray-700"
                         >Comentário</label
                       >
                       <textarea
-                        id="comentario"
-                        name="comentario"
+                        id="commentInput"
+                        name="comment"
                         rows="3"
                         required
                         minlength="20"
@@ -1771,14 +1775,14 @@
                         placeholder="Conte como foi sua experiência (20 a 600 caracteres)"
                       ></textarea>
                       <p class="mt-1 text-xs text-gray-500">
-                        <span id="contador-comentario">0</span>/600 caracteres.
+                        <span id="counter-comment">0</span>/600 caracteres.
                         <!-- contador em tempo real entra depois no JS -->
                       </p>
                     </div>
 
                     <!-- Foto (opcional, 1 imagem) -->
                     <div>
-                      <label for="foto" class="block text-sm font-medium text-gray-700">
+                      <label for="photo" class="block text-sm font-medium text-gray-700">
                         Foto da sua moldura (opcional)
                       </label>
                       <div id="photo-ui-row" class="relative mt-1">

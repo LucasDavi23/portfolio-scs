@@ -213,7 +213,7 @@ async function extractBase64AndMime(file) {
 // Filename helper
 // ------------------------------
 
-function generateUniqueFilename(file) {
+function generateUniqueFileName(file) {
   const now = new Date();
   const timestamp = now
     .toISOString()
@@ -233,7 +233,7 @@ export const AthenaImageProcessing = {
   validateFile,
   convertToWebp,
   extractBase64AndMime,
-  generateUniqueFilename,
+  generateUniqueFileName,
   ALLOWED_MIME_TYPES,
   DEFAULT_MAX_SIZE_MB,
 };

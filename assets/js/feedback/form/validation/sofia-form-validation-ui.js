@@ -32,16 +32,30 @@
 // Internal element map
 // ------------------------------
 
+// Logger — System Observability Layer
+// Provides logging capabilities for debugging and monitoring.
+// Provides:
+//  - Logger.debug()
+//  - Logger.info()
+//  - Logger.warn()
+//  - Logger.error()
+import { Logger } from '/assets/js/system/core/logger.js';
+
 const dom = document;
+
+let autoClearAttached = false;
 
 const elements = {
   form: dom.querySelector('#feedback-form'),
+  ratingGroup: dom.querySelector('#rating-group'),
   ratingHidden: dom.querySelector('#rating'),
-  nameInput: dom.querySelector('#nome'),
-  commentInput: dom.querySelector('#comentario'),
-  contactInput: dom.querySelector('#contato'),
+
+  nameInput: dom.querySelector('#nameInput'),
+  commentInput: dom.querySelector('#commentInput'),
+  contactInput: dom.querySelector('#contactInput'),
+
   honeypotInput: dom.querySelector('#honeypot'),
-  photoInput: dom.querySelector('#foto'),
+  photoInput: dom.querySelector('#photo'),
   submitButton: dom.querySelector('#btn-submit'),
   statusEl: dom.querySelector('#form-status'),
 };
@@ -70,19 +84,29 @@ function validateBasicRules(values) {
   // PT: Honeypot preenchido → provável bot
   // EN: Filled honeypot → likely bot
   if (values.honeypot) {
-    return { ok: false, message: 'Validation failed (possible bot).' };
+    return { ok: false, message: 'Validação falhou (possível bot).', field: 'honeypot' };
   }
 
-  // PT: Nota obrigatória (Ayla preenche hidden, Sofia só confere)
-  // EN: Rating required (Ayla fills hidden, Sofia only checks)
-  if (!values.rating) {
-    return { ok: false, message: 'Please choose a rating (stars).' };
+  // PT: Rating deve ser 1..5 (FormData vem string)
+  // EN: Rating must be 1..5 (FormData comes as string)
+  const ratingNum = Number(values.rating);
+
+  if (!Number.isInteger(ratingNum) || ratingNum < 1 || ratingNum > 5) {
+    return {
+      ok: false,
+      message: 'Por favor, escolha uma avaliação (1 a 5 estrelas).',
+      field: 'rating',
+    };
   }
 
   // PT: Nome mínimo para evitar lixo
   // EN: Minimum name length to avoid junk input
   if (values.name.length < 4) {
-    return { ok: false, message: 'Please enter a valid name (min 4 chars).' };
+    return {
+      ok: false,
+      message: 'Por favor, insira um nome válido (mínimo de 4 caracteres).',
+      field: 'name',
+    };
   }
 
   // PT: Comentário com limites básicos de UX
@@ -90,7 +114,8 @@ function validateBasicRules(values) {
   if (values.comment.length < 20 || values.comment.length > 600) {
     return {
       ok: false,
-      message: 'Comment must be between 20 and 600 characters.',
+      message: 'Por favor, insira um comentário entre 20 e 600 caracteres.',
+      field: 'comment',
     };
   }
 
@@ -118,7 +143,53 @@ function lockSubmit(isLocked) {
   const locked = !!isLocked;
   elements.submitButton.disabled = locked;
   elements.submitButton.setAttribute('aria-busy', locked ? 'true' : 'false');
-  elements.submitButton.textContent = locked ? 'Sending…' : 'Send';
+  elements.submitButton.textContent = locked ? 'Enviando…' : 'Enviar';
+}
+
+function getFieldElement(field) {
+  switch (field) {
+    case 'rating':
+      // PT: rating não é input visível, então retornamos null
+      // EN: rating isn't a visible input, so return null
+      return null;
+    case 'name':
+      return elements.nameInput;
+    case 'comment':
+      return elements.commentInput;
+    case 'contact':
+      return elements.contactInput;
+    case 'honeypot':
+      return elements.honeypotInput;
+    default:
+      return null;
+  }
+}
+
+// ------------------------------
+// Form UI reset (UX helper)
+// ------------------------------
+
+function clearFormStatus() {
+  if (!elements.statusEl) return;
+  elements.statusEl.textContent = '';
+  delete elements.statusEl.dataset.type;
+}
+
+function resetFormUI() {
+  // PT: reset do form (valores)
+  // EN: form reset (values)
+  elements.form?.reset();
+
+  // PT/EN: clear toast/status
+  clearFormStatus();
+
+  // PT/EN: clear field errors
+  clearFieldError(elements.nameInput);
+  clearFieldError(elements.commentInput);
+  clearFieldError(elements.contactInput);
+
+  // PT/EN: clear rating visual error
+  clearRatingError();
 }
 
 // ------------------------------
@@ -131,14 +202,50 @@ function markFieldError(inputEl, message) {
   inputEl.classList.add('border-red-500', 'ring-1', 'ring-red-400', 'focus:ring-red-400');
   inputEl.setAttribute('aria-invalid', 'true');
 
-  let hint = inputEl.parentElement?.querySelector('.hint-error');
-  if (!hint && inputEl.parentElement) {
+  // PT/EN: unique hint id tied to this input
+  const hintId =
+    inputEl.dataset.errId || `err_${inputEl.id || Math.random().toString(16).slice(2)}`;
+  inputEl.dataset.errId = hintId;
+
+  let hint = dom.getElementById(hintId);
+  if (!hint) {
     hint = dom.createElement('p');
+    hint.id = hintId;
     hint.className = 'hint-error mt-1 text-xs text-red-600';
-    inputEl.parentElement.appendChild(hint);
+    // PT/EN: insert right after the input (safe even with wrappers)
+    inputEl.insertAdjacentElement('afterend', hint);
   }
 
-  if (hint) hint.textContent = message;
+  hint.textContent = message;
+}
+
+function markRatingError(message) {
+  const wrapper = elements.ratingGroup;
+  if (!wrapper) return;
+
+  wrapper.classList.add('ring-2', 'ring-red-400', 'rounded-md');
+  wrapper.setAttribute('aria-invalid', 'true');
+
+  const hintId = 'rating-error-hint';
+  let hint = dom.getElementById(hintId);
+  if (!hint) {
+    hint = dom.createElement('p');
+    hint.id = hintId;
+    hint.className = 'hint-error mt-1 text-xs text-red-600';
+    wrapper.insertAdjacentElement('afterend', hint);
+  }
+  hint.textContent = message;
+}
+
+function clearRatingError() {
+  const wrapper = elements.ratingGroup;
+  if (!wrapper) return;
+
+  wrapper.classList.remove('ring-2', 'ring-red-400', 'rounded-md');
+  wrapper.removeAttribute('aria-invalid');
+
+  const hint = dom.getElementById('rating-error-hint');
+  if (hint) hint.remove();
 }
 
 function clearFieldError(inputEl) {
@@ -147,8 +254,38 @@ function clearFieldError(inputEl) {
   inputEl.classList.remove('border-red-500', 'ring-1', 'ring-red-400', 'focus:ring-red-400');
   inputEl.removeAttribute('aria-invalid');
 
-  const hint = inputEl.parentElement?.querySelector('.hint-error');
-  if (hint) hint.remove();
+  const hintId = inputEl.dataset.errId;
+  if (hintId) {
+    const hint = dom.getElementById(hintId);
+    if (hint) hint.remove();
+    delete inputEl.dataset.errId;
+  }
+}
+
+function attachAutoClearFieldErrors() {
+  Logger.debug('sofia', 'attachAutoClearFieldErrors called');
+
+  if (autoClearAttached) {
+    autoClearAttached = true;
+  }
+
+  // PT: Limpa erro ao digitar/modificar campo
+  // EN: Clears error on typing/modifying field
+  const bind = (el) => {
+    if (!el) return;
+    el.addEventListener('input', () => clearFieldError(el));
+    el.addEventListener('blur', () => clearFieldError(el));
+  };
+
+  bind(elements.nameInput);
+  bind(elements.commentInput);
+  bind(elements.contactInput);
+
+  // PT/EN: Rating stars – clear visual error when user interacts
+  if (elements.ratingGroup) {
+    elements.ratingGroup.addEventListener('click', clearRatingError);
+    elements.ratingGroup.addEventListener('change', clearRatingError);
+  }
 }
 
 // ------------------------------
@@ -162,6 +299,12 @@ export const SofiaFormValidationUI = {
   validateBasicRules,
   showFormStatus,
   lockSubmit,
+  getFieldElement,
+  clearFormStatus,
+  resetFormUI,
   markFieldError,
+  markRatingError,
   clearFieldError,
+  clearRatingError,
+  attachAutoClearFieldErrors,
 };

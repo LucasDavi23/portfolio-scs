@@ -101,27 +101,8 @@ export async function list(plat, page = 1, limit = 1, opts = { fast: 1 }) {
   url.searchParams.set('page', String(pg));
   url.searchParams.set('limit', String(lim));
 
-  // ---------------------------------------------
-  // ✅ nocache support (GAS + client cache bust)
-  // ---------------------------------------------
-  const isObj = opts && typeof opts === 'object';
-  const nocache =
-    isObj && (opts.nocache === true || String(opts.nocache) === '1' || opts.force === true);
-
-  if (nocache) {
-    url.searchParams.set('nocache', '1');
-    url.searchParams.set('cb', String(Date.now())); // cache buster
-  }
-
-  // adiciona opts como querystring, mas SEM duplicar nocache/cb
-  if (isObj) {
-    Object.entries(opts).forEach(([k, v]) => {
-      if (k === 'nocache' || k === 'cb' || k === 'force') return;
-      url.searchParams.set(k, String(v));
-    });
-
-    // garante fast padrão se não vier
-    if (!url.searchParams.has('fast')) url.searchParams.set('fast', '1');
+  if (opts && typeof opts === 'object') {
+    Object.entries(opts).forEach(([k, v]) => url.searchParams.set(k, String(v)));
   } else {
     url.searchParams.set('fast', '1');
   }
@@ -147,31 +128,13 @@ export async function listMeta(plat, page = 1, limit = 5, opts = { fast: 1 }) {
   url.searchParams.set('page', String(pg));
   url.searchParams.set('limit', String(lim));
 
-  const isObj = opts && typeof opts === 'object';
-  const nocache =
-    isObj && (opts.nocache === true || String(opts.nocache) === '1' || opts.force === true);
-
-  if (nocache) {
-    url.searchParams.set('nocache', '1');
-    url.searchParams.set('cb', String(Date.now()));
-  }
-
-  if (isObj) {
-    Object.entries(opts).forEach(([k, v]) => {
-      if (k === 'nocache' || k === 'cb' || k === 'force') return;
-      url.searchParams.set(k, String(v));
-    });
-    if (!url.searchParams.has('fast')) url.searchParams.set('fast', '1');
-  } else {
-    url.searchParams.set('fast', '1');
-  }
-
   const data = await NadiaAPICore.fetchJsonCached(url.toString(), opts);
 
   const itemsArr = Array.isArray(data) ? data : Array.isArray(data.items) ? data.items : [];
-  const items = itemsArr.map(normalizeItem).filter(Boolean);
 
+  const items = itemsArr.map(normalizeItem).filter(Boolean);
   const hasMore = typeof data?.hasMore === 'boolean' ? data.hasMore : items.length === lim;
+
   const total = typeof data?.total === 'number' ? data.total : undefined;
 
   return { items, hasMore, total };

@@ -37,7 +37,7 @@ import { ClaraNameHelpers } from '/assets/js/feedback/form/fields/name/clara-nam
 // 🧠 Athena PT: Processamento de imagem EN: Image processing helpers.
 // Provides:
 // validateFile()
-// generateUniqueName()
+// generateUniqueFileName()
 // convertToWebp()
 
 import { AthenaImageProcessing } from '/assets/js/feedback/form/image/athena-image-processing.js';
@@ -53,9 +53,39 @@ import { LyraUploadApiHelpers } from '/assets/js/feedback/form/api/submit/upload
 
 // 📝 Elis PT: Helpers para API de feedback EN: Feedback API helpers
 // Provides:
-// createFeedback() | criarFeedback()
+// submitFeedbackAction() | criarFeedback()
 
 import { ElisFeedbackApiHelpers } from '/assets/js/feedback/form/api/submit/feedback/elis-feedback-api-helpers.js';
+
+// --------------------------------------------------------------------------------------------
+// 🧠 Alma — Submit Queue
+// Provides:
+// - enqueue,
+// - peek,
+// - dequeue,
+// - removeById,
+// - clearQueue,
+// - getQueueSize,
+import { AlmaOutboxQueue } from '/assets/js/feedback/form/submit/outbox/alma-outbox-queue.js';
+
+// --------------------------------------------------------------------------------------------
+
+// 🧱 Noah PT: Outbox Processor EN: Outbox Processor
+// setSender,
+// configure,
+// start,
+// stop,
+// nudge,
+// getState,
+
+import { NoahOutboxProcessor } from '/assets/js/feedback/form/submit/outbox/noah-outbox-processor.js';
+
+// --------------------------------------------------------------------------------------------
+
+// 📟 Logger PT: Camada de logging EN: Logging layer
+// Provides:
+// Logger.debug(), Logger.info(), Logger.warn(), Logger.error()
+import { Logger } from '/assets/js/system/core/logger.js';
 
 // --------------------------------------------------------------------------------------------
 
@@ -109,6 +139,8 @@ async function uploadPhotoIfAny({
   quality = 0.8,
   maxSizeMB = 2,
 } = {}) {
+  // PT: sem arquivo, retorna meta vazio (comportamento esperado)
+  // EN: no file, return empty meta (expected behavior)
   if (!file) {
     return {
       photo_id: '',
@@ -119,9 +151,29 @@ async function uploadPhotoIfAny({
     };
   }
 
+  // PT: asserts de contrato (sem optional chaining)
+  // EN: contract asserts (no optional chaining)
   if (!photoHelpers) {
     const err = new Error('Photo helpers not connected (AthenaImageProcessing).');
     err.code = 'PHOTO_HELPERS_MISSING';
+    throw err;
+  }
+
+  if (typeof photoHelpers.validateFile !== 'function') {
+    const err = new Error('Athena.convertToWebp is missing.');
+    err.code = 'ATHENA_CONVERT_MISSING';
+    throw err;
+  }
+
+  if (typeof photoHelpers.convertToWebp !== 'function') {
+    const err = new Error('Athena.convertToWebp is missing.');
+    err.code = 'ATHENA_CONVERT_MISSING';
+    throw err;
+  }
+
+  if (typeof photoHelpers.generateUniqueFileName !== 'function') {
+    const err = new Error('Athena.generateUniqueFileName is missing.');
+    err.code = 'ATHENA_NAME_MISSING';
     throw err;
   }
 
@@ -131,40 +183,51 @@ async function uploadPhotoIfAny({
     throw err;
   }
 
-  const validation = photoHelpers.validateFile?.(file);
-  if (validation && validation.ok === false) {
+  const uploadFn =
+    uploadApi.uploadPhotoBase64 || uploadApi.sendPhotoBase64 || uploadApi.enviarFotoBase64;
+
+  if (typeof uploadFn !== 'function') {
+    const err = new Error('Upload function not found on uploadApi (Lyra).');
+    err.code = 'UPLOAD_FN_MISSING';
+    throw err;
+  }
+
+  // ------------------------------
+  // Validate original file
+  // ------------------------------
+  const validation = photoHelpers.validateFile(file);
+  if (validation.ok === false) {
     const err = new Error(validation.message || 'Invalid image file.');
     err.code = 'INVALID_PHOTO';
     throw err;
   }
 
   const photo_name_original = file.name || '';
-  const photo_name = photoHelpers.generateUniqueName?.(file) || photo_name_original;
+
+  // PT: filename único (baseado em Athena)
+  // EN: unique filename (via Athena)
+  const photo_name = photoHelpers.generateUniqueFileName(file);
 
   // Convert to webp (base64 + mime)
-  const converted = await photoHelpers.convertToWebp?.(file, {
+  const converted = await photoHelpers.convertToWebp(file, {
     maxSide,
     quality,
     maxSizeMB,
   });
 
-  if (!converted?.base64 || !converted?.mime) {
-    const err = new Error('Image conversion failed.');
+  if (!converted || typeof converted.base64 !== 'string' || !converted.base64) {
+    const err = new Error('Image conversion failed (missing base64).');
     err.code = 'PHOTO_CONVERT_FAILED';
     throw err;
   }
 
-  // Upload (compat modes)
-  // Expected new: uploadApi.uploadPhotoBase64({ base64, mime, filename, original_name })
-  // Legacy fallback: uploadApi.sendPhotoBase64(...)
-  const uploadFn =
-    uploadApi.uploadPhotoBase64 || uploadApi.sendPhotoBase64 || uploadApi.enviarFotoBase64;
-
-  if (typeof uploadFn !== 'function') {
-    const err = new Error('Upload function not found on uploadApi.');
-    err.code = 'UPLOAD_FN_MISSING';
+  if (!converted.mime) {
+    const err = new Error('Image conversion failed (missing mime).');
+    err.code = 'PHOTO_CONVERT_FAILED';
     throw err;
   }
+
+  // Upload (Lyra contract)
 
   const up = await uploadFn({
     base64: converted.base64,
@@ -174,7 +237,7 @@ async function uploadPhotoIfAny({
   });
 
   // Compatibility: up.ok or up.success
-  const ok = up?.ok ?? up?.success ?? false;
+  const ok = up?.success ?? up?.ok ?? false;
   if (!ok) {
     const err = new Error(up?.message || 'Falha ao enviar a imagem.');
     err.code = 'UPLOAD_FAILED';
@@ -200,6 +263,58 @@ async function uploadPhotoIfAny({
   };
 }
 
+// --------------------------------------------------
+// Outbox bootstrap (Selene -> Noah)
+// --------------------------------------------------
+let outboxInitialized = false;
+
+/**
+ * PT: Inicializa Noah para processar a outbox (1x).
+ * EN: Initializes Noah to process the outbox (1x).
+ */
+function initOutboxProcessing() {
+  if (outboxInitialized) return;
+  // PT: Noah precisa de um sender. Aqui usamos Elis como "sender" do payload final.
+  // EN: Noah needs a sender. Here we use Elis as the sender for the final payload.
+  NoahOutboxProcessor.setSender(async (payload) => {
+    const ret = await ElisFeedbackApiHelpers.submitFeedbackAction(payload);
+
+    const ok = ret?.ok ?? ret?.success ?? false;
+    if (ok) return { ok: true, data: ret };
+
+    return {
+      ok: false,
+      error: ret?.message || ret?.error || 'CREATE_FAILED',
+      status: ret?.status,
+    };
+  });
+
+  NoahOutboxProcessor.setHooks({
+    onCommitted: (queueItem, result) => {
+      Logger.info('feedback.outbox.committed', '[Noah] outbox item committed after retry', {
+        source: 'outbox',
+        clientRequestId: queueItem?.payload?.clientRequestId || queueItem?.id || '',
+        attempts: queueItem?.meta?.attempts,
+      });
+      try {
+        window.dispatchEvent(
+          new CustomEvent('feedback:committed', {
+            detail: {
+              source: 'outbox',
+              clientRequestId: queueItem?.payload?.clientRequestId || queueItem?.id || '',
+              payload: queueItem?.payload || null,
+              item: result?.data?.item || result?.data?.data || result?.data || null,
+            },
+          })
+        );
+      } catch (_) {}
+    },
+  });
+
+  NoahOutboxProcessor.start();
+  outboxInitialized = true;
+}
+
 /**
  * PT: Executa o submit completo e retorna um resultado padronizado.
  * EN: Runs full submit and returns a standardized result.
@@ -213,12 +328,21 @@ async function uploadPhotoIfAny({
  * @returns {Object} { ok, data, error, meta }
  */
 async function submitFeedback(formData = {}, options = {}) {
+  Logger.info('feedback.submit.start', 'submit started', {
+    hasFile: !!(formData?.file || formData?.foto || formData?.arquivo),
+  });
+
   const {
     platform = 'scs',
     origin = 'portfolio_scs',
     now = new Date(),
     ratingOptions = undefined, // opcional, se Zaya precisar
   } = options;
+
+  // --------------------------------------------------
+  // 🧾 Client Request Identity (per submit attempt)
+  // --------------------------------------------------
+  const clientRequestId = crypto.randomUUID();
 
   try {
     const name = normalizeText(formData.name ?? formData.nome);
@@ -246,6 +370,7 @@ async function submitFeedback(formData = {}, options = {}) {
     });
 
     const payload = {
+      clientRequestId,
       plataforma: platform,
       rating,
       nome: name,
@@ -263,16 +388,45 @@ async function submitFeedback(formData = {}, options = {}) {
     };
 
     // ✅ Elis (criar feedback)
-    const ret = await ElisFeedbackApiHelpers.createFeedback(payload);
+    const ret = await ElisFeedbackApiHelpers.submitFeedbackAction(payload);
 
     const success = ret?.ok ?? ret?.success ?? false;
     if (!success) {
+      // PT/EN: ensure Noah is ready
+      initOutboxProcessing();
+
+      // PT: envia para a Outbox (Alma) para retry
+      // EN: enqueue into Outbox (Alma) for retry
+      AlmaOutboxQueue.enqueue(payload, {
+        reason: 'create_failed',
+        source: 'selene',
+        createdAt: createClientTimestamp(now),
+      });
+
+      // PT/EN: wake Noah up to try immediately
+      NoahOutboxProcessor.nudge();
+
       const err = new Error(ret?.message || ret?.error || 'Erro ao salvar feedback.');
       err.code = 'CREATE_FAILED';
       throw err;
     }
 
     const item = ret?.item || ret?.data || null;
+
+    try {
+      window.dispatchEvent(
+        new CustomEvent('feedback:committed', {
+          detail: {
+            source: 'submit',
+            clientRequestId: payload.clientRequestId || '',
+            payload,
+            item,
+          },
+        })
+      );
+    } catch (_) {
+      /* ignore */
+    }
 
     return {
       ok: true,
@@ -289,6 +443,19 @@ async function submitFeedback(formData = {}, options = {}) {
       meta: { platform, origin, hasPhoto: !!file },
     };
   } catch (error) {
+    Logger.warn('feedback.submit.failed', 'submit failed', {
+      code: error?.code || 'SUBMIT_FAILED',
+      message: error?.message,
+      hasPhoto: !!(formData?.file || formData?.foto || formData?.arquivo),
+      fileType: (formData?.file || formData?.foto || formData?.arquivo)?.type,
+      fileSizeMB:
+        formData?.file || formData?.foto || formData?.arquivo
+          ? Number(
+              ((formData.file || formData.foto || formData.arquivo).size / (1024 * 1024)).toFixed(2)
+            )
+          : null,
+    });
+
     return {
       ok: false,
       data: null,
@@ -304,4 +471,5 @@ async function submitFeedback(formData = {}, options = {}) {
 export const SeleneSubmitFlow = {
   submitFeedback,
   uploadPhotoIfAny,
+  initOutboxProcessing,
 };
