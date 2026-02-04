@@ -42,3 +42,150 @@
 #contact-sentinel {
   height: 1px;
 }
+
+/* ==================================================
+  🍔 Elo — Mobile Menu Drawer (CSS-only)
+  Atua diretamente sobre #menu existente
+================================================== */
+
+/* ------------------------------
+   Backdrop (já existe no HTML)
+------------------------------ */
+#menu-backdrop {
+  background: rgba(0, 0, 0, 0.42);
+  opacity: 0;
+  transition: opacity 220ms cubic-bezier(0.2, 0.8, 0.2, 1);
+
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+
+  /* 🔒 evita scroll encadeado (mobile) */
+  overscroll-behavior: contain;
+
+  /* 🔒 impede gesture de scroll no overlay (Android) */
+  touch-action: none;
+}
+
+#menu-backdrop.is-open {
+  opacity: 1;
+}
+
+/* ------------------------------
+   Menu container (#menu)
+   - vira o drawer animado
+   - e vira scroll container (pra não vazar pro fundo)
+------------------------------ */
+#menu {
+  /* PT: Evita clique “fantasma” quando fechado.
+     EN: Prevent pointer events when closed. */
+  pointer-events: none;
+
+  /* PT: Menu vira container rolável (resolve o “vazamento” do scroll).
+     EN: Make menu a scroll container (prevents scroll leak). */
+  height: 100vh;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+
+  /* 🔒 evita scroll encadeado (mobile) */
+  overscroll-behavior: contain;
+
+  /* animação base */
+  transform: translateX(16px);
+  opacity: 0;
+
+  transition:
+    transform 260ms cubic-bezier(0.2, 0.9, 0.2, 1),
+    opacity 220ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+/* Estado aberto (JS adiciona .is-open) */
+#menu.is-open {
+  pointer-events: auto;
+  transform: translateX(0);
+  opacity: 1;
+}
+
+/* Mobile real: drawer mais compacto */
+@media (max-width: 420px) {
+  #menu {
+    width: min(78vw, 360px);
+  }
+
+  #menu nav {
+    padding-bottom: 16px !important; /* era pb-8 */
+  }
+
+  #menu .space-y-2 > * + * {
+    margin-top: 6px !important; /* era 8px */
+  }
+}
+
+/* Tablet e acima: mantém como está hoje */
+@media (min-width: 421px) {
+  #menu {
+    width: 100%;
+    max-width: 24rem; /* sm:max-w-sm = 384px */
+  }
+}
+
+/* Estado aberto */
+#menu.is-open {
+  pointer-events: auto;
+  transform: translateX(0);
+  opacity: 1;
+}
+
+/* ------------------------------
+   Links: micro motion elegante
+------------------------------ */
+#menu .nav-link {
+  opacity: 0;
+  transform: translateY(6px);
+
+  transition:
+    transform 260ms cubic-bezier(0.2, 0.9, 0.2, 1),
+    opacity 220ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+/* Stagger leve (sem JS) */
+#menu.is-open .nav-link {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+#menu.is-open .nav-link:nth-child(1) {
+  transition-delay: 40ms;
+}
+#menu.is-open .nav-link:nth-child(2) {
+  transition-delay: 60ms;
+}
+#menu.is-open .nav-link:nth-child(3) {
+  transition-delay: 80ms;
+}
+#menu.is-open .nav-link:nth-child(4) {
+  transition-delay: 100ms;
+}
+#menu.is-open .nav-link:nth-child(5) {
+  transition-delay: 120ms;
+}
+#menu.is-open .nav-link:nth-child(6) {
+  transition-delay: 140ms;
+}
+#menu.is-open .nav-link:nth-child(7) {
+  transition-delay: 160ms;
+}
+#menu.is-open .nav-link:nth-child(8) {
+  transition-delay: 180ms;
+}
+
+/* ------------------------------
+   Reduced motion
+------------------------------ */
+@media (prefers-reduced-motion: reduce) {
+  #menu,
+  #menu-backdrop,
+  #menu .nav-link {
+    transition: none !important;
+    transform: none !important;
+  }
+}

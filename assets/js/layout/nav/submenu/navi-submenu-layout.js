@@ -6,20 +6,48 @@
 // EN: Controls the mobile menu: open/close, backdrop, ESC key and smooth
 //     scrolling for anchor links.
 
+const OPEN_CLASS = 'is-open';
+const DESKTOP_MIN = 640; // Tailwind sm
+
+function isDesktop() {
+  return window.innerWidth >= DESKTOP_MIN;
+}
+
 // Função para abrir o menu
 // Function to open the menu
 function openMenu({ menu, backdrop }) {
+  // PT: Se o botão existe e foi clicado, abre.
+  // EN: If the button exists and was clicked, open.
+
   menu.classList.remove('hidden');
   backdrop.classList.remove('hidden');
   document.body.classList.add('overflow-hidden');
+
+  // PT: ativa animação no próximo frame
+  // EN: enable animation next frame
+  requestAnimationFrame(() => {
+    menu.classList.add(OPEN_CLASS);
+    backdrop.classList.add(OPEN_CLASS);
+  });
 }
 
 // Função para fechar o menu
 // Function to close the menu
 function closeMenu({ menu, backdrop }) {
-  menu.classList.add('hidden');
-  backdrop.classList.add('hidden');
+  // PT: remove animação primeiro
+  // EN: remove animation first
+  menu.classList.remove(OPEN_CLASS);
+  backdrop.classList.remove(OPEN_CLASS);
+
   document.body.classList.remove('overflow-hidden');
+
+  // PT: espera transição e depois oculta
+  // EN: wait transition then hide
+  const HIDE_DELAY = 280; // casa com o CSS (260ms)
+  window.setTimeout(() => {
+    menu.classList.add('hidden');
+    backdrop.classList.add('hidden');
+  }, HIDE_DELAY);
 }
 
 // Inicializa o menu mobile
@@ -33,6 +61,13 @@ export function initSubmenu() {
   if (!menu || !backdrop) return;
 
   const ctx = { menu, backdrop };
+
+  // PT: estado inicial consistente
+  // EN: consistent initial state
+  menu.classList.add('hidden');
+  backdrop.classList.add('hidden');
+  menu.classList.remove(OPEN_CLASS);
+  backdrop.classList.remove(OPEN_CLASS);
 
   if (menuToggle) {
     menuToggle.addEventListener('click', () => openMenu(ctx));
@@ -55,16 +90,27 @@ export function initSubmenu() {
     if (!a) return;
 
     const href = a.getAttribute('href');
-    // Fecha o menu primeiro
+
+    // PT: Fecha o menu primeiro
+    // EN: Close first
     closeMenu(ctx);
 
     if (href && href.startsWith('#')) {
       e.preventDefault();
       const target = document.querySelector(href);
       if (target) {
-        setTimeout(() => target.scrollIntoView({ behavior: 'smooth', block: 'start' }), 80);
+        setTimeout(() => {
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 120);
       }
     }
+  });
+
+  // ✅ Fecha se entrar em desktop (ex: rotacionar tablet / resize)
+  // ✅ Auto close when switching to desktop
+  window.addEventListener('resize', () => {
+    const toggleVisible = !!menuToggle && menuToggle.offsetParent !== null;
+    if (!toggleVisible) closeMenu(ctx);
   });
 }
 
