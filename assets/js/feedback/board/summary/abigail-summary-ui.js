@@ -35,6 +35,7 @@ import { EndpointConfig } from '/assets/js/feedback/core/config/feedback-endpoin
 // - loadSummarySnapshot()
 // - saveSummarytoCache()
 // - fetchSummaryWithRetry()
+// - fetchSummaryMetaWithRetry()
 // - buildSummaryFromResponse()
 
 import { AthenaisSummaryHelpers } from '/assets/js/feedback/board/summary/athenais-summary-helpers.js';
@@ -50,9 +51,6 @@ import { AthenaisSummaryHelpers } from '/assets/js/feedback/board/summary/athena
 import { ZoeRating } from '/assets/js/system/ui/rating/zoe-rating.js';
 
 // -----------------------------------------------------------------------------
-// AbigailSummaryUI — Summary UI (Presentation Layer)
-// Provides:
-// - initSummaryUI()
 
 console.log('summary.js: carregado / loaded. (Abigaíl entrou em ação)');
 
@@ -228,7 +226,9 @@ function initSummaryUI() {
     }
 
     try {
-      const data = await AthenaisSummaryHelpers.fetchSummaryWithRetry(); // PT: Tenta buscar da rede.
+      const data = await AthenaisSummaryHelpers.fetchSummaryMetaWithRetry({
+        forceFresh: forceNetwork,
+      }); // PT: Tenta buscar da rede.
       console.log('📦 Dados brutos do GAS (summary):', data);
       const summary = AthenaisSummaryHelpers.buildSummaryFromResponse(data);
       console.log('📊 Summary calculado:', summary);
@@ -263,6 +263,18 @@ function initSummaryUI() {
       // EN: If cache was already applied, keep the current UI state unchanged.
     }
   }
+
+  // -------------------------------------------------------------
+  // Realtime: summary escuta novos feedbacks confirmados
+  // -------------------------------------------------------------
+  let summaryRefreshTimer = null;
+
+  window.addEventListener('feedback:committed', () => {
+    clearTimeout(summaryRefreshTimer);
+    summaryRefreshTimer = setTimeout(() => {
+      loadSummary({ forceNetwork: true });
+    }, 250);
+  });
 
   // PT: Expondo uma função global opcional para “forçar” atualização
   //     (útil após envio de novo feedback).

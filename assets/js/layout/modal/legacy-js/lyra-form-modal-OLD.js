@@ -16,7 +16,7 @@
 //  - unlockBodyScroll()
 //  - getScrollLockCount()
 
-import { LatchRootScroll } from '/assets/js/system/utils/latch-root-scroll-lock.js';
+import { LatchBodyScroll } from '/assets/js/system/utils/latch-body-scroll-lock.js';
 
 const MODAL_ID = 'feedback-modal';
 const OPEN_SELECTOR = '[data-open-feedback]';
@@ -28,6 +28,22 @@ let dialog;
 let openButtons;
 
 /**
+ * PT: Trava o scroll da página
+ * EN: Locks page scroll
+ */
+function lockScroll() {
+  document.documentElement.classList.add('no-scroll');
+}
+
+/**
+ * PT: Libera o scroll da página
+ * EN: Unlocks page scroll
+ */
+function unlockScroll() {
+  document.documentElement.classList.remove('no-scroll');
+}
+
+/**
  * PT: Abre o modal
  * EN: Opens the modal
  */
@@ -36,7 +52,7 @@ function openModal() {
 
   modal.classList.remove('hidden');
   modal.setAttribute('aria-hidden', 'false');
-  LatchRootScroll.lockScroll();
+  lockScroll();
 
   // foco inicial (acessibilidade)
   requestAnimationFrame(() => {
@@ -53,7 +69,7 @@ function closeModal() {
 
   modal.classList.add('hidden');
   modal.setAttribute('aria-hidden', 'true');
-  LatchRootScroll.unlockScroll();
+  unlockScroll();
 }
 
 /**

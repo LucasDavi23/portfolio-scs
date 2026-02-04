@@ -30,3 +30,9 @@
    Fornece ajustes específicos para telas pequenas (≤ 640px)
 */
 @import '/assets/css/system/layout//modal/modal-mobile.css';
+
+/* Elo — Navigation Visual Connector
+   EN: Elo — Navigation Visual Connector
+   Fornece estilos visuais para indicar o estado ativo da navegação
+*/
+@import '/assets/js/layout/nav/css/elo-nav-visual.css';

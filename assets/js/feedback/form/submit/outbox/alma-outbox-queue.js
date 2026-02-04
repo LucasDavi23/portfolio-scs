@@ -23,6 +23,10 @@
 //     pending data when requested.
 // ==================================================
 
+// imports
+// 📟 UUID PT: Gerador de UUID EN: UUID Generator
+import { generateUUID } from '/assets/js/system/utils/uuid.js';
+
 // --------------------------------------------------
 // Internal constants
 // --------------------------------------------------
@@ -98,7 +102,7 @@ function enqueue(payload, meta = {}) {
   if (!payload) return;
 
   const queueItem = {
-    id: payload.clientRequestId || crypto.randomUUID(),
+    id: payload.clientRequestId || generateUUID(),
     payload,
     meta,
     createdAt: generateTimestamp(),

@@ -14,6 +14,9 @@ export default defineConfig({
 
   // ⬇️ Aqui entra o proxy só para ambiente de DEV (npm run dev)
   server: {
+    host: true,
+    port: 5173,
+    strictPort: true,
     proxy: {
       // JSON (lista de avaliações, etc.)
       '/gas': {

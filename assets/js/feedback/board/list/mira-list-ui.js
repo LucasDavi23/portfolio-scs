@@ -108,6 +108,15 @@ import { LumaLoading } from '/assets/js/system/ui/loading/luma-loading';
 
 import { ZoeRating } from '/assets/js/system/ui/rating/zoe-rating.js';
 
+// -----------------------------------------------------------------------------
+// ✨ Latch — Body Scroll Lock (System Utils)
+// Provides:
+//  - lockBodyScroll()
+//  - unlockBodyScroll()
+//  - getScrollLockCount()
+
+import { LatchRootScroll } from '/assets/js/system/utils/latch-root-scroll-lock.js';
+
 // ==========================
 // 1) HELPERS BÁSICOS DE DOM
 // ==========================
@@ -118,6 +127,11 @@ const qs = (selector, root = document) => root.querySelector(selector); // root 
 /** PT: Atalho para querySelectorAll em array. EN: Shorthand to get an array. */
 const qsa = (selector, root = document) => Array.from(root.querySelectorAll(selector)); // root opcional
 
+/** PT: Retorna o limite padrão baseado na largura da tela. EN: Returns default limit based on screen width. */
+function getDefaultLimit() {
+  return window.matchMedia('(max-width: 639px)').matches ? 8 : 12;
+}
+
 // ==========================
 // 2) ESTADO DO MODAL
 // ==========================
@@ -126,7 +140,7 @@ const state = {
   // estado inicial do modal
   plat: 'scs', // plataforma atual (scs, google, facebook, etc)
   page: 1, // pagina atual
-  limit: 5, // itens por página
+  limit: 5, // fallback (open() define 8 mobile / 12 desktop)
   hasMore: false, // se há mais páginas
   loading: false, // se há requisição em andamento
   total: undefined, // total real (fast:0), opcional
@@ -408,6 +422,7 @@ export function open(plat) {
   state.page = 1; // página 1
   state.hasMore = false; // sem mais páginas
   state.total = undefined; // total desconhecido
+  state.limit = getDefaultLimit(); // itens por página baseado na tela
 
   // header + limpar UI
   els.titulo.textContent = DaraListHelpers.getPlatformLabel(state.plat);
@@ -434,8 +449,8 @@ export function open(plat) {
   // abrir Modal
   els.modal.classList.remove('hidden'); // mostra modal
   els.modal.classList.add('flex'); // mostra modal
-  document.body.style.overflow = 'hidden'; // trava scroll body
-
+  // 🔒 TRAVA SCROLL (Latch)
+  LatchRootScroll.lockScroll();
   console.log('[Mira List] open()', { plat: state.plat });
 
   // desativar "Carregar mais" até terminar 1ª carga
@@ -479,8 +494,8 @@ export function open(plat) {
 export function close() {
   els.modal.classList.add('hidden');
   els.modal.classList.remove('flex');
-  document.body.style.overflow = '';
-
+  // 🔓 LIBERA SCROLL (Latch)
+  LatchRootScroll.unlockScroll();
   setTimeout(() => {
     els.list.innerHTML = '';
   }, 100);

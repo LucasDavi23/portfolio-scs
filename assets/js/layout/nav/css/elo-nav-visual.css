@@ -1,0 +1,44 @@
+/* ==================================================
+  🎨 Elo — Navigation Visual Connector
+
+  Nível: Adulta
+
+  PT: Responsável por exibir visualmente
+    o estado ativo da navegação.
+  EN: Handles visual indication of
+    active navigation state.
+================================================== */
+/* ------------------------------
+   Desktop: active underline
+   - Reaproveita a linguagem do hover:underline
+   - Fica fixo quando a seção está ativa
+   ------------------------------ */
+.nav-link.is-active {
+  text-decoration-line: underline;
+  text-underline-offset: 8px;
+}
+
+/* ------------------------------
+   Mobile menu: active row highlight
+   - Visual discreto para indicar "você está aqui"
+   - Mantém o look clean do menu
+   ------------------------------ */
+#menu .nav-link.is-active {
+  background-color: rgb(243 244 246); /* gray-100 */
+  border-radius: 0.375rem; /* rounded-md */
+}
+
+/* ------------------------------
+   Optional: smoother feel
+   - Apenas transições leves
+   - Não interfere no layout
+   ------------------------------ */
+.nav-link {
+  transition:
+    background-color 180ms ease,
+    text-decoration-color 180ms ease;
+}
+
+#contact-sentinel {
+  height: 1px;
+}

@@ -14,3 +14,13 @@ html.no-scroll,
 html.no-scroll body {
   overflow: hidden !important;
 }
+
+/* ------------------------------------------------------------
+   Modal state — disable snap & smooth to avoid scroll jumps
+   PT: Durante modal aberto, desativa snap e smooth
+   EN: While modal is open, disable snap and smooth
+------------------------------------------------------------ */
+html.modal-open {
+  scroll-snap-type: none !important;
+  scroll-behavior: auto !important;
+}

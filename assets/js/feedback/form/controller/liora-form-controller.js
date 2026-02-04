@@ -73,6 +73,16 @@ import { LumaLoading } from '/assets/js/system/ui/loading/luma-loading.js';
 import { StellaSubmitOverlay } from '/assets/js/system/ui/loading/stella-submit-overlay.js';
 
 // --------------------------------------------------
+// Logger — System Observability Layer
+// Provides logging capabilities for debugging and monitoring.
+// Provides:
+//  - Logger.debug()
+//  - Logger.info()
+//  - Logger.warn()
+//  - Logger.error()
+import { Logger } from '/assets/js/system/core/logger.js';
+
+// --------------------------------------------------
 // Internal state (avoid double-binding)
 // --------------------------------------------------
 let isAttached = false;

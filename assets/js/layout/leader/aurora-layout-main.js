@@ -39,6 +39,13 @@ import { NaviSubmenuLayout } from '/assets/js/layout/nav/submenu/navi-submenu-la
 // - initScrollEffects()
 import { AuraScrollEffects } from '/assets/js/layout/nav/scroll/aura-scroll-effects.js';
 
+// 🧭 Nara — estado do menu via scroll
+// EN 🧭 Nara — scroll-based menu state
+// Fornece:
+// - enableNavState()
+// - disableNavState()
+import { NaraNavState } from '/assets/js/layout/nav/scroll/nara-nav-state.js';
+
 // 👁️ Iris — modal de imagem simples
 // EN 👁️ Iris — simple image modal
 // Fornece:
@@ -74,6 +81,8 @@ function initLayout() {
   // 2) Navegação (submenu / menu mobile)
   NaviSubmenuLayout.initSubmenuLayout();
 
+  // 2.1) Sincroniza estado do menu via scroll
+  NaraNavState.enableNavState();
   // 3) Efeitos de scroll (quando existir implementação)
   // AuraScrollEffects.initScrollEffects();
 

@@ -5,6 +5,24 @@
 //     bloqueia o scroll de fundo e fecha por botão, backdrop ou ESC.
 // EN: Manages the global image modal: shows the image in focus, locks
 //     background scroll and closes via button, backdrop or ESC.
+// -----------------------------------------------------------------------------
+//
+// Imports
+// -----------------------------------------------------------------------------
+// ✨ Latch — Body Scroll Lock (System Utils)
+// Provides:
+//  - lockBodyScroll()
+//  - unlockBodyScroll()
+//  - getScrollLockCount()
+import { LatchRootScroll } from '/assets/js/system/utils/latch-root-scroll-lock.js';
+//
+// -----------------------------------------------------------------------------
+// 🪨 Onyx PT: Tap Guard EN: Tap Guard
+// Provides:
+// createTapGuard()
+import { OnyxTapGuard } from '/assets/js/system/ui/gestures/onyx-tap-guard';
+
+// -----------------------------------------------------------------------------
 
 export function ImageViewer() {
   const modal = document.getElementById('modalImg');
@@ -13,43 +31,47 @@ export function ImageViewer() {
 
   if (!modal || !modalImg || !btnClose) return;
 
-  // PT: trava scroll sem shift (robusto)
-  // EN: locks scroll without layout shift (robust)
-  let _scrollY = 0;
+  // 🪨 Onyx PT: Guardião de TAP (evita abrir modal ao rolar no mobile)
+  // EN: Tap guard (prevents opening modal while scrolling on mobile)
+  const tapGuard = OnyxTapGuard.createTapGuard({
+    movementThresholdPixels: 10,
+    maximumTapDurationMs: 350,
+    ghostClickBlockDurationMs: 450,
+  });
 
-  function lockScrollFixed() {
-    _scrollY = window.scrollY || document.documentElement.scrollTop || 0;
+  let activeOpenerElement = null;
 
-    document.body.style.position = 'fixed';
-    document.body.style.top = `-${_scrollY}px`;
-    document.body.style.left = '0';
-    document.body.style.right = '0';
-    document.body.style.width = '100%';
-  }
+  // --------------------------------------------------
+  // Helpers
+  // --------------------------------------------------
+  function resolveImageDataFromOpener(opener) {
+    let src = '';
+    let altText = '';
 
-  function unlockScrollFixed() {
-    const y = _scrollY;
+    // 1) data-full no opener
+    src = opener.dataset.full || '';
 
-    // PT: salva e força scroll sem animação (se estiver scroll-smooth)
-    // EN: temporarily disable smooth scrolling during restore
-    const html = document.documentElement;
-    const prevBehavior = html.style.scrollBehavior;
-    html.style.scrollBehavior = 'auto';
+    // 2) fallback: img interna
+    if (!src) {
+      const innerImg = opener.querySelector('img');
+      if (innerImg) {
+        src = innerImg.dataset.full || innerImg.src || '';
+        altText = innerImg.alt || '';
+      }
+    }
 
-    document.body.style.position = '';
-    document.body.style.top = '';
-    document.body.style.left = '';
-    document.body.style.right = '';
-    document.body.style.width = '';
+    // 3) se o opener em si é IMG
+    if (!src && opener.tagName === 'IMG') {
+      src = opener.src || '';
+      altText = opener.alt || '';
+    }
 
-    // PT: restaura no próximo frame para evitar "jump"
-    // EN: restore on next frame to avoid jump
-    requestAnimationFrame(() => {
-      window.scrollTo(0, y);
+    // 4) fallback alt
+    if (!altText) {
+      altText = opener.getAttribute('aria-label') || '';
+    }
 
-      // PT/EN: devolve comportamento anterior
-      html.style.scrollBehavior = prevBehavior;
-    });
+    return { src, altText };
   }
 
   function openModal(src, altText = '') {
@@ -63,7 +85,7 @@ export function ImageViewer() {
     modal.classList.remove('hidden');
     modal.classList.add('grid');
     modal.setAttribute('aria-hidden', 'false');
-    lockScrollFixed();
+    LatchRootScroll.lockScroll();
   }
 
   function closeModal() {
@@ -73,15 +95,15 @@ export function ImageViewer() {
 
     // PT/EN: deixa o DOM aplicar hidden primeiro
     requestAnimationFrame(() => {
-      unlockScrollFixed();
+      LatchRootScroll.unlockScroll();
       modalImg.src = '';
       modalImg.alt = '';
     });
   }
 
-  // Delegação global — funciona inclusive para elementos injetados depois
-  // PT: delegação global para abrir o modal (mais estável que click)
-  // EN: global delegation to open the modal (more stable than click)
+  // --------------------------------------------------
+  // Open modal (tap-safe via Onyx)
+  // --------------------------------------------------
   document.addEventListener(
     'pointerdown',
     (e) => {
@@ -97,32 +119,34 @@ export function ImageViewer() {
       e.preventDefault();
       e.stopPropagation();
 
-      let src = '';
-      let altText = '';
+      activeOpenerElement = opener;
 
-      // 1) data-full no opener
-      src = opener.dataset.full || '';
+      // Inicia o tracking do tap guard
+      tapGuard.capturePointerDown(e, opener);
+    },
+    true // capture: pega antes de handlers/navegação
+  );
 
-      // 2) fallback: img interna
-      if (!src) {
-        const innerImg = opener.querySelector('img');
-        if (innerImg) {
-          src = innerImg.dataset.full || innerImg.src || '';
-          altText = innerImg.alt || '';
-        }
-      }
+  document.addEventListener(
+    'pointermove',
+    (e) => {
+      tapGuard.trackPointerMove(e);
+    },
+    true
+  );
 
-      // 3) se o opener em si é IMG
-      if (!src && opener.tagName === 'IMG') {
-        src = opener.src || '';
-        altText = opener.alt || '';
-      }
+  document.addEventListener(
+    'pointerup',
+    (e) => {
+      if (!activeOpenerElement) return;
 
-      // 4) fallback alt
-      if (!altText) {
-        altText = opener.getAttribute('aria-label') || '';
-      }
+      const opener = activeOpenerElement;
+      activeOpenerElement = null;
 
+      const evaluation = tapGuard.evaluatePointerUp(e);
+      if (!evaluation.ok) return;
+
+      const { src, altText } = resolveImageDataFromOpener(opener);
       if (!src) {
         console.warn('[Iris] src não encontrado, não vou abrir a imagem.');
         return;
@@ -130,8 +154,24 @@ export function ImageViewer() {
 
       openModal(src, altText);
     },
-    true // capture: pega antes de handlers/navegação
+    true
   );
+
+  // PT: bloqueia click fantasma após drag/scroll
+  // EN: blocks ghost click after drag/scroll
+  document.addEventListener(
+    'click',
+    (e) => {
+      const opener = e.target.closest('.js-open-modal');
+      if (!opener) return;
+      tapGuard.blockGhostClick(e);
+    },
+    true
+  );
+
+  // --------------------------------------------------
+  // Close handlers
+  // --------------------------------------------------
 
   btnClose.addEventListener(
     'pointerdown',

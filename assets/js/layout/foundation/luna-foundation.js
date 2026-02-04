@@ -17,22 +17,24 @@ function initFooterYear() {
 // PT: Cria o botão "voltar ao topo" e adiciona a funcionalidade de rolagem suave.
 // EN: Creates the "back to top" button and adds smooth scroll functionality.
 function initBackToTop() {
-  const backToTopBtn = document.getElementById('backTotTopBtn');
+  const backToTopBtn = document.getElementById('backToTopBtn'); // ✅ padroniza o id
   if (!backToTopBtn) return;
 
   const backToTop = () => {
-    document.body.scrollTo({ top: 0, behavior: 'smooth' });
-    document.documentElement.scrollTo({ top: 0, behavior: 'smooth' });
+    const isModalOpen = document.documentElement.classList.contains('modal-open');
+    window.scrollTo({ top: 0, behavior: isModalOpen ? 'auto' : 'smooth' });
   };
 
   const onScroll = () => {
     backToTopBtn.style.display = window.scrollY > 20 ? 'block' : 'none';
   };
 
-  window.addEventListener('scroll', onScroll);
-  backToTopBtn.addEventListener('click', backToTop);
+  window.addEventListener('scroll', onScroll, { passive: true });
+  backToTopBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    backToTop();
+  });
 
-  // já garante o estado inicial
   onScroll();
 }
 

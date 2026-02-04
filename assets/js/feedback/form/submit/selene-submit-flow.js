@@ -81,6 +81,10 @@ import { AlmaOutboxQueue } from '/assets/js/feedback/form/submit/outbox/alma-out
 import { NoahOutboxProcessor } from '/assets/js/feedback/form/submit/outbox/noah-outbox-processor.js';
 
 // --------------------------------------------------------------------------------------------
+// 📟 UUID PT: Gerador de UUID EN: UUID Generator
+import { generateUUID } from '/assets/js/system/utils/uuid.js';
+
+// --------------------------------------------------------------------------------------------
 
 // 📟 Logger PT: Camada de logging EN: Logging layer
 // Provides:
@@ -342,7 +346,7 @@ async function submitFeedback(formData = {}, options = {}) {
   // --------------------------------------------------
   // 🧾 Client Request Identity (per submit attempt)
   // --------------------------------------------------
-  const clientRequestId = crypto.randomUUID();
+  const clientRequestId = generateUUID();
 
   try {
     const name = normalizeText(formData.name ?? formData.nome);
