@@ -587,7 +587,21 @@
             <!-- Imagem à DIREITA (carrossel com setas) -->
             <div class="flex items-center justify-center mt-4 lg:mt-2">
               <!-- Carrossel -->
-              <div id="carrossel-producao" class="relative w-full mx-auto">
+              <div
+                id="carrossel-producao"
+                class="relative w-full mx-auto"
+                data-viewer-group="production"
+                data-viewer-images='[
+                "assets/img/background/producao/producao-1.webp",
+                "assets/img/background/producao/producao-2.webp",
+                "assets/img/background/producao/producao-3.webp",
+                "assets/img/background/producao/producao-4.webp",
+                "assets/img/background/producao/producao-5.webp",
+                "assets/img/background/producao/producao-6.webp",
+                "assets/img/background/producao/producao-7.webp",
+                "assets/img/background/producao/producao-8.webp"
+              ]'
+              >
                 <!-- Wrapper -->
                 <div
                   class="relative h-72 sm:h-96 lg:h-[520px] xl:h-[560px] overflow-hidden rounded-lg shadow-[0_10px_25px_-10px_rgba(0,0,0,.35)] ring-1 ring-black/10"
@@ -602,6 +616,8 @@
                       alt="Produção — pallet"
                       class="js-open-modal absolute left-1/2 top-1/2 block w-full -translate-x-1/2 -translate-y-1/2 object-cover"
                       data-full="assets/img/background/producao/producao-1.webp"
+                      data-viewer-group="production"
+                      data-viewer-index="0"
                       draggable="false"
                     />
                   </div>
@@ -616,6 +632,8 @@
                       alt="Produção — bancadas"
                       class="js-open-modal absolute left-1/2 top-1/2 block w-full -translate-x-1/2 -translate-y-1/2 object-cover"
                       data-full="assets/img/background/producao/producao-2.webp"
+                      data-viewer-group="production"
+                      data-viewer-index="1"
                       draggable="false"
                     />
                   </div>
@@ -630,6 +648,8 @@
                       alt="Produção — bancadas"
                       class="js-open-modal absolute left-1/2 top-1/2 block w-full -translate-x-1/2 -translate-y-1/2 object-cover"
                       data-full="assets/img/background/producao/producao-3.webp"
+                      data-viewer-group="production"
+                      data-viewer-index="2"
                       draggable="false"
                     />
                   </div>
@@ -644,6 +664,8 @@
                       alt="Produção — bancadas"
                       class="js-open-modal absolute left-1/2 top-1/2 block w-full -translate-x-1/2 -translate-y-1/2 object-cover"
                       data-full="assets/img/background/producao/producao-4.webp"
+                      data-viewer-group="production"
+                      data-viewer-index="3"
                       draggable="false"
                     />
                   </div>
@@ -658,6 +680,8 @@
                       alt="Produção — bancadas"
                       class="js-open-modal absolute left-1/2 top-1/2 block w-full -translate-x-1/2 -translate-y-1/2 object-cover"
                       data-full="assets/img/background/producao/producao-5.webp"
+                      data-viewer-group="production"
+                      data-viewer-index="4"
                       draggable="false"
                     />
                   </div>
@@ -672,6 +696,8 @@
                       alt="Produção — bancadas"
                       class="js-open-modal absolute left-1/2 top-1/2 block w-full -translate-x-1/2 -translate-y-1/2 object-cover"
                       data-full="assets/img/background/producao/producao-6.webp"
+                      data-viewer-group="production"
+                      data-viewer-index="5"
                       draggable="false"
                     />
                   </div>
@@ -686,6 +712,8 @@
                       alt="Produção — bancadas"
                       class="js-open-modal absolute inset-0 w-full h-full object-cover object-center"
                       data-full="assets/img/background/producao/producao-7.webp"
+                      data-viewer-group="production"
+                      data-viewer-index="6"
                       draggable="false"
                     />
                   </div>
@@ -700,6 +728,8 @@
                       alt="Produção — bancadas"
                       class="js-open-modal absolute left-1/2 top-1/2 block w-full -translate-x-1/2 -translate-y-1/2 object-cover"
                       data-full="assets/img/background/producao/producao-8.webp"
+                      data-viewer-group="production"
+                      data-viewer-index="7"
                       draggable="false"
                     />
                   </div>
@@ -1140,7 +1170,10 @@
 
       <!-- 🖼️ Modal imagem -->
 
-      <div id="modalImg" class="fixed inset-0 z-[60] hidden place-items-center bg-black/70 p-4">
+      <div
+        id="modalImg"
+        class="fixed inset-0 z-[60] hidden grid place-items-center bg-black/70 p-4 opacity-0 transition-opacity duration-300 ease-out"
+      >
         <!-- botão fechar -->
         <button
           type="button"
@@ -1151,13 +1184,53 @@
           ✕
         </button>
 
-        <!-- imagem ampliada -->
-        <div class="flex items-center justify-center">
+        <!-- Viewer wrapper (relative para setas/contador) -->
+        <div class="relative flex items-center justify-center">
+          <!-- imagem ampliada -->
           <img
             id="modalImgSrc"
             class="max-w-[92vw] max-h-[90dvh] rounded-xl shadow-2xl ring-1 ring-white/20 object-contain"
             alt="Pré-visualização"
+            draggable="false"
           />
+
+          <!-- Controls (Echo mode only) -->
+          <div
+            id="modalViewerControls"
+            class="pointer-events-none absolute inset-0 hidden"
+            aria-hidden="true"
+          >
+            <!-- Prev -->
+            <button
+              id="modalViewerPrev"
+              type="button"
+              aria-label="Imagem anterior"
+              class="pointer-events-auto absolute left-3 top-1/2 -translate-y-1/2 grid h-11 w-11 place-items-center rounded-full bg-black/40 text-white ring-1 ring-white/10 hover:bg-black/60 focus:outline-none focus:ring-2 focus:ring-white/60"
+            >
+              ‹
+            </button>
+
+            <!-- Next -->
+            <button
+              id="modalViewerNext"
+              type="button"
+              aria-label="Próxima imagem"
+              class="pointer-events-auto absolute right-3 top-1/2 -translate-y-1/2 grid h-11 w-11 place-items-center rounded-full bg-black/40 text-white ring-1 ring-white/10 hover:bg-black/60 focus:outline-none focus:ring-2 focus:ring-white/60"
+            >
+              ›
+            </button>
+
+            <!-- Counter -->
+            <div class="pointer-events-none absolute bottom-3 left-1/2 -translate-x-1/2">
+              <div
+                id="modalViewerCounter"
+                class="rounded-full bg-black/45 px-3 py-1 text-xs font-medium text-white ring-1 ring-white/10"
+                aria-live="polite"
+              >
+                1 / 1
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
