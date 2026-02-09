@@ -5,10 +5,10 @@
 //     bloqueia o scroll de fundo e fecha por botão, backdrop ou ESC.
 // EN: Manages the global image modal: shows the image in focus, locks
 //     background scroll and closes via button, backdrop or ESC.
-// -----------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------
 //
 // Imports
-// -----------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------
 // ✨ Latch — Body Scroll Lock (System Utils)
 // Provides:
 //  - lockBodyScroll()
@@ -16,27 +16,36 @@
 //  - getScrollLockCount()
 import { LatchRootScroll } from '/assets/js/system/utils/latch-root-scroll-lock.js';
 //
-// -----------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------
 // 🪨 Onyx PT: Tap Guard EN: Tap Guard
 // Provides:
 // createTapGuard()
 import { OnyxTapGuard } from '/assets/js/system/ui/gestures/onyx-tap-guard';
 
-// -----------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------
 //
 // 🔊 Echo — Viewer Carousel Assistant
 // Provides:
 //  - EchoViewerCarousel
 import { EchoViewerCarousel } from '/assets/js/layout/modal/echo-viewer-carousel.js';
 
-// -----------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------
+// 🕯️ Vela — Modal Motion (System Utils)
+// Provides:
+// openModalMotion,
+// closeModalMotion,
+
+import { VelaModalMotion } from '/assets/js/layout/modal/vela-modal-motion.js';
+
+// -------------------------------------------------------------------------------------
 
 export function ImageViewer() {
+  const modalPanel = document.getElementById('modalImgPanel');
   const modal = document.getElementById('modalImg');
   const modalImg = document.getElementById('modalImgSrc');
   const btnClose = document.getElementById('modalClose');
 
-  if (!modal || !modalImg || !btnClose) return;
+  if (!modal || !modalPanel || !modalImg || !btnClose) return;
 
   // ------------------------------------------------------------------
   // PT: garante estado fechado inicial do modal (compat com animação)
@@ -64,9 +73,9 @@ export function ImageViewer() {
     echoSession = null;
   }
 
-  // -----------------------------------------------------------------------------
+  // ------------------------------------------------------------------
   // 🎛️ Viewer Controls Elements (Echo mode)
-  // -----------------------------------------------------------------------------
+  // ------------------------------------------------------------------
   const viewerControls = document.getElementById('modalViewerControls');
   const viewerPrev = document.getElementById('modalViewerPrev');
   const viewerNext = document.getElementById('modalViewerNext');
@@ -76,9 +85,9 @@ export function ImageViewer() {
   // EN: controls are optional, but recommended.
   const hasViewerControls = !!(viewerControls && viewerPrev && viewerNext && viewerCounter);
 
-  // ---------------------------------------------------------------------------
+  // ------------------------------------------------------------------
   // 🔒 Close Shield — evita click-through após fechar o modal
-  // ---------------------------------------------------------------------------
+  // ------------------------------------------------------------------
   let closeShieldUntil = 0;
 
   function armCloseShield(ms = 450) {
@@ -93,9 +102,9 @@ export function ImageViewer() {
   // Helpers
   // --------------------------------------------------
 
-  // -----------------------------------------------------------------------------
+  // ------------------------------------------------------------------
   // 🔎 Carousel Context Resolver
-  // -----------------------------------------------------------------------------
+  // ------------------------------------------------------------------
   function resolveImageDataFromOpener(opener) {
     let src = '';
     let altText = '';
@@ -150,9 +159,9 @@ export function ImageViewer() {
     return { images, startIndex };
   }
 
-  // -----------------------------------------------------------------------------
+  // ------------------------------------------------------------------
   // 🎛️ Viewer UI Helpers (Echo mode)
-  // -----------------------------------------------------------------------------
+  // ------------------------------------------------------------------
   function hideViewerControls() {
     if (!hasViewerControls) return;
     viewerControls.classList.add('hidden');
@@ -214,16 +223,23 @@ export function ImageViewer() {
     // EN: force browser to commit initial state
     void modal.offsetHeight;
 
-    // PT: anima para "aberto"
-    // EN: animate to "open"
-    requestAnimationFrame(() => {
-      modal.classList.remove('opacity-0');
-    });
-
     LatchRootScroll.lockScroll();
+
+    // 🎞️ Motion premium (Iris)
+    VelaModalMotion.openModalMotion({
+      rootEl: modal, // overlay fade
+      panelEl: modalPanel, // panel fade/scale
+      enablePanelTranslate: false, // imagem fica melhor sem slide
+      timings: { openMs: 360, closeMs: 520 },
+    });
   }
 
-  function closeModal() {
+  let isClosing = false; // flag para evitar múltiplos closes
+
+  async function closeModal() {
+    if (isClosing) return;
+    isClosing = true;
+
     // PT: arma escudo para bloquear eventos vazando após fechar
     // EN: arms shield to block events leaking after close
     armCloseShield(450);
@@ -235,29 +251,24 @@ export function ImageViewer() {
     destroyEchoSession();
     hideViewerControls();
 
-    // PT: anima para "fechado"
-    // EN: animate to "closed"
-    modal.classList.add('opacity-0');
+    await VelaModalMotion.closeModalMotion({
+      rootEl: modal,
+      panelEl: modalPanel,
+      enablePanelTranslate: false,
+      timings: { openMs: 360, closeMs: 520 },
+    });
 
-    const finishClose = (event) => {
-      // PT: só reage à transição do próprio modal
-      // EN: only react to the modal's own transition
-      if (event.target !== modal) return;
+    modal.classList.add('hidden');
+    modal.setAttribute('aria-hidden', 'true');
 
-      modal.removeEventListener('transitionend', finishClose);
+    // PT: limpa imagem depois de esconder (evita flicker)
+    // EN: clear image after hiding (prevents flicker)
+    modalImg.src = '';
+    modalImg.alt = '';
 
-      modal.classList.add('hidden');
-      modal.setAttribute('aria-hidden', 'true');
+    LatchRootScroll.unlockScroll();
 
-      // PT: limpa imagem depois de esconder (evita flicker)
-      // EN: clear image after hiding (prevents flicker)
-      modalImg.src = '';
-      modalImg.alt = '';
-
-      LatchRootScroll.unlockScroll();
-    };
-
-    modal.addEventListener('transitionend', finishClose, { once: true });
+    isClosing = false;
   }
 
   // --------------------------------------------------

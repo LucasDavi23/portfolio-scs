@@ -117,6 +117,13 @@ import { ZoeRating } from '/assets/js/system/ui/rating/zoe-rating.js';
 
 import { LatchRootScroll } from '/assets/js/system/utils/latch-root-scroll-lock.js';
 
+// -----------------------------------------------------------------------------
+// 🕯️ Vela — Modal Motion (System Utils)
+// Provides:
+// openModalMotion,
+// closeModalMotion,
+import { VelaModalMotion } from '/assets/js/layout/modal/vela-modal-motion.js';
+
 // ==========================
 // 1) HELPERS BÁSICOS DE DOM
 // ==========================
@@ -159,6 +166,8 @@ let els = null; // refs de DOM (inicializado no init)
 function bindElements(root = document) {
   els = {
     // objeto para guardar refs de DOM / object to hold DOM refs
+    modal: qs('#modalFeedback', root), // modal container
+    panel: qs('#modalFeedbackPanel', root), // painel do modal
     modal: qs('#modalFeedback'), // modal container
     titulo: qs('#modalFeedbackTitulo'), // título do modal
     sub: qs('#modalFeedbackSub'), // subtítulo do modal
@@ -416,6 +425,9 @@ async function searchTotalIfNecessary() {
 // ==========================
 
 export function open(plat) {
+  // inicializa se ainda não foi (passa root para bindElements)
+  if (!initialized) ListModal(document);
+
   // reset de estado // reset state
 
   state.plat = plat || 'scs'; // plataforma
@@ -452,6 +464,14 @@ export function open(plat) {
   // 🔒 TRAVA SCROLL (Latch)
   LatchRootScroll.lockScroll();
   console.log('[Mira List] open()', { plat: state.plat });
+
+  // 🎞️ Motion (Vela)
+  if (els.modal && els.panel) {
+    VelaModalMotion.openModalMotion({
+      rootEl: els.modal,
+      panelEl: els.panel,
+    });
+  }
 
   // desativar "Carregar mais" até terminar 1ª carga
   if (els.btnMore) {
@@ -491,14 +511,31 @@ export function open(plat) {
   searchTotalIfNecessary();
 }
 
-export function close() {
-  els.modal.classList.add('hidden');
-  els.modal.classList.remove('flex');
+let isClosing = false; // flag para evitar múltiplos closes
+
+export async function close() {
+  if (isClosing) return; // já está fechando
+  isClosing = true;
+
+  // 🎞️ Motion (Vela) — fecha primeiro, esconde depois
+  if (els.modal && els.panel) {
+    await VelaModalMotion.closeModalMotion({
+      rootEl: els.modal,
+      panelEl: els.panel,
+    });
+  }
+
+  if (els?.modal) {
+    els.modal.classList.add('hidden');
+    els.modal.classList.remove('flex');
+  }
+
   // 🔓 LIBERA SCROLL (Latch)
   LatchRootScroll.unlockScroll();
-  setTimeout(() => {
-    els.list.innerHTML = '';
-  }, 100);
+
+  els.list.innerHTML = '';
+
+  isClosing = false; // reset flag para permitir reabrir
 }
 
 // ==========================
@@ -628,7 +665,7 @@ function ListModal(root = document) {
   if (initialized) return; // já inicializado
   initialized = true;
 
-  bindElements(); // vincula refs de DOM
+  bindElements(root); // vincula refs de DOM
 
   // Delegação para abrir o modal via [data-action="ver-mais"]
   root.addEventListener('click', (e) => {
@@ -647,14 +684,19 @@ function ListModal(root = document) {
     open(plat);
   });
 
-  els.btnClose?.addEventListener('click', close); // fechar botão
+  els.btnClose?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    close();
+  });
 
   els.modal?.addEventListener('click', (e) => {
-    if (e.target === els.modal) close(); // backdrop
+    if (e.target === els.modal) close();
   });
 
   window.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') close();
+    if (e.key === 'Escape' && !els.modal.classList.contains('hidden')) {
+      close();
+    }
   });
 
   // Paginar

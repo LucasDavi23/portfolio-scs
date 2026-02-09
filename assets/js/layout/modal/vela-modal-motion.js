@@ -36,8 +36,13 @@
 // Defaults (project-friendly)
 // ------------------------------
 const DEFAULT_TIMINGS = {
-  openMs: 280,
-  closeMs: 200,
+  openMs: 360,
+  closeMs: 520,
+
+  // PT: Enter (ease-out) / Leave (ease-in) premium
+  // EN: Premium enter (ease-out) / leave (ease-in)
+  enterEasing: 'cubic-bezier(0, 0, 0.2, 1)', // ease-out (material-ish)
+  leaveEasing: 'cubic-bezier(0.4, 0, 1, 1)', // ease-in
 };
 
 const DEFAULT_CLASSES = {
@@ -50,10 +55,10 @@ const DEFAULT_CLASSES = {
 
   // PT: Panel (card/painel) — fade + slide
   // EN: Panel (card/panel) — fade + slide
-  panelEnterFrom: ['opacity-0', 'translate-y-2'],
-  panelEnterTo: ['opacity-100', 'translate-y-0'],
-  panelExitFrom: ['opacity-100', 'translate-y-0'],
-  panelExitTo: ['opacity-0', 'translate-y-2'],
+  panelEnterFrom: ['opacity-0', 'translate-y-3', 'sm:translate-y-0', 'sm:scale-95'],
+  panelEnterTo: ['opacity-100', 'translate-y-0', 'sm:scale-100'],
+  panelExitFrom: ['opacity-100', 'translate-y-0', 'sm:scale-100'],
+  panelExitTo: ['opacity-0', 'translate-y-3', 'sm:translate-y-0', 'sm:scale-95'],
 
   // PT: “Segurança” para evitar click durante close (opcional)
   // EN: “Safety” to prevent clicks during close (optional)
@@ -83,17 +88,19 @@ function applyClasses(el, add = [], remove = []) {
   if (addList.length) el.classList.add(...addList);
 }
 
-function setTransition(el, durationMs) {
+function setTransition(el, durationMs, easing) {
   if (!el) return;
 
   // PT: Sem "all" — reduz riscos (só opacity/transform via classes)
   // EN: Avoid "all" — reduces risks (only opacity/transform via classes)
   el.style.transitionDuration = `${Math.max(0, durationMs)}ms`;
+  el.style.transitionTimingFunction = easing || '';
 }
 
 function clearTransition(el) {
   if (!el) return;
   el.style.transitionDuration = '';
+  el.style.transitionTimingFunction = '';
 }
 
 function forceReflow(el) {
@@ -148,17 +155,24 @@ function normalizeConfig(config = {}) {
   const mergedTimings = {
     openMs: timings.openMs ?? DEFAULT_TIMINGS.openMs,
     closeMs: timings.closeMs ?? DEFAULT_TIMINGS.closeMs,
+    enterEasing: timings.enterEasing ?? DEFAULT_TIMINGS.enterEasing,
+    leaveEasing: timings.leaveEasing ?? DEFAULT_TIMINGS.leaveEasing,
   };
+
+  const resolved = resolveTimings(mergedTimings);
+
+  mergedTimings.openMs = resolved.openMs;
+  mergedTimings.closeMs = resolved.closeMs;
 
   const mergedClasses = { ...DEFAULT_CLASSES, ...stateClasses };
 
   // PT: Se for fullscreen no mobile, pode desativar translate (só fade)
   // EN: If it's fullscreen on mobile, you can disable translate (fade only)
   if (!enablePanelTranslate) {
-    mergedClasses.panelEnterFrom = ['opacity-0'];
-    mergedClasses.panelEnterTo = ['opacity-100'];
-    mergedClasses.panelExitFrom = ['opacity-100'];
-    mergedClasses.panelExitTo = ['opacity-0'];
+    mergedClasses.panelEnterFrom = ['opacity-0', 'sm:scale-95'];
+    mergedClasses.panelEnterTo = ['opacity-100', 'sm:scale-100'];
+    mergedClasses.panelExitFrom = ['opacity-100', 'sm:scale-100'];
+    mergedClasses.panelExitTo = ['opacity-0', 'sm:scale-95'];
   }
 
   return {
@@ -173,8 +187,8 @@ function normalizeConfig(config = {}) {
 function setBaseOpenState(rootEl, panelEl, classes, timings) {
   // PT: Garantia de transição consistente
   // EN: Ensures consistent transitions
-  setTransition(rootEl, timings.openMs);
-  setTransition(panelEl, timings.openMs);
+  setTransition(rootEl, timings.openMs, timings.enterEasing);
+  setTransition(panelEl, timings.openMs, timings.enterEasing);
 
   // PT: Aplica estado inicial (from)
   // EN: Apply initial (from) state
@@ -190,8 +204,8 @@ function setBaseOpenState(rootEl, panelEl, classes, timings) {
 }
 
 function setBaseCloseState(rootEl, panelEl, classes, timings, preventClickDuringClose) {
-  setTransition(rootEl, timings.closeMs);
-  setTransition(panelEl, timings.closeMs);
+  setTransition(rootEl, timings.closeMs, timings.leaveEasing);
+  setTransition(panelEl, timings.closeMs, timings.leaveEasing);
 
   // PT: Garante que estamos "visíveis" antes de fechar
   // EN: Ensure we are "visible" before closing
@@ -224,6 +238,28 @@ function resetAfterClose(rootEl, panelEl, classes) {
   // PT: Remove o shield de clique (se estiver)
   // EN: Remove click shield (if present)
   if (rootEl) rootEl.classList.remove(classes.closingShieldClass);
+}
+
+// ------------------------------
+// Helper Timing
+// ------------------------------
+
+function isMobileViewport() {
+  if (typeof window === 'undefined') return false;
+  return window.matchMedia('(max-width: 640px)').matches;
+}
+
+// timings resolver
+function resolveTimings(userTimings = {}) {
+  const openMs = userTimings.openMs ?? DEFAULT_TIMINGS.openMs;
+  let closeMs = userTimings.closeMs ?? DEFAULT_TIMINGS.closeMs;
+
+  // 📱 Mobile: close mais suave
+  if (isMobileViewport()) {
+    closeMs = Math.max(closeMs, 540);
+  }
+
+  return { openMs, closeMs };
 }
 
 // ------------------------------

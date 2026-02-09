@@ -1172,7 +1172,7 @@
 
       <div
         id="modalImg"
-        class="fixed inset-0 z-[60] hidden grid place-items-center bg-black/70 p-4 opacity-0 transition-opacity duration-300 ease-out"
+        class="fixed inset-0 z-[60] hidden grid place-items-center bg-black/70 p-4 opacity-0 transition-opacity"
       >
         <!-- botão fechar -->
         <button
@@ -1185,7 +1185,11 @@
         </button>
 
         <!-- Viewer wrapper (relative para setas/contador) -->
-        <div class="relative flex items-center justify-center">
+        <!-- Panel -->
+        <div
+          id="modalImgPanel"
+          class="relative flex items-center justify-center opacity-0 transition-[opacity, transform]"
+        >
           <!-- imagem ampliada -->
           <img
             id="modalImgSrc"
@@ -1237,10 +1241,11 @@
       <!-- 💬 Modal lista de feedback -->
       <div
         id="modalFeedback"
-        class="fixed inset-0 z-[50] hidden items-center justify-center bg-black/60 p-4 sm:p-6"
+        class="fixed inset-0 z-[50] hidden items-center justify-center bg-black/60 p-4 sm:p-6 opacity-0 transition-opacity"
       >
         <div
-          class="mx-auto w-[96vw] max-w-screen-lg lg:max-w-[1100px] 2xl:max-w-[1400px] bg-white rounded-2xl shadow-2xl ring-1 ring-black/10 max-h-[90vh] flex flex-col overflow-hidden"
+          id="modalFeedbackPanel"
+          class="mx-auto w-[96vw] max-w-screen-lg lg:max-w-[1100px] 2xl:max-w-[1400px] bg-white rounded-2xl shadow-2xl ring-1 ring-black/10 max-h-[90vh] flex flex-col overflow-hidden opacity-0 translate-y-2 transition-[opacity,transform]"
         >
           <!-- Cabeçalho -->
           <div class="shrink-0 z-10 bg-white/95 backdrop-blur px-6 py-4 border-b">
@@ -1742,7 +1747,7 @@
       <div id="feedback-modal" class="fixed inset-0 z-[9999] hidden" aria-hidden="true">
         <!-- Backdrop -->
         <div
-          class="absolute inset-0 bg-black/60 backdrop-blur-[1px] z-10"
+          class="absolute inset-0 bg-black/60 backdrop-blur-[1px] z-10 opacity-0 transition-opacity"
           data-feedback-backdrop
         ></div>
 
@@ -1752,7 +1757,7 @@
         >
           <!-- Panel -->
           <div
-            class="nb-modal pointer-events-auto w-[96vw] sm:w-[min(92vw,980px)] rounded-2xl bg-white shadow-xll"
+            class="nb-modal pointer-events-auto w-[96vw] sm:w-[min(92vw,980px)] rounded-2xl bg-white shadow-xll opacity-0 transition-[opacity,transform]"
             role="dialog"
             aria-modal="true"
             tabindex="-1"
