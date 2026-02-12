@@ -69,13 +69,13 @@ function normalizeItem(x) {
       .find(Boolean) || '';
 
   return {
-    estrelas: Number(x.estrelas ?? x.rating ?? 0) || 0,
-    data: toISO(x.data ?? x.date ?? ''),
-    autor: (x.autor ?? x.author ?? '').toString().trim(),
-    texto: (x.texto ?? x.comment ?? '').toString().trim(),
-    url: pickStr(x.url) || undefined,
-    foto_url: toPublicImageUrl(rawFoto) || undefined,
-    plataforma: (x.plataforma ?? x.plat ?? '').toString().trim().toLowerCase() || undefined,
+    platform: String(x.platform || '').toLowerCase(),
+    rating: Number(x.rating || 0),
+    date: toISO(x.date || ''),
+    author: String(x.author || '').trim(),
+    text: String(x.text || '').trim(),
+    url: String(x.url || '').trim(),
+    photo_url: toPublicImageUrl(x.photo_url || ''),
   };
 }
 

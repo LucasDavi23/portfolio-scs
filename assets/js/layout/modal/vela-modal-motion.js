@@ -37,7 +37,7 @@
 // ------------------------------
 const DEFAULT_TIMINGS = {
   openMs: 360,
-  closeMs: 520,
+  closeMs: 450, // close mais lento que open para sensação de "resposta"
 
   // PT: Enter (ease-out) / Leave (ease-in) premium
   // EN: Premium enter (ease-out) / leave (ease-in)

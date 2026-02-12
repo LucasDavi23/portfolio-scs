@@ -12,7 +12,7 @@
 import { HelenaAvatarHelpers } from '/assets/js/feedback/board/avatar/helena-avatar-helpers.js';
 
 export function attachAvatarToAuthor(card) {
-  const nameEl = card.querySelector('.meta-row [data-c-autor]');
+  const nameEl = card.querySelector('.meta-row [data-c-author]');
   if (!nameEl) return;
 
   // PT: Evita duplicação do wrapper.
@@ -23,7 +23,7 @@ export function attachAvatarToAuthor(card) {
   wrap.className = 'author-wrap';
 
   const avatar = document.createElement('span');
-  avatar.className = 'avatar-iniciais';
+  avatar.className = 'avatar-initials';
   avatar.setAttribute('aria-hidden', 'true');
 
   nameEl.parentNode.insertBefore(wrap, nameEl);

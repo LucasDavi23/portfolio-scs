@@ -54,7 +54,7 @@ function openModal() {
     rootEl: backdrop,
     panelEl: dialog,
     enablePanelTranslate: false,
-    timings: { openMs: 360, closeMs: 520 },
+    timings: { openMs: 360, closeMs: 450 },
   });
 
   // foco inicial (acessibilidade)
@@ -77,7 +77,7 @@ async function closeModal() {
     rootEl: backdrop,
     panelEl: dialog,
     enablePanelTranslate: false,
-    timings: { openMs: 360, closeMs: 520 },
+    timings: { openMs: 360, closeMs: 450 },
   });
 
   modal.classList.add('hidden');

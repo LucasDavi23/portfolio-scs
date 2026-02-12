@@ -230,7 +230,7 @@ export function ImageViewer() {
       rootEl: modal, // overlay fade
       panelEl: modalPanel, // panel fade/scale
       enablePanelTranslate: false, // imagem fica melhor sem slide
-      timings: { openMs: 360, closeMs: 520 },
+      timings: { openMs: 360, closeMs: 450 },
     });
   }
 
@@ -255,7 +255,7 @@ export function ImageViewer() {
       rootEl: modal,
       panelEl: modalPanel,
       enablePanelTranslate: false,
-      timings: { openMs: 360, closeMs: 520 },
+      timings: { openMs: 360, closeMs: 450 },
     });
 
     modal.classList.add('hidden');

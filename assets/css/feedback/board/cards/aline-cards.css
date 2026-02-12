@@ -143,7 +143,7 @@ section[data-feedback-card][data-variant='media'] .header-date {
    PT: tipografia confortável + quebra segura.
    EN: comfortable typography + safe wrapping. */
 
-[data-feedback-card] [data-c-texto] {
+[data-feedback-card] [data-c-text] {
   font-size: 15.5px; /* tamanho confortável */
   line-height: 1.75; /* altura ideal */
   letter-spacing: 0.005em; /* leve espaçamento */
@@ -154,12 +154,12 @@ section[data-feedback-card][data-variant='media'] .header-date {
   overflow-wrap: anywhere;
 }
 /* Respiro entre parágrafos */
-[data-feedback-card] [data-c-texto] + [data-c-texto] {
+[data-feedback-card] [data-c-text] + [data-c-text] {
   margin-top: 0.6rem;
 }
 /* Desktop levemente maior */
 @media (min-width: 768px) {
-  [data-feedback-card] [data-c-texto] {
+  [data-feedback-card] [data-c-text] {
     font-size: 16px;
     line-height: 1.78;
   }
@@ -169,14 +169,14 @@ section[data-feedback-card][data-variant='media'] .header-date {
 section[data-feedback-card][data-variant='media']
   article[data-c-list]
   .media-grid
-  [data-c-texto]:first-child {
+  [data-c-text]:first-child {
   margin-top: 0.35rem; /* ~5–6px em mobile */
 }
 @media (min-width: 768px) {
   section[data-feedback-card][data-variant='media']
     article[data-c-list]
     .media-grid
-    [data-c-texto]:first-child {
+    [data-c-text]:first-child {
     margin-top: 0.45rem; /* ~7px em telas maiores */
   }
 }
@@ -262,7 +262,7 @@ section[data-feedback-card][data-variant='media'] .author-wrap [data-c-autor] {
   font-weight: 600;
   color: #111827;
 }
-section[data-feedback-card][data-variant='media'] .avatar-iniciais {
+section[data-feedback-card][data-variant='media'] .avatar-initials {
   width: 28px;
   height: 28px;
   display: inline-grid;

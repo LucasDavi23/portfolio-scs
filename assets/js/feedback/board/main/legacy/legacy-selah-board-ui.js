@@ -203,6 +203,7 @@ async function carregarHero(seq, { silent = false } = {}) {
     if (seq !== _initSeq) return;
 
     const item = Array.isArray(lista) && lista[0] ? lista[0] : null;
+
     if (!item) throw new Error('Sem dados para exibir.');
     renderHeroInPlace(root, item);
   } catch (e) {
@@ -460,24 +461,36 @@ function renderCardError(root, msg, onRetry) {
   lista.querySelector('[data-c-retry]')?.addEventListener('click', () => onRetry && onRetry());
 }
 
-async function carregarCard(selector, plat, seq, { silent = false } = {}) {
+async function carregarCard(
+  selector,
+  plat,
+  seq,
+  { silent = false, forceFresh = false, avoidSignature = '' } = {}
+) {
   console.log('[carregarCard] ENTER', { selector, plat, seq, _initSeq });
 
   const root = document.querySelector(selector);
   if (!root) {
     console.warn('[carregarCard] root NÃO encontrado para', selector);
-    return;
+    return { ok: false, plat, hasPhotoUrl: false, signature: '', item: null };
   }
 
   clearTimeout(cardsAutoRetryTimer);
   if (!silent) renderCardLoading(root);
 
+  const fastMode = forceFresh ? 0 : 1;
+
+  // Define quantos itens pedir
+  const limit = plat === 'scs' ? 3 : CFG.cards.perPlatform;
+
   try {
-    let itens = await window.FeedbackAPI.list(plat, 1, CFG.cards.perPlatform, { fast: 1 });
-    if (!Array.isArray(itens) || !itens.length) {
-      itens = await window.FeedbackAPI.list(plat, 1, CFG.cards.perPlatform, {
-        fast: 0,
-      });
+    let itens = await window.FeedbackAPI.list(plat, 1, limit, {
+      fast: fastMode,
+      nocache: forceFresh,
+    });
+
+    if ((!Array.isArray(itens) || !itens.length) && !forceFresh) {
+      itens = await window.FeedbackAPI.list(plat, 1, limit, { fast: 0, nocache: true });
     }
 
     console.log('[carregarCard] itens carregados', {
@@ -489,65 +502,215 @@ async function carregarCard(selector, plat, seq, { silent = false } = {}) {
     // evita pintar rodada velha
     if (seq !== _initSeq) {
       console.warn('[carregarCard] ABORT seq mismatch', { seq, _initSeq });
-      return;
+      return { ok: false, plat, hasPhotoUrl: false, signature: '', item: null };
     }
 
-    const item = Array.isArray(itens) && itens[0] ? itens[0] : null;
+    // const item = Array.isArray(itens) && itens[0] ? itens[0] : null;
+
+    // ✅ SCS: se tiver mais de 1, tenta achar um diferente do anterior
+
+    const candidates = Array.isArray(itens) ? itens : [];
+
+    function sigOf(x) {
+      return `${x?.data_iso || x?.data || ''}|${x?.autor || x?.nome || ''}|${(x?.texto || x?.comentario || '').slice(0, 40)}`;
+    }
+
+    // ✅ assinatura “proibida” (prioriza a que veio do backoff; se não vier, usa a última pintada)
+    const forbiddenSig = (avoidSignature || lastSignatureByPlat[plat] || '').trim();
+
+    const topSigs = candidates.map(sigOf);
+    console.log('[carregarCard] top signatures', { plat, topSigs });
+
+    // DEBUG (pode manter por enquanto)
+    if (plat === 'scs') {
+      console.log('[SCS top signatures]', topSigs);
+      console.log('[SCS forbiddenSig]', forbiddenSig);
+    }
+
+    if (plat === 'scs' && forbiddenSig) {
+      const idx = topSigs.indexOf(forbiddenSig);
+
+      // A) resposta "stale": nem contém o que está na tela agora
+      // => não pinta nada, deixa o backoff tentar de novo
+      if (idx === -1) {
+        return {
+          ok: false,
+          plat,
+          hasPhotoUrl: false,
+          signature: '',
+          item: null,
+          topSigs,
+          advanced: false,
+        };
+      }
+
+      // B) ainda não avançou: o topo continua sendo o mesmo item da tela
+      // => não pinta nada, deixa o backoff tentar de novo
+      if (idx === 0) {
+        return {
+          ok: true,
+          plat,
+          hasPhotoUrl: false,
+          signature: forbiddenSig,
+          item: null,
+          topSigs,
+          advanced: false,
+        };
+      }
+
+      // C) avançou: forbiddenSig existe, mas não é mais o topo
+      // => o novo é candidates[0] (segue fluxo)
+    }
+
+    let item = candidates[0] || null;
+
     if (!item) {
-      console.log('[carregarCard] sem item -> fallback');
       renderCardFallback(root, []);
-      return;
+      return {
+        ok: false,
+        plat,
+        hasPhotoUrl: false,
+        signature: '',
+        item: null,
+        topSigs,
+        advanced: false,
+      };
     }
 
+    const signature = sigOf(item);
+
+    console.log('[carregarCard] first item snapshot', {
+      plat,
+      autor: item?.autor ?? item?.nome,
+      data: item?.data ?? item?.data_iso,
+      texto: (item?.texto ?? item?.comentario ?? '').slice(0, 60),
+      signature,
+    });
     // verifica se é card fixo (data-c-list existe)
     const lista = root.querySelector('[data-c-list]');
     console.log('[carregarCard] lista existe?', !!lista);
 
     // 👉 sempre monta o miolo padrão; o fillCardFixed já cria a estrutura
     if (lista) {
+      // ✅ SCS: evita repintar o mesmo item (não "volta" visualmente)
+      if (plat === 'scs' && lastSignatureByPlat[plat] === signature) {
+        return {
+          ok: true,
+          plat,
+          hasPhotoUrl: Boolean(item?.foto_url),
+          signature,
+          item,
+        };
+      }
+
       console.log('[carregarCard] chamando fillCardFixed...');
-      fillCardFixed(root, item);
+      await fillCardFixed(root, item);
+
+      // ✅ REGISTRA O ÚLTIMO ITEM REALMENTE PINTADO
+      lastSignatureByPlat[plat] = signature;
     } else {
       console.log('[carregarCard] sem [data-c-list] -> fallback');
       renderCardFallback(root, [item]);
     }
+
+    return {
+      ok: true,
+      plat,
+      hasPhotoUrl: Boolean(item?.foto_url),
+      signature,
+      topSigs,
+      item,
+    };
   } catch (e) {
     console.error(`[feedbackMural] Erro card ${plat}:`, e);
+
     const offline = typeof navigator !== 'undefined' && !navigator.onLine;
     const msg = offline
       ? 'Sem conexão. Verifique sua internet.'
       : e?.message || 'Falha ao carregar.';
 
-    // ✅ passa seq no callback do botão
-    renderCardError(root, msg, () => carregarCard(selector, plat, _initSeq, { silent: false }));
+    renderCardError(root, msg, () =>
+      carregarCard(selector, plat, _initSeq, { silent: false, forceFresh })
+    );
 
     if (!offline) {
       cardsAutoRetryTimer = setTimeout(
-        () => carregarCard(selector, plat, _initSeq, { silent: true }),
+        () => carregarCard(selector, plat, _initSeq, { silent: true, forceFresh }),
         ElaraBoardHelpers.NET.autoRetryAfterMs
       );
     }
+
+    return { ok: false, plat, hasPhotoUrl: false, signature: '', item: null };
   }
 }
 
 function scheduleBoardRefreshFromCommitted(detail) {
   const clientRequestId = String(detail?.clientRequestId || '');
-
-  // PT: sem id, ignora (contrato do evento)
-  // EN: no id, ignore (event contract)
   if (!clientRequestId) return;
-
-  // PT: de-dupe (evita processar o mesmo commit duas vezes)
-  // EN: de-dupe (avoid processing same commit twice)
   if (clientRequestId === lastCommittedClientRequestId) return;
   lastCommittedClientRequestId = clientRequestId;
 
-  // PT: debounce curtinho (evita múltiplos refresh caso tenha 2 eventos)
-  // EN: short debounce (avoid multiple refresh bursts)
   clearTimeout(committedRefreshTimer);
   committedRefreshTimer = setTimeout(() => {
-    SelahBoardUI.refresh?.();
+    const seq = ++_initSeq;
+
+    // ✅ captura no momento do refresh (sempre o que está na tela agora)
+    const previousSig = lastSignatureByPlat['scs'] || '';
+
+    console.log('[Selah] previousSig before refresh', { previousSig, seq, _initSeq });
+
+    refreshSCSWithBackoff(seq, { expectPhoto: true, previousSig });
   }, 250);
+}
+
+const lastSignatureByPlat = Object.create(null);
+
+async function refreshSCSWithBackoff(seq, { expectPhoto = true, previousSig = '' } = {}) {
+  const delays = [0, 1200, 3200];
+
+  for (let i = 0; i < delays.length; i++) {
+    if (delays[i]) await new Promise((r) => setTimeout(r, delays[i]));
+    if (seq !== _initSeq) return;
+
+    const res = await carregarCard(CFG.seletores.cardSCS, 'scs', seq, {
+      silent: true,
+      forceFresh: true,
+      avoidSignature: previousSig, // ✅ IMPORTANTE
+    });
+
+    if (seq !== _initSeq) return;
+    if (!res?.ok) continue;
+
+    // ✅ novo contrato: se ainda não avançou, segue tentando
+    if (res.advanced === false) {
+      console.log('[SCS backoff] not advanced yet', { attempt: i + 1, previousSig });
+      continue;
+    }
+
+    const topSigs = Array.isArray(res.topSigs) ? res.topSigs : [];
+    const hasPreviousInList = !previousSig || topSigs.includes(previousSig);
+    const isNewItem = !!res.signature && res.signature !== previousSig;
+
+    console.log('[SCS backoff] resultado', {
+      attempt: i + 1,
+      previousSig,
+      hasPreviousInList,
+      isNewItem,
+      hasPhotoUrl: !!res.hasPhotoUrl,
+      signature: res.signature,
+    });
+
+    // snapshot inconsistente (atrasado) → tenta de novo
+    if (previousSig && !hasPreviousInList) continue;
+
+    if (isNewItem) {
+      if (!expectPhoto) return;
+      if (res.hasPhotoUrl) return;
+
+      // se for “novo” mas a foto ainda não consolidou, tenta de novo
+      continue;
+    }
+  }
 }
 
 // ---------- API pública (moderna) ----------
@@ -615,13 +778,13 @@ window.addEventListener('feedback:novo', (ev) => {
     });
   } else {
     // ⚠️ Mantido como estava, para não mexer no comportamento agora
-    carregarHero({ silent: false });
+    carregarHero(_initSeq, { silent: false });
   }
 });
 
 // Recarrega quando a conexão volta
 window.addEventListener('online', () => {
-  const seq = _initSeq;
+  const seq = ++_initSeq;
   carregarCard(CFG.seletores.cardSCS, 'scs', seq, { silent: true });
   carregarCard(CFG.seletores.cardShopee, 'shopee', seq, { silent: true });
   carregarCard(CFG.seletores.cardML, 'ml', seq, { silent: true });

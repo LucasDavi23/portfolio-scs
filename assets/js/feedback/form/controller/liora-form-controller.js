@@ -119,6 +119,52 @@ async function handleSubmit(event) {
 
   const modalEl = document.getElementById('feedback-modal');
 
+  // --------------------------------------------------
+  // ① Collect (UX-level data)
+  // PT: coleta valores do form (trim) + arquivo
+  // EN: collect form values (trim) + file
+  // --------------------------------------------------
+  const values = SofiaFormValidationUI.collectFormValues();
+
+  // ✅ Adapta coleta de foto (compatibilidade)
+  const photoInput = SofiaFormValidationUI.elements?.photoInput || document.getElementById('photo');
+  values.file = photoInput?.files?.[0] || null;
+
+  // --------------------------------------------------
+  // ② Validate (UX rules first — no busy/overlay yet)
+  // PT: valida antes de entrar em "modo envio" (mobile scroll)
+  // EN: validate before entering "sending mode" (mobile scroll)
+  // --------------------------------------------------
+  const basic = SofiaFormValidationUI.validateBasicRules(values);
+
+  if (!basic.ok) {
+    // PT/EN: garante que nenhum overlay atrapalhe UX
+    StellaSubmitOverlay.hide(modalEl);
+
+    const message = basic.message || 'Verifique os dados e tente novamente.';
+
+    // ②.a Mark field error (visual)
+    if (basic.field === 'rating') {
+      SofiaFormValidationUI.markRatingError(message);
+    } else {
+      const fieldEl = SofiaFormValidationUI.getFieldElement(basic.field);
+      SofiaFormValidationUI.markFieldError(fieldEl, message);
+    }
+
+    // ②.b Guide user (scroll to invalid field)
+    SofiaFormValidationUI.scrollToField(basic.field);
+
+    // ②.c Status message
+    SofiaFormValidationUI.showFormStatus(message, 'error');
+    return;
+  }
+
+  // --------------------------------------------------
+  // ③ Send (enter busy mode + overlay, then submit flow)
+  // PT: agora sim entra em modo envio
+  // EN: now enter sending mode
+  // --------------------------------------------------
+
   try {
     SofiaFormValidationUI.lockSubmit(true);
     setFormBusy(true);
@@ -138,36 +184,11 @@ async function handleSubmit(event) {
     // ✅ UX: início do envio (loading persistente)
     SofiaFormValidationUI.showFormStatus('Enviando seu feedback…', 'info');
 
-    const values = SofiaFormValidationUI.collectFormValues();
-
-    // ✅ Adapta coleta de foto (compatibilidade)
-    const photoInput =
-      SofiaFormValidationUI.elements?.photoInput || document.getElementById('photo');
-    values.file = photoInput?.files?.[0] || null;
-
-    const basic = SofiaFormValidationUI.validateBasicRules(values);
-
-    if (!basic.ok) {
-      // PT: validação é UX do usuário -> sem Halo
-      // EN: validation is user UX -> no Halo
-      StellaSubmitOverlay.hide(modalEl);
-
-      const message = basic.message || 'Verifique os dados e tente novamente.';
-
-      // ✅ Marca o campo certo (sem heurística)
-      if (basic.field === 'rating') {
-        SofiaFormValidationUI.markRatingError(message);
-      } else {
-        const fieldEl = SofiaFormValidationUI.getFieldElement(basic.field);
-        SofiaFormValidationUI.markFieldError(fieldEl, message);
-      }
-
-      SofiaFormValidationUI.showFormStatus(message, 'error');
-      return;
-    }
-
     const result = await SeleneSubmitFlow.submitFeedback(values);
 
+    // --------------------------------------------------
+    // ④ Result handling (error/success)
+    // --------------------------------------------------
     if (!result?.ok) {
       StellaSubmitOverlay.hide(modalEl);
 
@@ -191,6 +212,9 @@ async function handleSubmit(event) {
     HaloMessageBox.show('Feedback enviado com sucesso! ✨', 'success', { duration: 1400 });
     SofiaFormValidationUI.showFormStatus('Feedback enviado com sucesso. Obrigado! ✨', 'success');
 
+    // --------------------------------------------------
+    // ⑤ Post-success cleanup (delayed reset)
+    // --------------------------------------------------
     setTimeout(() => {
       // PT: reset geral do form
       // EN: general form reset
@@ -209,6 +233,9 @@ async function handleSubmit(event) {
       window.dispatchEvent(new CustomEvent('feedback:photo:clear-request'));
     }, 800);
   } catch (error) {
+    // --------------------------------------------------
+    // ⑥ Unhandled exception
+    // --------------------------------------------------
     StellaSubmitOverlay.hide(modalEl);
 
     Logger.error('liora', 'Unhandled submit exception', error);
@@ -216,6 +243,9 @@ async function handleSubmit(event) {
     HaloMessageBox.show(error?.message || 'Erro inesperado ao enviar.', 'error', { duration: 0 });
     SofiaFormValidationUI.showFormStatus(error?.message || 'Erro inesperado ao enviar.', 'error');
   } finally {
+    // --------------------------------------------------
+    // ⑦ Always release busy state
+    // --------------------------------------------------
     setFormBusy(false);
     SofiaFormValidationUI.lockSubmit(false);
   }

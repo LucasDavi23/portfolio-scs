@@ -168,7 +168,6 @@ function bindElements(root = document) {
     // objeto para guardar refs de DOM / object to hold DOM refs
     modal: qs('#modalFeedback', root), // modal container
     panel: qs('#modalFeedbackPanel', root), // painel do modal
-    modal: qs('#modalFeedback'), // modal container
     titulo: qs('#modalFeedbackTitulo'), // título do modal
     sub: qs('#modalFeedbackSub'), // subtítulo do modal
     list: qs('#modalFeedbackList'), // <ul> da list
@@ -292,12 +291,12 @@ function renderItem(it) {
 
   const rating = document.createElement('span');
   rating.className = 'shrink-0';
-  rating.innerHTML = ZoeRating.renderRating(it.estrelas || 0, {
+  rating.innerHTML = ZoeRating.renderRating(it.rating || 0, {
     size: 'sm', // lista/modal → discreto
     showValue: false, // só estrelas
   });
 
-  const when = JuniperDateTime.format(it.data);
+  const when = JuniperDateTime.format(it.date);
   const time = document.createElement('time');
   time.className = 'text-xs text-gray-500 whitespace-nowrap';
   time.textContent = when || '';
@@ -306,15 +305,15 @@ function renderItem(it) {
 
   const txt = document.createElement('p');
   txt.className = 'mt-0 text-gray-900 leading-6';
-  txt.textContent = it.texto || '';
+  txt.textContent = it.text || '';
 
-  const autor = document.createElement('p');
-  autor.className = 'mt-0 text-xs text-gray-500';
-  autor.textContent = it.autor ? `- ${it.autor}` : '';
+  const author = document.createElement('p');
+  author.className = 'mt-0 text-xs text-gray-500';
+  author.textContent = it.author ? `- ${it.author}` : '';
 
   body.appendChild(meta);
   body.appendChild(txt);
-  body.appendChild(autor);
+  body.appendChild(author);
   line.appendChild(body);
 
   // Linha divisória

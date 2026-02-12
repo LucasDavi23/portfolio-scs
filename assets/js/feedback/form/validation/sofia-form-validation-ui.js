@@ -193,6 +193,103 @@ function resetFormUI() {
 }
 
 // ------------------------------
+// Focus & Scroll UX Helpers
+// ------------------------------
+
+// ------------------------------
+// Focus & Scroll UX Helpers
+// ------------------------------
+
+function isScrollableY(el) {
+  if (!el) return false;
+  const s = window.getComputedStyle(el);
+  const oy = s.overflowY;
+  return (oy === 'auto' || oy === 'scroll') && el.scrollHeight > el.clientHeight + 1;
+}
+
+function getModalRoot() {
+  return document.getElementById('feedback-modal');
+}
+
+function getDialogEl() {
+  return document.querySelector('#feedback-modal [role="dialog"]');
+}
+
+function getHeaderOffset(dialogEl) {
+  const header = dialogEl?.querySelector('[data-modal-header]');
+  const h = header ? header.getBoundingClientRect().height : 0;
+  return h + 12; // respiro
+}
+
+// PT: acha o container rolável REAL subindo do target até o modal
+// EN: finds the REAL scroll container going up from target to modal
+function findScrollParentWithinModal(targetEl) {
+  const modal = getModalRoot();
+  if (!modal || !targetEl) return null;
+
+  let el = targetEl.parentElement;
+  while (el && el !== modal) {
+    if (isScrollableY(el)) return el;
+    el = el.parentElement;
+  }
+
+  // fallback: tenta dialog, se ele for scrollável
+  const dialog = getDialogEl();
+  if (isScrollableY(dialog)) return dialog;
+
+  return null;
+}
+
+function forceScrollTo(containerEl, dialogEl, targetEl) {
+  if (!containerEl || !dialogEl || !targetEl) return;
+
+  const containerRect = containerEl.getBoundingClientRect();
+  const targetRect = targetEl.getBoundingClientRect();
+
+  // posição do target dentro do container rolável
+  const topInContainer = targetRect.top - containerRect.top + containerEl.scrollTop;
+  const top = Math.max(0, topInContainer - getHeaderOffset(dialogEl));
+
+  // FORÇA (sem smooth, mobile-friendly)
+  containerEl.scrollTop = top;
+
+  // reassert no próximo frame (alguns mobiles reancoram)
+  requestAnimationFrame(() => {
+    containerEl.scrollTop = top;
+  });
+}
+
+function scrollToField(field) {
+  const dialogEl = getDialogEl();
+  const targetEl = field === 'rating' ? elements.ratingGroup : getFieldElement(field);
+  if (!dialogEl || !targetEl) return;
+
+  const containerEl = findScrollParentWithinModal(targetEl);
+  if (!containerEl) return;
+
+  // debug opcional (se quiser manter)
+  // console.log('[Sofia scroll] container:', {
+  //   overflowY: getComputedStyle(containerEl).overflowY,
+  //   scrollTop: containerEl.scrollTop,
+  //   scrollHeight: containerEl.scrollHeight,
+  //   clientHeight: containerEl.clientHeight,
+  // });
+
+  forceScrollTo(containerEl, dialogEl, targetEl);
+}
+
+function focusField(field) {
+  if (field === 'rating') {
+    elements.ratingGroup?.setAttribute('tabindex', '-1');
+    elements.ratingGroup?.focus?.({ preventScroll: true });
+    return;
+  }
+
+  const el = getFieldElement(field);
+  el?.focus?.({ preventScroll: true });
+}
+
+// ------------------------------
 // Field error UI (no HTML changes required)
 // ------------------------------
 
@@ -302,6 +399,8 @@ export const SofiaFormValidationUI = {
   getFieldElement,
   clearFormStatus,
   resetFormUI,
+  scrollToField,
+  focusField,
   markFieldError,
   markRatingError,
   clearFieldError,
