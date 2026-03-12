@@ -1,7 +1,12 @@
 // /assets/js/feedback/board/main/selah-board-ui.js
 // 🌿 Selah — Board de Avaliações (UI)
+//
+// Nível / Level: Adulto / Adult
+//
 // PT: Simboliza contemplação. Exibe o Board de avaliações com transições suaves.
+//
 // EN: Symbolizes contemplation. Renders the review board with smooth transitions.
+//
 /* -----------------------------------------------------------------------------*/
 
 // Imports / Dependências
@@ -18,7 +23,7 @@ import { DaliaImageHelpers } from '/assets/js/feedback/board/image/dalia-image-h
 
 // 🎨 Petra — UI da imagem (thumb + auto-recover)
 // EN 🎨 Petra — Image UI (thumb + auto-recover)
-// Fornece:
+// Fornece / Provides:
 // - LoadThumbWithRetries,
 // - smartAutoRecover,
 // - markHasPhoto
@@ -28,7 +33,7 @@ import { PetraImageUI } from '/assets/js/feedback/board/image/petra-image-ui.js'
 
 // ✨ Elara — helpers do board (estrelas, datas, imagens)
 // EN ✨ Elara — board helpers (stars, dates, images)
-// Fornece:
+// Fornece / Provides:
 //  - formatDate()
 //  - skeletonLines()
 //  - pickImagePair()
@@ -39,12 +44,22 @@ import { ElaraBoardHelpers } from '/assets/js/feedback/board/main/elara-board-he
 // ------------------------------------------------------------
 // ⭐ Zoe — rating UI do system (avaliações por estrelas)
 // EN ⭐ Zoe — system rating UI (star-based ratings)
-// Fornece:
+// Fornece / Provides:
 //  - renderRating()
 //  - normalizeRating()
 //  - mountInput()
 
 import { ZoeRating } from '/assets/js/system/ui/rating/zoe-rating.js';
+
+// ------------------------------------------------------------
+// Juniper — utilitário de data/hora do system
+// EN Juniper — system date/time utility
+// Fornece / Provides:
+//  - parseDateTime()
+//  - formatDateTime()
+//  - formatDate()
+
+import { JuniperDateTime } from '/assets/js/system/utils/juniper-date-time.js';
 
 // ------------------------------------------------------------
 
@@ -114,12 +129,13 @@ function renderFeaturedReview(root, item) {
     // --------------------------------------------------
     const author = item.author ?? 'Customer';
     const rating = item.rating ?? item.stars ?? 0; // fallback, temporary
-    const date = item.date ?? item.date_iso ?? item.dateIso ?? '';
+    let dateLabel = '';
     const text = item.text ?? item.comment ?? '';
 
     if (elAuthor) elAuthor.textContent = author;
     if (elRating) elRating.innerHTML = ZoeRating.renderRating(rating);
-    if (elDate) elDate.textContent = ElaraBoardHelpers.formatDate(date);
+    dateLabel = JuniperDateTime.formatFromItem(item);
+    if (elDate) elDate.textContent = dateLabel;
     if (elText) elText.textContent = text;
   }
 
@@ -377,12 +393,12 @@ async function fillCardFixed(root, item) {
   const textEl = listEl.querySelector('[data-c-text]');
   const authorEl = listEl.querySelector('[data-c-author]');
 
-  const dateISO = item.date ?? item.data ?? item.data_iso;
-  const text = item.text ?? item.texto ?? item.comentario ?? '';
-  const author = item.author ?? item.autor ?? item.nome ?? '';
+  const text = item.text ?? item.texto ?? item.comment ?? item.comentario ?? '';
+  const author = item.author ?? item.autor ?? item.name ?? item.nome ?? '';
 
+  // 📅 Date label (safe: prefers date_br, then date_ms, then legacy)
   if (dateEl) {
-    dateEl.textContent = ElaraBoardHelpers.formatDate(dateISO);
+    dateEl.textContent = JuniperDateTime.formatFromItem(item);
   }
   if (textEl) {
     textEl.textContent = text;
@@ -564,7 +580,7 @@ function renderCardFallback(root, items) {
 
   // PT/EN: keep aliases for backward compatibility
   const author = first.author ?? first.autor ?? first.nome ?? 'Cliente';
-  const dateISO = first.date ?? first.data ?? first.data_iso ?? '';
+  const dateLabel = ElaraBoardHelpers.resolveDateLabel(first);
   const text = first.text ?? first.texto ?? first.comentario ?? '';
   const ratingValue = Number(first.rating ?? first.estrelas) || 0;
 
@@ -572,7 +588,7 @@ function renderCardFallback(root, items) {
     <article class="p-3 border rounded-lg bg-white">
       <div class="flex items-center justify-between gap-3 mb-1">
         <div class="font-medium truncate">${author}</div>
-        <div class="text-xs text-neutral-500">${ElaraBoardHelpers.formatDate(dateISO)}</div>
+        <div class="text-xs text-neutral-500">${dateLabel}</div>
       </div>
 
       <div class="mb-1">
@@ -706,7 +722,16 @@ async function loadPlatformCard(
     const candidates = Array.isArray(items) ? items : [];
 
     function getSignature(x) {
-      const date = x?.date_iso || x?.date || x?.data_iso || x?.data || '';
+      const date =
+        x?.date_ms ??
+        x?.date_br ??
+        x?.date_iso ??
+        x?.dateIso ??
+        x?.date ??
+        x?.data_iso ??
+        x?.data ??
+        '';
+
       const author = x?.author || x?.autor || x?.name || x?.nome || '';
       const text = x?.text || x?.texto || x?.comment || x?.comentario || '';
       return `${date}|${author}|${text.slice(0, 40)}`;
@@ -775,9 +800,17 @@ async function loadPlatformCard(
 
     console.log('[loadPlatformCard] first item snapshot', {
       platform,
-      author: item?.autor ?? item?.nome,
-      date: item?.data ?? item?.data_iso,
-      text: (item?.texto ?? item?.comentario ?? '').slice(0, 60),
+      author: item?.author ?? item?.autor ?? item?.name ?? item?.nome,
+      date:
+        item?.date_br ??
+        item?.date_ms ??
+        item?.date ??
+        item?.date_iso ??
+        item?.dateIso ??
+        item?.data ??
+        item?.data_iso ??
+        '',
+      text: (item?.text ?? item?.texto ?? item?.comment ?? item?.comentario ?? '').slice(0, 60),
       signature,
     });
 
@@ -1029,7 +1062,10 @@ window.addEventListener('feedback:novo', (ev) => {
       rating: detail.item.rating,
       author: detail.item.author ?? detail.item.name,
       text: detail.item.text ?? detail.item.comment,
-      date_iso: detail.item.date_iso,
+      date_br: detail.item.date_br,
+      date_ms: detail.item.date_ms,
+      // fallback compatível
+      date_iso: detail.item.date_iso ?? detail.item.dateIso,
       photo_url: detail.item.photo_url,
     });
   } else {

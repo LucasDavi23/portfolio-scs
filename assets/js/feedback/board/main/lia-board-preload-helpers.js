@@ -1,8 +1,11 @@
-// /assets/js/feedback/board/main/lia-board-preload-helpers.js
 // 🌱 Lia — Aprendiz do Board (Preload)
+//
+// Nível / Level: Aprendiz / Apprentice
+//
 // PT: Irmã mais nova da Selah. Responsável por buscar o primeiro lote de cards
 //     do mural utilizando a Naomi (CardAPI) e manter um cache leve de curto prazo,
 //     garantindo que o Board fique rápido e eficiente após o primeiro acesso.
+//
 // EN: Younger sister of Selah. Responsible for fetching the initial batch of cards
 //     through Naomi (CardAPI) and maintaining a short-lived cache to keep the Board
 //     fast and responsive after the first load. Only handles warm-up logic — no DOM.

@@ -53,10 +53,10 @@ function closeMenu({ menu, backdrop }) {
 // Inicializa o menu mobile
 // Initializes the mobile menu
 export function initSubmenu() {
-  const menuToggle = document.getElementById('menu-toggle');
-  const closeBtn = document.getElementById('close-menu');
-  const menu = document.getElementById('menu');
-  const backdrop = document.getElementById('menu-backdrop');
+  const menuToggle = document.getElementById('mobile-menu-toggle');
+  const closeBtn = document.getElementById('mobile-menu-close');
+  const menu = document.getElementById('mobile-menu');
+  const backdrop = document.getElementById('mobile-menu-backdrop');
 
   if (!menu || !backdrop) return;
 

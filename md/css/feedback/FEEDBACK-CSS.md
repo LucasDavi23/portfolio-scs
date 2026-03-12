@@ -4,29 +4,19 @@ Este documento descreve a arquitetura do **CSS do módulo de Feedback**.
 Aqui não estão os estilos em si, mas **como eles se organizam**, **quem faz o quê**
 e **como as camadas se relacionam**.
 
-O módulo de Feedback é composto por três camadas principais:
+O módulo de Feedback é composto por duas camadas principais:
 
-1. Layout da seção
-2. Board (exibição das avaliações)
-3. Formulário (envio de feedback)
-
----
-
-## 🧭 1. Layout do Feedback (Astra)
-
-Responsável pela **estrutura da seção de feedback** dentro da página.
-
-- Organiza a disposição do hero, board e formulário
-- Aplica princípios de layout definidos globalmente por Atlas
-- Atua apenas no escopo local do feedback
-
-**Arquivos principais:**
-
-- `astra-feedback-layout.css`
+1. Board (exibição das avaliações)
+2. Formulário (envio de feedback)
 
 ---
 
-## 🧩 2. Board de Avaliações (Seren)
+A estrutura de layout da seção de Feedback é gerenciada
+principalmente por meio de utilitários do Tailwind no HTML.
+A camada CSS concentra-se em responsabilidades visuais específicas,
+como cards, avatares, rating e estilização do formulário.
+
+## 🧩 1. Board de Avaliações (Seren)
 
 Responsável pela **exibição das avaliações prontas**.
 O board não lida com entrada de dados, apenas com leitura e visualização.
@@ -37,34 +27,30 @@ O board não lida com entrada de dados, apenas com leitura e visualização.
 
 ### 🎴 Estrutura
 
-- **Aline** — estrutura visual dos cards (containers, sombras, variantes)
+- **Aline** — estrutura visual dos cards (containers, bordas, fundos e sombras)
 
 ### 👤 Identidade e Conteúdo
 
-- **Nina** — avatar e identidade do autor
-- **Sofia** — texto do feedback
 - **Tessa** — imagem do feedback
-- **Zara** — exibição do rating (estrelas)
+- **Zara** — apresentação visual do rating (estrelas)
 - **Marka** — badges e selos de origem/contexto
-
-### 🔧 Utilidades Locais
-
-- **Nora** — helpers e ajustes visuais específicos do board
 
 ### 🧩 Variantes
 
-- **Compact** — modo denso do board, reduzindo espaçamentos e altura dos cards  
+- **Compact** — modo denso do board, reduzindo espaçamentos
+  e a densidade de layout dos cards
   (decisão estrutural sob liderança da Seren)
 
 ---
 
-## 📝 3. Formulário de Feedback (Nyla)
+## 📝 2. Formulário de Feedback (Nyla)
 
 Responsável pela **interface visual de envio do feedback**.
 
 ### 🌾 Liderança
 
-- **Nyla** — coordena o módulo do formulário e seus imports
+- **Nyla** — coordena a estrutura visual do módulo de formulário
+  e centraliza a importação das especialistas
 
 ### 📝 Interface
 
@@ -102,5 +88,5 @@ O Feedback utiliza essas bases, mas não as redefine.
 Este documento cobre **exclusivamente o CSS do módulo de Feedback**.
 Outros aspectos do sistema são documentados em seus respectivos arquivos:
 
-- `LAYOUT-CSS.md`
-- `SYSTEM-CSS.md`
+- `layout-css.md`
+- `system-css.md`

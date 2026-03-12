@@ -1,14 +1,20 @@
-// ============================================================
-// 🪨 PETRA — Protetora das Imagens (DOM)
-// 🪨 PETRA — Image Protector (DOM)
-// Nível: Adulta
-// ------------------------------------------------------------
-// PT: Aplica thumb/full, fallback visual e auto-recover no DOM.
-// EN: Applies thumb/full, visual fallback and auto-recover in the DOM.
-// Usa a lógica pura da Dália (dalia-image-helpers.js).
-// EN: Uses the pure logic from Dália (dalia-image-helpers.js).
-// ============================================================
-
+// 🪨 Petra — Image DOM Controller
+//
+// Nível / Level: Adulto / Adult
+//
+// PT: Responsável pelo comportamento visual das imagens no Board.
+//     Aplica thumb/full, fallback visual e auto-recover diretamente
+//     no DOM. Utiliza a lógica pura fornecida pela Dália
+//     (dalia-image-helpers.js).
+//
+// EN: Responsible for the visual behavior of images in the Board.
+//     Applies thumb/full images, visual fallback and auto-recover
+//     directly in the DOM. Uses the pure logic provided by Dália
+//     (dalia-image-helpers.js).
+// ------------------------------------------------------------------
+//
+// Imports / Dependências
+//
 // 🌿 Dália — lógica de imagem (helpers)
 // EN 🌿 Dalia — image logic (helpers)
 // Fornece:

@@ -1,10 +1,21 @@
 import { defineConfig } from 'vite';
+import handlebars from 'vite-plugin-handlebars';
+import { resolve } from 'path';
 
 const GAS_EXEC =
   'https://script.google.com/macros/s/AKfycbzzCFgGmXhIDc7xlaJa_XpacGMu3GBn7d0kg2ntRgUrpuisnV__AjF_8pJGXgG6NaMP0A/exec';
 
 export default defineConfig({
   root: '.', // seu index.html está na raiz
+
+  plugins: [
+    handlebars({
+      partialDirectory: [
+        resolve(__dirname, 'src/foundation'),
+        resolve(__dirname, 'src/foundation/partials'),
+      ],
+    }),
+  ],
 
   build: {
     outDir: 'dist', // pasta de saída

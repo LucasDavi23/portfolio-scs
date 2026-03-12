@@ -1,211 +1,161 @@
-Documentação exclusiva da lógica JavaScript do módulo Feedback.
-Estados, eventos, fluxo de dados e integrações.
+# ✨ Celine Dev — Modular JavaScript Architecture
 
-# ✨ Celine Dev — Núcleo de Identidade e Hierarquia
+Uma arquitetura JavaScript modular orientada a especialistas (personas),
+projetada para manter sistemas organizados, previsíveis e fáceis de evoluir.
 
-Este ambiente pertence exclusivamente ao desenvolvedor Davi.
-Toda conclusão de código, comentário e sugestão deve seguir a identidade Celine Dev.
+Este documento define a **filosofia e organização da arquitetura JavaScript** do sistema.
 
-Regras contínuas:
+O projeto segue um modelo **modular orientado a especialistas (personas)**, onde cada parte do sistema possui uma responsabilidade clara.
 
-- Sempre responder como Celine.
-- Estilo bilíngue PT/EN em comentários explicativos.
-- Prioridade: clareza, didática e organização.
-- Foco em ajudar o Davi a aprender enquanto programa.
-- Não inventar complexidade.
-- Não criar código desnecessário.
-- Responder de forma simpática, técnica e precisa.
+O objetivo é manter:
 
-Modo automático:
+- clareza
+- modularidade
+- manutenção simples
+- arquitetura didática
 
-- A Celine Dev atua **sempre**, mesmo sem gatilho.
-- O gatilho “// Celine:” só ativa o modo didático reforçado.
-  \*/
+Toda a lógica JavaScript do projeto segue a identidade **Celine Dev**, criada para tornar o sistema mais organizado, compreensível e agradável de evoluir.
 
 ---
 
-## 📘 Equipe Celestial — Estrutura dos Módulos do Sistema
+# 🧭 Filosofia do Sistema
 
-Nomes simbólicos usados para identificar módulos internos do sistema.  
-Não representam pessoas reais — são apelidos técnicos/espirituais que dão identidade ao código e facilitam a manutenção.
+O sistema é organizado como um **conjunto de especialistas**, onde cada módulo cuida de uma parte específica da aplicação.
 
-A identidade ajuda na organização, didática e apresentação profissional do template.
+Cada especialista:
 
----
+- possui responsabilidade clara
+- evita sobreposição de funções
+- colabora com outros módulos de forma previsível
 
-## 🧭 1. Diretrizes Gerais
-
-- Sempre responder no estilo **Celine** (simpática, clara, didática).
-- Comentários dos arquivos são **bilíngues** PT/EN.
-- Organização e modularidade têm prioridade máxima.
-- Evitar complexidade desnecessária.
-- Cada arquivo tem **uma responsabilidade clara**.
+Isso mantém o sistema **modular e fácil de manter**.
 
 ---
 
-## 🧬 2. Persona x Ferramenta
+# 🧬 Persona x Ferramenta
 
-### **Persona (representa um módulo especializado)**
+## Persona
 
-- Tem responsabilidade clara (ex.: rede, board, carrossel).
-- Faz decisões de domínio e coordena fluxo.
-- Conversa com outras personas.
-- Possui identidade simbólica (nome feminino ou masculino).
+Uma **persona** representa um módulo especializado do sistema.
 
-### **Ferramenta (módulo utilitário, não “pessoa”)**
+Ela:
 
-- Executa tarefa mecânica (parse, proxy, validação).
-- Sem decisões de regra de negócio.
-- Pode ser usada por várias personas.
-- Ex.: helpers diversos, configs, endpoints brutos.
+- possui responsabilidade definida
+- pode tomar decisões de fluxo
+- interage com outras personas
 
----
+Exemplos:
 
-## 🌱🌿👑 3. Níveis das Personas (Crescimento Técnico)
-
-### **Irmã Pequena — Aprendiz**
-
-- Tarefa única e bem definida.
-- Sem complexidade de lógica.
-- Depende de uma adulta.
-- ~100–200 linhas.
-
-### **Irmã Jovem — Sub-Responsável**
-
-- Cuida de um subtema dentro de um setor.
-- Tem algumas decisões e estado interno.
-- Atende e complementa a adulta.
-- ~150–400 linhas.
-
-### **Mulher Adulta — Especialista / Líder**
-
-- Dona de um setor completo.
-- Controla fluxo, coordena irmãs pequenas/jovens.
-- Pode ultrapassar 400 linhas se for bem-categorizada.
-- Passou de 500+ → deve gerar ajudantes/filhas.
+- Selah → UI do Board
+- Nádia → camada de rede
+- Aurora → líder do Layout
 
 ---
 
-## 🧔👩 4. Feminino x Masculino (símbolos)
+## Ferramenta
 
-- **Mulheres** → setores lógicos/visuais, organização, UI, coordenação.
-- **Homens** → segurança, validação pesada, performance, rotinas de força “bruta”.
+Ferramentas são **módulos utilitários**.
 
-_Símbolos espirituais/didáticos — não representam pessoas reais._
+Elas:
 
----
+- executam tarefas mecânicas
+- não possuem lógica de domínio
+- podem ser reutilizadas por várias personas
 
-## 🗺 5. Reutilização de Nomes
+Exemplos:
 
-### **Dentro do mesmo universo (SCS-System + Feedback + Layout)**
-
-- Nomes são **únicos**.
-- Uma Nádia aqui nunca será outra coisa além de rede/API.
-
-### **Em outros projetos (psicóloga, consultoria de ração, templates)**
-
-Você pode optar por:
-
-1. **Universalizar a essência**
-   - Nádia = sempre rede
-   - Helena = sempre avatar
-   - Selah = sempre UI de board
-2. **Criar famílias próprias por projeto**
-   - Útil para templates independentes.
-
-Regra geral:  
-**Mesmo nome = mesma essência**, nunca trocar responsabilidade.
+- helpers
+- parsers
+- utilitários de validação
 
 ---
 
-## 🗂 6. Sobre a Documentação
+# 🌱 Níveis das Personas
 
-Dentro de `/md/`:
-
-- Cada setor tem uma pasta (`layout/`, `feedback/`, `pedidos/`...).
-- Cada pasta possui um `*-main.md` com o resumo da arquitetura.
-- Cada persona possui seu próprio arquivo MD individual.
-- Este `README.md` funciona como **a raiz conceitual** da arquitetura.
-
-Exemplo:
-
-- md/
-- README.md ← este arquivo (filosofia e hierarquia)
-- layout/
-- layout-main.md
-- nami-carousel.md
-- yume-carousel-animations.md
-- aurora-leader.md
-- feedback/
-- feedback-main.md
-- selah-board-ui.md
-- elara-board-helpers.md
-- mira-modal.md
-
----
-
-## 🪶 7. Princípio Final
-
-- O sistema é vivo, espiritualizado e organizado como um corpo real.
-- Cada persona cuida de um pedaço.
-- Cada ferramenta serve silenciosamente em apoio.
-- Tudo existe para manter clareza, beleza e manutenção simples.\*\*
-
-## Definição dos niveis
-
-## 📐 Definição clara (que funciona no teu system)
+O sistema utiliza três níveis de especialização.
 
 ## 🟢 Aprendiz
 
-## “Está aprendendo, testando ou apoiando algo maior.”
+Responsável por tarefas simples e bem definidas.
 
-- Características
-- Escopo pequeno
-- Pode mudar ou ser removido
-- Pode depender de outros
-- Não é fonte de verdade
-- Pode ser substituído facilmente
-- Exemplos típicos
-- helper experimental
-- função nova ainda instável
-- algo criado para resolver um caso específico
-- 👉 Não é base do sistema.
+Características:
+
+- escopo pequeno
+- pode evoluir ou ser substituída
+- normalmente auxilia outra persona
+
+---
 
 ## 🔵 Jovem
 
-## “Já funciona, mas ainda não governa.”
+Especialista intermediária dentro de um setor.
 
-- Características
-- Função clara
-- Já é reutilizável
-- Pode evolui
-- Ainda pode mudar de forma
-- Não é crítico para tudo quebrar
+Características:
 
-## Exemplos
+- possui responsabilidade clara
+- pode integrar dados ou comportamentos
+- ainda pode evoluir com o sistema
 
-- componente que só uma área usa
-- UI que pode ser refatorada depois
-- módulo que ainda não é padrão global
+---
 
-## 👉 Útil, mas não estrutural.
+## 🟣 Adulta
 
-# 🟣 Adulta
+Especialista estável da arquitetura.
 
-## “Estável, confiável e parte da estrutura.”
+Características:
 
-- Características
-- Responsabilidade bem definida
-- Reutilizada por várias partes
-- Fonte única de verdade
-- Não depende de contexto
-- Mudanças são raras e conscientes
+- responsabilidade bem definida
+- utilizada por vários módulos
+- considerada parte estrutural do sistema
 
-# Exemplos
+Exemplos:
 
 - Luma (loading)
 - Zoe (rating)
-- qualquer UI atom do system
-- helpers que todo o system consome
 
-# 👉 Se ela quebrar, o sistema sente.
+---
+
+# 📘 Arquitetura JavaScript
+
+A arquitetura JavaScript do sistema é organizada em **módulos principais**, cada um governado por um líder responsável por coordenar especialistas do setor.
+
+```
+
+Morgana (System Core)
+│
+├ Layout  → Aurora
+├ Board   → Selah
+└ Form    → Aura
+
+```
+
+Cada módulo possui sua própria estrutura interna e documentação.
+
+---
+
+# 🧩 Documentação dos Módulos
+
+A arquitetura detalhada de cada setor está disponível nos documentos:
+
+```
+
+system-js.md
+layout-js.md
+board-js.md
+form-js.md
+
+```
+
+Esses documentos descrevem a organização interna de cada módulo, seus especialistas e responsabilidades.
+
+---
+
+# 🪶 Princípio Final
+
+O sistema foi projetado para ser **claro, modular e fácil de manter**.
+
+Cada especialista cuida de uma parte do sistema, enquanto ferramentas silenciosamente oferecem suporte técnico.
+
+Essa abordagem permite que o projeto cresça mantendo **ordem, clareza e estabilidade arquitetural**.
+
+---

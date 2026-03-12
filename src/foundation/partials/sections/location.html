@@ -1,0 +1,78 @@
+<!-- ===================================================== -->
+<!-- PARTIAL: SECTION / LOCATION -->
+<!-- Foundation / partials/sections/location.html -->
+<!-- ===================================================== -->
+
+<section id="localizacao" class="min-h-[calc(60vh-4rem)] snap-start scroll-mt-20">
+  <div class="mx-auto max-w-screen-2xl px-4 py-12 sm:px-6 lg:px-8">
+    <div class="grid grid-cols-1 gap-6 items-center xl:grid-cols-2 xl:gap-8">
+      <!-- TEXTO (esquerda no desktop) -->
+      <div class="flex items-center bg-gray-100 lg:order-1 rounded-2xl">
+        <div class="p-8 sm:p-16 lg:p-24">
+          <h2 class="text-2xl font-bold sm:text-3xl">Onde estamos</h2>
+
+          <p class="mt-4 text-gray-600">
+            Nossa fábrica e atendimento estão localizados em Guarulhos/SP. Visite-nos para conhecer
+            de perto o processo e retirar pedidos quando combinado.
+          </p>
+
+          <div class="mt-6 text-sm text-gray-700 space-y-1">
+            <p class="font-semibold">Endereço</p>
+            <p>Rua Tasso Fragoso, nº 105</p>
+            <p>Parque das Nações — Guarulhos/SP</p>
+            <p>CEP 07243-570</p>
+          </div>
+
+          <!-- Ações -->
+          <div class="mt-6 flex flex-col sm:flex-row gap-3">
+            <a
+              href="https://www.google.com/maps/dir/?api=1&destination=Rua+Tasso+Fragoso,+105,+Guarulhos,+SP"
+              target="_blank"
+              rel="noopener"
+              class="inline-flex items-center justify-center rounded-lg bg-gray-900 px-4 py-2 text-white hover:opacity-90"
+            >
+              Como chegar
+            </a>
+
+            <a
+              href="https://www.google.com/maps?q=Rua+Tasso+Fragoso,+105,+Guarulhos,+SP"
+              target="_blank"
+              class="inline-flex items-center justify-center rounded-lg bg-gray-900 px-4 py-2 text-white hover:opacity-90"
+            >
+              Ver no Google Maps
+            </a>
+
+            <button
+              type="button"
+              class="inline-flex items-center justify-center rounded-lg border border-gray-300 px-4 py-2 text-gray-700 hover:bg-gray-50"
+              onclick="
+                navigator.clipboard.writeText(
+                  'Rua Tasso Fragoso, 105 - Parque das Nações, Guarulhos/SP - 07243-570'
+                )
+              "
+            >
+              Copiar endereço
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- MAPA (direita no desktop) -->
+      <div class="mt-6 lg:mt-0 lg:order-2">
+        <div
+          class="map-card relative isolate rounded-2xl overflow-hidden ring-1 ring-black/10 shadow-lg aspect-[16/10] lg:aspect-[16/9]"
+        >
+          <!-- iFrame ocupa todo o cartão -->
+          <iframe
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d7321.013335271659!2d-46.41159395826342!3d-23.44218169870948!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x94ce62701f3f58d1%3A0x7040f1067ebf6f0f!2sR.%20Tasso%20Fragoso%2C%20105%20-%20Parque%20das%20Nacoes%2C%20Guarulhos%20-%20SP%2C%2007243-570!5e0!3m2!1spt-BR!2sbr!4v1759183706777!5m2!1spt-BR!2sbr"
+            class="absolute inset-0 h-full w-full"
+            style="border: 0"
+            allowfullscreen
+            loading="lazy"
+            referrerpolicy="no-referrer-when-downgrade"
+          ></iframe>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

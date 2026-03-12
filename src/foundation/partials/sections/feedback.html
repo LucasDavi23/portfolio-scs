@@ -1,0 +1,424 @@
+<!-- ===================================================== -->
+<!-- SECTION: FEEDBACK -->
+<!-- Foundation / sections/feedback.html -->
+<!-- ===================================================== -->
+
+<section id="feedback" class="py-6 scroll-mt-20 min-h-[calc(60vh-4rem)] snap-start">
+  <!-- sentinela do scrollspy -->
+  <div id="feedback-s" aria-hidden="true" class="h-px pointer-events-none"></div>
+
+  <!-- Cabeçalho no estilo da galeria -->
+  <div class="max-w-screen-lg px-3 sm:px-4 lg:px-6 mx-auto">
+    <header class="text-center">
+      <h2 class="text-lg font-bold text-gray-900 sm:text-2xl">Avaliações de Clientes</h2>
+      <p class="max-w-md mx-auto mt-2 text-gray-500 text-sm">Mural das plataformas</p>
+    </header>
+  </div>
+
+  <!-- Bloco branco com os cards das avaliações de notas -->
+  <div class="mx-auto max-w-screen-2xl px-4 py-3 sm:px-6 lg:px-8 -mt-2">
+    <div class="rounded-2xl overflow-hidden ring-1 ring-black/10 shadow-lg bg-white">
+      <div class="px-5 sm:px-8 py-6 sm:py-7">
+        <!-- RESUMO (SCS) + CTA avaliação de notas -->
+        <div class="mt-5 grid grid-cols-1 md:grid-cols-3 gap-4 feedback-topo">
+          <!-- Barras -->
+          <div class="rounded-xl border border-gray-200 p-4 sm:p-5">
+            <div class="space-y-2">
+              <div class="flex items-center gap-3">
+                <span class="w-8 text-xs font-medium text-gray-600">5 ★</span>
+                <div class="h-2 flex-1 rounded bg-gray-100 overflow-hidden">
+                  <div class="h-full bg-amber-400" style="width: 0%" data-sum-bar="5"></div>
+                </div>
+                <span class="w-10 text-right text-[11px] text-gray-500" data-sum-count="5">0</span>
+              </div>
+              <div class="flex items-center gap-3">
+                <span class="w-8 text-xs font-medium text-gray-600">4 ★</span>
+                <div class="h-2 flex-1 rounded bg-gray-100 overflow-hidden">
+                  <div class="h-full bg-amber-400" style="width: 0%" data-sum-bar="4"></div>
+                </div>
+                <span class="w-10 text-right text-[11px] text-gray-500" data-sum-count="4">0</span>
+              </div>
+              <div class="flex items-center gap-3">
+                <span class="w-8 text-xs font-medium text-gray-600">3 ★</span>
+                <div class="h-2 flex-1 rounded bg-gray-100 overflow-hidden">
+                  <div class="h-full bg-amber-400" style="width: 0%" data-sum-bar="3"></div>
+                </div>
+                <span class="w-10 text-right text-[11px] text-gray-500" data-sum-count="3">0</span>
+              </div>
+              <div class="flex items-center gap-3">
+                <span class="w-8 text-xs font-medium text-gray-600">2 ★</span>
+                <div class="h-2 flex-1 rounded bg-gray-100 overflow-hidden">
+                  <div class="h-full bg-amber-400" style="width: 0%" data-sum-bar="2"></div>
+                </div>
+                <span class="w-10 text-right text-[11px] text-gray-500" data-sum-count="2">0</span>
+              </div>
+              <div class="flex items-center gap-3">
+                <span class="w-8 text-xs font-medium text-gray-600">1 ★</span>
+                <div class="h-2 flex-1 rounded bg-gray-100 overflow-hidden">
+                  <div class="h-full bg-amber-400" style="width: 0%" data-sum-bar="1"></div>
+                </div>
+                <span class="w-10 text-right text-[11px] text-gray-500" data-sum-count="1">0</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Média -->
+          <div class="rounded-xl border border-gray-200 p-4 sm:p-5 bg-amber-50/50">
+            <div class="text-center">
+              <div class="text-2xl sm:text-3xl font-semibold" data-sum-avg>–</div>
+              <div class="mt-1 text-amber-500 text-lg" data-sum-stars>★★★★★</div>
+              <div class="mt-1 text-[12px] text-gray-600">
+                <span data-sum-total>0</span> avaliações
+              </div>
+              <div class="mt-1 text-[12px] text-gray-500">Somente SCS</div>
+            </div>
+          </div>
+
+          <!-- CTA -->
+          <div
+            class="rounded-xl border border-gray-200 bg-gray-50/80 p-8 flex flex-col items-center justify-between text-center feedback-cta hover:border-gray-300 transition"
+          >
+            <div>
+              <h3 class="text-[14px] font-semibold text-gray-900 leading-tight">
+                Compartilhe sua opinião
+              </h3>
+              <p class="mt-1 text-[11.5px] text-gray-500">Ajude outras pessoas a escolher.</p>
+            </div>
+
+            <button
+              type="button"
+              class="mt-4 inline-flex items-center justify-center gap-2 rounded-full bg-neutral-900 px-5 py-2 text-sm font-medium text-white shadow-sm ring-1 ring-black/10 transition hover:bg-neutral-800 hover:scale-[1.02] active:scale-[0.98]"
+              data-open-feedback
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="h-4 w-4"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M12 4v16m8-8H4"
+                />
+              </svg>
+              Feedback
+            </button>
+          </div>
+        </div>
+
+        <!-- GRID 4 CARDS (SCS + Shopee + ML + Google) -->
+        <div class="mt-4 md:mt-5 grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
+          <!-- SCS -->
+          <div class="p-1">
+            <section
+              class="rounded-xl border border-gray-200 p-3 h-full flex flex-col overflow-hidden"
+              data-feedback-card="scs"
+              data-variant="media"
+            >
+              <header class="flex flex-wrap items-center justify-between gap-x-2 gap-y-1">
+                <span
+                  class="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium border shrink-0"
+                  style="background: #eef2ff; color: #3730a3; border-color: #c7d2fe"
+                  >SCS</span
+                >
+                <!-- (opcional) remova este data-c-rating se quiser as estrelas só dentro do cinza -->
+                <div
+                  class="flex items-center gap-1.5 text-xs leading-none whitespace-nowrap"
+                  data-c-rating
+                ></div>
+              </header>
+
+              <!-- Área cinza -->
+              <article class="mt-2 rounded-lg bg-gray-50 p-2 text-[13px] min-w-0" data-c-list>
+                <div class="media-grid">
+                  <!-- TOPO (autor à esq / data à dir) -->
+                  <div class="meta-row flex items-center justify-between gap-2">
+                    <span class="header-author truncate" data-c-author></span>
+                    <time class="header-date" data-c-date></time>
+                  </div>
+
+                  <!-- TEXTO -->
+                  <div class="text-wrap">
+                    <p
+                      class="text-gray-800 leading-5 break-words hyphens-auto line-clamp-none"
+                      data-c-text
+                    ></p>
+                  </div>
+
+                  <!-- Separado de linha -->
+                  <div class="photo-sep"></div>
+
+                  <!-- FOTO EMBAIXO (alinhada à direita) -->
+                  <figure class="photo-wrap">
+                    <button
+                      type="button"
+                      class="thumb-container group relative rounded-xl overflow-hidden border border-gray-200 bg-white js-open-modal hidden"
+                      aria-label="Ver foto em tela cheia"
+                    >
+                      <img
+                        src=""
+                        data-full=""
+                        alt=""
+                        class="transition duration-300 group-hover:scale-[1.03]"
+                        loading="lazy"
+                      />
+                      <span class="badge-ghost">Ver foto</span>
+                    </button>
+                    <div
+                      class="thumb-fallback hidden rounded-xl border border-dashed grid place-items-center bg-white text-[10px] text-gray-400"
+                    >
+                      sem foto
+                    </div>
+                  </figure>
+                </div>
+              </article>
+
+              <button
+                type="button"
+                class="mt-2 inline-flex justify-center rounded-lg border px-2.5 py-1.5 text-[12px] hover:bg-gray-50"
+                data-platform="scs"
+                data-action="ver-mais"
+                data-c-view-more
+              >
+                Ver mais
+              </button>
+            </section>
+          </div>
+
+          <!-- Shopee -->
+          <div class="p-1">
+            <section
+              class="rounded-xl border border-gray-200 p-3 h-full flex flex-col overflow-hidden"
+              data-feedback-card="shopee"
+              data-variant="media"
+            >
+              <header class="flex flex-wrap items-center justify-between gap-x-2 gap-y-1">
+                <span
+                  class="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium border shrink-0"
+                  style="background: #fff7ed; color: #9a3412; border-color: #fed7aa"
+                  >Shopee</span
+                >
+                <div
+                  class="flex items-center gap-1.5 text-xs leading-none whitespace-nowrap"
+                  data-c-rating
+                ></div>
+              </header>
+
+              <!-- Área cinza -->
+              <article class="mt-2 rounded-lg bg-gray-50 p-2 text-[13px] min-w-0" data-c-list>
+                <div class="media-grid">
+                  <!-- TOPO (autor à esq / data à dir) -->
+                  <div class="meta-row flex items-center justify-between gap-2">
+                    <span class="header-author truncate" data-c-author></span>
+                    <time class="header-date" data-c-date></time>
+                  </div>
+
+                  <!-- TEXTO -->
+                  <div class="text-wrap">
+                    <p
+                      class="text-gray-800 leading-5 break-words hyphens-auto line-clamp-none"
+                      data-c-text
+                    ></p>
+                  </div>
+
+                  <!-- Separador -->
+                  <div class="photo-sep"></div>
+
+                  <!-- FOTO EMBAIXO -->
+                  <figure class="photo-wrap">
+                    <button
+                      type="button"
+                      class="thumb-container group relative rounded-xl overflow-hidden border border-gray-200 bg-white js-open-modal hidden"
+                      aria-label="Ver foto em tela cheia"
+                    >
+                      <img
+                        src=""
+                        data-full=""
+                        alt=""
+                        class="transition duration-300 group-hover:scale-[1.03]"
+                        loading="lazy"
+                      />
+                      <span class="badge-ghost">Ver foto</span>
+                    </button>
+                    <div
+                      class="thumb-fallback hidden rounded-xl border border-dashed grid place-items-center bg-white text-[10px] text-gray-400"
+                    >
+                      sem foto
+                    </div>
+                  </figure>
+                </div>
+              </article>
+
+              <button
+                type="button"
+                class="mt-2 inline-flex justify-center rounded-lg border px-2.5 py-1.5 text-[12px] hover:bg-gray-50"
+                data-platform="shopee"
+                data-action="ver-mais"
+                data-c-view-more
+              >
+                Ver mais
+              </button>
+            </section>
+          </div>
+
+          <!-- Mercado Livre -->
+          <div class="p-1">
+            <section
+              class="rounded-xl border border-gray-200 p-3 h-full flex flex-col overflow-hidden"
+              data-feedback-card="ml"
+              data-variant="media"
+            >
+              <header class="flex flex-wrap items-center justify-between gap-x-2 gap-y-1">
+                <span
+                  class="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium border shrink-0"
+                  style="background: #fef9c3; color: #854d0e; border-color: #fde68a"
+                  >Mercado Livre</span
+                >
+                <div
+                  class="flex items-center gap-1.5 text-xs leading-none whitespace-nowrap"
+                  data-c-rating
+                ></div>
+              </header>
+
+              <!-- Área cinza -->
+              <article class="mt-2 rounded-lg bg-gray-50 p-2 text-[13px] min-w-0" data-c-list>
+                <div class="media-grid">
+                  <!-- TOPO -->
+                  <div class="meta-row flex items-center justify-between gap-2">
+                    <span class="header-author truncate" data-c-author></span>
+                    <time class="header-date" data-c-date></time>
+                  </div>
+
+                  <!-- TEXTO -->
+                  <div class="text-wrap">
+                    <p
+                      class="text-gray-800 leading-5 break-words hyphens-auto line-clamp-none"
+                      data-c-text
+                    ></p>
+                  </div>
+
+                  <!-- Separador -->
+                  <div class="photo-sep"></div>
+
+                  <!-- FOTO EMBAIXO -->
+                  <figure class="photo-wrap">
+                    <button
+                      type="button"
+                      class="thumb-container group relative rounded-xl overflow-hidden border border-gray-200 bg-white js-open-modal hidden"
+                      aria-label="Ver foto em tela cheia"
+                    >
+                      <img
+                        src=""
+                        data-full=""
+                        alt=""
+                        class="transition duration-300 group-hover:scale-[1.03]"
+                        loading="lazy"
+                      />
+                      <span class="badge-ghost">Ver foto</span>
+                    </button>
+                    <div
+                      class="thumb-fallback hidden rounded-xl border border-dashed grid place-items-center bg-white text-[10px] text-gray-400"
+                    >
+                      sem foto
+                    </div>
+                  </figure>
+                </div>
+              </article>
+
+              <button
+                type="button"
+                class="mt-2 inline-flex justify-center rounded-lg border px-2.5 py-1.5 text-[12px] hover:bg-gray-50"
+                data-platform="ml"
+                data-action="ver-mais"
+                data-c-view-more
+              >
+                Ver mais
+              </button>
+            </section>
+          </div>
+
+          <!-- Google -->
+          <div class="p-1">
+            <section
+              class="rounded-xl border border-gray-200 p-3 h-full flex flex-col overflow-hidden"
+              data-feedback-card="google"
+              data-variant="media"
+            >
+              <header class="flex flex-wrap items-center justify-between gap-x-2 gap-y-1">
+                <span
+                  class="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium border shrink-0"
+                  style="background: #eff6ff; color: #1d4ed8; border-color: #bfdbfe"
+                  >Google</span
+                >
+                <div
+                  class="flex items-center gap-1.5 text-xs leading-none whitespace-nowrap"
+                  data-c-rating
+                ></div>
+              </header>
+
+              <!-- Área cinza -->
+              <article class="mt-2 rounded-lg bg-gray-50 p-2 text-[13px] min-w-0" data-c-list>
+                <div class="media-grid">
+                  <!-- TOPO -->
+                  <div class="meta-row flex items-center justify-between gap-2">
+                    <span class="header-author truncate" data-c-author></span>
+                    <time class="header-date" data-c-date></time>
+                  </div>
+
+                  <!-- TEXTO -->
+                  <div class="text-wrap">
+                    <p
+                      class="text-gray-800 leading-5 break-words hyphens-auto line-clamp-none"
+                      data-c-text
+                    ></p>
+                  </div>
+
+                  <!-- Separador -->
+                  <div class="photo-sep"></div>
+
+                  <!-- FOTO EMBAIXO -->
+                  <figure class="photo-wrap">
+                    <button
+                      type="button"
+                      class="thumb-container group relative rounded-xl overflow-hidden border border-gray-200 bg-white js-open-modal hidden"
+                      aria-label="Ver foto em tela cheia"
+                    >
+                      <img
+                        src=""
+                        data-full=""
+                        alt=""
+                        class="transition duration-300 group-hover:scale-[1.03]"
+                        loading="lazy"
+                      />
+                      <span class="badge-ghost">Ver foto</span>
+                    </button>
+                    <div
+                      class="thumb-fallback hidden rounded-xl border border-dashed grid place-items-center bg-white text-[10px] text-gray-400"
+                    >
+                      sem foto
+                    </div>
+                  </figure>
+                </div>
+              </article>
+
+              <button
+                type="button"
+                class="mt-2 inline-flex justify-center rounded-lg border px-2.5 py-1.5 text-[12px] hover:bg-gray-50"
+                data-platform="google"
+                data-action="ver-mais"
+                data-c-view-more
+              >
+                Ver mais
+              </button>
+            </section>
+          </div>
+        </div>
+
+        <p class="text-[11px] text-gray-400 mt-4">Conteúdo reproduzido de avaliações públicas.</p>
+      </div>
+    </div>
+  </div>
+</section>

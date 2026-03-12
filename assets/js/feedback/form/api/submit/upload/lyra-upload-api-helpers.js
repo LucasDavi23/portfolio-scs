@@ -1,7 +1,7 @@
 // ==================================================
 // 🪷 Lyra — Upload Photo API (helpers) —
 //
-// Nível: Adulta
+// Nível: Adulto
 //
 // File: lyra-upload-api-helpers.js
 //
@@ -17,7 +17,7 @@
 // Fornece:
 // - getFeedbackEndpoint
 // - postJsonAction
-import { VesperFormApiCoreHelpers } from '/assets/js/feedback/form/api/rede/vesper-form-api-core-helpers.js';
+import { VesperFormApiCoreHelpers } from '/assets/js/feedback/form/api/network/vesper-form-api-core-helpers.js';
 
 /**
  * PT: Envia uma imagem em base64 para o Apps Script.

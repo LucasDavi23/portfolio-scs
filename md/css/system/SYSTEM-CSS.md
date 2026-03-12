@@ -2,7 +2,7 @@
 
 ### Governança de Morrigan — Diretora Geral do CSS
 
-Este documento apresenta o **mapa estrutural completo do CSS do sistema**.  
+Este documento apresenta o **mapa estrutural do CSS do sistema**.  
 Ele descreve como os estilos globais, layouts e fundamentos visuais são
 organizados, carregados e coordenados.
 
@@ -13,15 +13,17 @@ isolamento de responsabilidades e consistência visual entre módulos.
 
 ## 🧭 Visão Geral dos Setores (CSS)
 
-| Setor             | Líder / Diretora     | Pasta Base           | Papel Visual Resumido                                         |
-| ----------------- | -------------------- | -------------------- | ------------------------------------------------------------- |
-| **System (Core)** | Morrigan 🜃           | `/system`            | Entrada do CSS, ordem de imports e coordenação visual global. |
-| **Layout**        | Atlas 🧭             | `/system/layout`     | Estrutura macro, containers, grids e limites do sistema.      |
-| **Tipografia**    | Lexa 🅰️              | `/system/typography` | Linguagem tipográfica base e hierarquia textual.              |
-| **UI Base**       | Vega ⭐              | `/system/ui`         | Componentes visuais reutilizáveis e estados de interação.     |
-| **Foundation**    | —                    | `/system/foundation` | Regras estruturais globais (scroll, viewport, base).          |
-| **Feedback**      | Astra / Seren / Nyla | `/feedback`          | Estilos locais do módulo de Feedback (documentado à parte).   |
-| **Responsivo**    | —                    | `/layout/responsive` | Ajustes técnicos por faixa de dispositivo.                    |
+| Setor             | Líder / Diretora | Pasta Base                  | Papel Visual Resumido                |
+| ----------------- | ---------------- | --------------------------- | ------------------------------------ |
+| **System (Core)** | Morrigan 🜃       | `/system`                   | Entrada do CSS e coordenação global  |
+| **Layout**        | Atlas 🧭         | `/system/layout`            | Estrutura macro, grids e containers  |
+| **Tipografia**    | Lexa 🅰️          | `/system/typography`        | Linguagem tipográfica do sistema     |
+| **UI Base**       | Vega ⭐          | `/system/ui`                | Componentes visuais reutilizáveis    |
+| **Navigation UI** | Elo 🎨           | `/system/ui/navigation`     | Estado visual da navegação           |
+| **Message UI**    | Veil 🌫️          | `/system/ui/message`        | Aparência visual da message box      |
+| **Foundation**    | —                | `/system/foundation`        | Regras estruturais globais           |
+| **Feedback**      | Seren / Nyla     | `/feedback`                 | Estilos locais do módulo de Feedback |
+| **Responsivo**    | —                | `/system/layout/responsive` | Ajustes por dispositivo              |
 
 ---
 
@@ -32,95 +34,88 @@ isolamento de responsabilidades e consistência visual entre módulos.
 ## 1) 🜃 Diretoria Geral do CSS (Morrigan)
 
 /system/director  
-└── **Morrigan 🜃** — Diretora Geral do CSS
+└── **Morrigan 🜃**
 
-**Papel:**
-
-- Atua como **ponto de entrada do CSS**
-- Centraliza e ordena o carregamento dos líderes visuais
-- Não define estilos, layout ou UI
-- Garante previsibilidade, modularidade e escalabilidade
-
-Morrigan é **coordenação pura**, equivalente visual da Morgana (JS).
+Coordena o carregamento e a organização global do CSS.
 
 ---
 
 ## 2) 🧱 Foundation — Base Estrutural
 
-/system/foundation  
-└── **Foundation** — regras estruturais globais
+/system/foundation
 
-**Responsabilidades:**
+Regras estruturais globais:
 
-- Controle de viewport
-- Comportamento base de scroll
-- Global scroll lock (modais)
-- Regras técnicas compartilhadas por todo o sistema
-
-Foundation sustenta todas as demais camadas.
+- viewport
+- scroll base
+- scroll lock técnico
+- regras estruturais compartilhadas
 
 ---
 
 ## 3) 🧭 Layout Global do Sistema (Atlas)
 
 /system/layout  
-└── **Atlas 🧭** — Líder de Layout do Sistema
+└── **Atlas 🧭**
 
-**Responsabilidades:**
+Responsável por:
 
-- Containers principais
-- Grids e limites estruturais
-- Consistência espacial entre páginas e módulos
-
-Atlas **não estiliza componentes**, apenas estrutura.
+- containers
+- grids
+- estrutura espacial
 
 ---
 
 ## 4) 🅰️ Tipografia do Sistema (Lexa)
 
 /system/typography  
-└── **Lexa 🅰️** — Tipografia do Sistema
+└── **Lexa 🅰️**
 
-**Responsabilidades:**
+Define a linguagem tipográfica:
 
-- Fontes base
-- Hierarquia textual
-- Pesos e line-height
-- Linguagem visual tipográfica unificada
-
-Lexa define **linguagem**, não layout nem UI.
+- fontes
+- pesos
+- hierarquia textual
 
 ---
 
 ## 5) ⭐ UI Base do Sistema (Vega)
 
 /system/ui  
-└── **Vega ⭐** — UI do Sistema
+└── **Vega ⭐**
 
-**Responsabilidades:**
+Responsável por padrões de interface:
 
-- Botões e links
-- Estados de interação (hover, focus, disabled)
-- Microcomponentes reutilizáveis
-- Padrões de UI compartilhados
-
-Vega opera **acima da tipografia** e **abaixo das features**.
+- botões
+- links
+- estados de interação
+- microcomponentes
 
 ---
 
-## 6) 📱 Camada Responsiva (Técnica)
+## 6) 🎨 Navigation UI (Elo)
 
-/layout/responsive
+/system/ui/navigation  
+└── **Elo 🎨**
 
-- **modal-mobile.css** — ajustes específicos para mobile
-- **notebook-scale.css** — ajustes de escala para notebooks
+Responsável por representar visualmente o **estado ativo da navegação**.
 
-**Características:**
+---
 
-- Sem width fixo
-- Preferência por _zoom_
-- _scale_ como fallback
-- Preservação de proporções e legibilidade
+## 7) 🌫️ Message UI (Veil)
+
+/system/ui/message  
+└── **Veil 🌫️**
+
+Responsável pela aparência visual da **Message Box** utilizada pelo sistema.
+
+---
+
+## 8) 📱 Camada Responsiva
+
+/system/layout/responsive
+
+Arquivos técnicos de adaptação por dispositivo.
 
 ---
 
@@ -129,42 +124,27 @@ Vega opera **acima da tipografia** e **abaixo das features**.
 - CSS é organizado por **domínio visual**
 - Especialistas cuidam de partes específicas
 - Leaders coordenam conjuntos
-- Directors garantem ordem e entrada do sistema
-- Nenhum arquivo mistura responsabilidades
+- Directors garantem ordem e entrada
 - CSS não executa lógica nem estado
 
 ---
 
 ## 🔗 Relação com o JavaScript
 
-O CSS espelha conceitualmente o JS, sem duplicar funções:
-
-| JS (Lógica)      | CSS (Visual)         |
-| ---------------- | -------------------- |
-| Morgana          | Morrigan             |
-| Leaders de setor | Leaders visuais      |
-| UI JS            | UI CSS (Vega)        |
-| Utils puros      | Foundation / ajustes |
-
-Ambos evoluem de forma **independente**, porém **coordenada**.
-
----
-
-## ✅ Escopo
-
-Este documento cobre **exclusivamente o CSS do sistema**.  
-Outras camadas são documentadas separadamente:
-
-- `LAYOUT-CSS.md`
-- `FEEDBACK-CSS.md`
+| JS (Lógica)      | CSS (Visual)    |
+| ---------------- | --------------- |
+| Morgana          | Morrigan        |
+| Leaders de setor | Leaders visuais |
+| UI JS            | UI CSS          |
+| Utils            | Foundation      |
 
 ---
 
 ## ⭐ Conclusão
 
 O CSS do sistema não é um conjunto de estilos soltos,  
-mas um **sistema visual governado**, com hierarquia clara,
-papéis definidos e ponto de entrada único.
+mas um **sistema visual governado**, com hierarquia clara
+e ponto de entrada único.
 
 **Morrigan garante ordem.  
 O restante garante forma.**

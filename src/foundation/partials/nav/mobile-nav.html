@@ -1,0 +1,91 @@
+<!-- ===================================================== -->
+<!-- PARTIAL: NAV / MOBILE -->
+<!-- Foundation / partials/nav/mobile-nav.html -->
+<!-- ===================================================== -->
+
+<!-- Backdrop do menu (cobre a tela ao abrir) -->
+<div id="mobile-menu-backdrop" class="fixed inset-0 z-[55] bg-black/40 hidden"></div>
+
+<aside
+  id="mobile-menu"
+  class="fixed inset-y-0 right-0 z-[61] w-full sm:max-w-sm bg-white shadow-xl hidden"
+>
+  <div class="flex items-center justify-between px-6 py-5">
+    <a href="#inicio" class="sr-only">Início</a>
+    <button id="mobile-menu-close" class="p-2 rounded-md text-gray-700">
+      <span class="sr-only">Fechar menu</span>
+      <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+      </svg>
+    </button>
+  </div>
+
+  <nav class="px-6 pb-8">
+    <div class="space-y-2 text-center">
+      <a
+        href="#sobre"
+        data-nav="sobre"
+        class="nav-link block px-4 py-2 text-sm font-semibold text-gray-900 hover:bg-gray-100"
+        >Sobre</a
+      >
+
+      <a
+        href="#producao"
+        data-nav="producao"
+        class="nav-link block px-4 py-2 text-sm font-semibold text-gray-900 hover:bg-gray-100"
+        >Produção</a
+      >
+
+      <a
+        href="#pos-vendas"
+        data-nav="pos-vendas"
+        class="nav-link block px-4 py-2 text-sm font-semibold text-gray-900 hover:bg-gray-100"
+        >Pós-vendas</a
+      >
+
+      <a
+        href="#localizacao"
+        data-nav="localizacao"
+        class="nav-link block px-4 py-2 text-sm font-semibold text-gray-900 hover:bg-gray-100"
+        >Localização</a
+      >
+
+      <a
+        href="#produtos"
+        data-nav="produtos"
+        class="nav-link block px-4 py-2 text-sm font-semibold text-gray-900 hover:bg-gray-100"
+        >Produtos</a
+      >
+
+      <a
+        href="#galeria"
+        data-nav="galeria"
+        class="nav-link block px-4 py-2 text-sm font-semibold text-gray-900 hover:bg-gray-100"
+        >Galeria</a
+      >
+
+      <a
+        href="#feedback-s"
+        data-nav="feedback-s"
+        class="nav-link block px-4 py-2 text-sm font-semibold text-gray-900 hover:bg-gray-100"
+        >Feedback</a
+      >
+
+      <a
+        href="#celine-s"
+        data-nav="celine-s"
+        class="nav-link block px-4 py-2 text-sm font-semibold text-gray-900 hover:bg-gray-100"
+        >Sistema (Celine)</a
+      >
+
+      <a
+        href="https://wa.me/551134528549?text=Ol%C3%A1%20SCS%20Molduras."
+        target="_blank"
+        rel="noopener"
+        class="block px-4 py-3 text-sm font-semibold text-white bg-gray-900 rounded-lg"
+      >
+        WhatsApp
+      </a>
+    </div>
+  </nav>
+</aside>

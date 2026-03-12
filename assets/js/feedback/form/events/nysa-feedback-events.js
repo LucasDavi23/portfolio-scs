@@ -6,13 +6,13 @@
 // File: nysa-feedback-events.js
 //
 // PT: Emite eventos internos relacionados ao feedback.
-//     Nysa padroniza o formato do evento "feedback:novo",
+//     Nysa padroniza o formato do evento "feedbacknew",
 //     garantindo que outras partes do sistema (Hero/Board/etc.)
 //     recebam um payload consistente.
 //     Ela não valida domínio, não toca UI e não chama API — apenas emite.
 //
 // EN: Emits internal feedback-related events.
-//     Nysa standardizes the "feedback:novo" event format,
+//     Nysa standardizes the "feedbacknew" event format,
 //     ensuring other parts of the system (Hero/Board/etc.)
 //     receive a consistent payload.
 //     She does not validate domain, does not touch UI, and does not call APIs — only emits.
@@ -22,7 +22,7 @@
  * PT: Nome do evento público (compatível com o legado).
  * EN: Public event name (legacy-compatible).
  */
-const EVENT_NAME = 'feedback:novo';
+const EVENT_NAME = 'feedbacknew';
 
 /**
  * PT: Monta o formato padrão de "avaliacao" para o Hero/Board.
@@ -51,8 +51,8 @@ function buildEvaluation({
 }
 
 /**
- * PT: Emite o evento "feedback:novo" com o formato esperado.
- * EN: Emits the "feedback:novo" event with the expected format.
+ * PT: Emite o evento "feedbacknew" com o formato esperado.
+ * EN: Emits the "feedbacknew" event with the expected format.
  *
  * @param {Object} args
  * @param {Object} args.evaluation - shape used by Hero/Board

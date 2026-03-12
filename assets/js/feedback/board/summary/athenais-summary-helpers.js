@@ -1,5 +1,7 @@
 // ✨ Athenais — Guardiã da Lógica do Summary (Helpers)
 //
+// Nível / Level: Jovem / Young
+//
 // PT: Athenais simboliza precisão e sabedoria técnica. Aqui, ela cuida apenas
 //     da lógica “pura” do summary:
 //       • cache local (snapshot e TTL),

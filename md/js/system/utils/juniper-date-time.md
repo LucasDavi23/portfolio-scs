@@ -1,47 +1,35 @@
-# 🌿 Juniper — Date / Time Utilities
+## 🌿 Juniper — Date / Time Utilities
 
-**Camada:** System / Utils  
-**Nível:** Adulta  
-**Função:** Manipulação e formatação segura de data e hora
-
----
-
-## 🧠 Responsabilidade
+**Nível / Level:** Adulto / Adult
 
 **PT:**  
-Juniper fornece funções **puras** para interpretar, normalizar e formatar
-datas e horários no sistema, sempre com _fallback_ seguro.
-Não possui DOM, não conhece UI e não depende de contexto visual.
+Juniper fornece **utilidades puras para manipulação de datas e horários** no sistema.
+
+Responsabilidades:
+
+- interpretar valores de **data e hora**
+- **normalizar formatos** de data
+- formatar datas com **fallback seguro**
+
+Juniper atua apenas como **camada utilitária**.
+
+Ela não manipula DOM,  
+não conhece interface  
+e não depende de contexto visual.
+
+---
 
 **EN:**  
-Juniper provides **pure** utilities to parse, normalize and format
-date/time values with safe fallbacks.
-No DOM, no UI awareness, no visual context.
+Juniper provides **pure utilities for date and time handling** in the system.
 
----
+Responsibilities:
 
-## 🎯 O que a Juniper faz
+- parse **date and time values**
+- **normalize date formats**
+- format dates with **safe fallbacks**
 
-- Interpretar datas em formatos variados
-- Normalizar valores inválidos ou ausentes
-- Formatar data/hora para exibição
-- Garantir fallback consistente (evita `Invalid Date`)
+Juniper operates only as a **utility layer**.
 
----
-
-## 🚫 O que a Juniper NÃO faz
-
-- ❌ Manipular DOM
-- ❌ Renderizar UI
-- ❌ Fazer fetch
-- ❌ Conhecer origem dos dados (API, Modal, Board, etc.)
-
----
-
-## 🔗 Relações
-
-- **Morgana (System/Core):** expõe Juniper como utilitário global
-- **UIs (Mira, Selah, etc.):** consomem Juniper para exibição de datas
-- **Helpers de domínio:** podem reutilizar Juniper sem acoplamento
-
----
+She does not manipulate the DOM,  
+has no UI awareness  
+and does not depend on visual context.

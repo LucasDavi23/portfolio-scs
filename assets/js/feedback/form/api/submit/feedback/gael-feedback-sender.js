@@ -2,8 +2,6 @@
 //
 // Nível: Jovem
 //
-// File: gael-feedback-sender.js
-//
 // PT: Especialista no envio do feedback para o Apps Script.
 //     Atua como camada de proteção do envio: chama a API (Elis),
 //     interpreta respostas técnicas, classifica falhas

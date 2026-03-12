@@ -1,5 +1,7 @@
-// /assets/js/feedback/Mira_Dara/feedback-list-helpers.js
 // ✨ Dara — Assistente lógica da Mira (Helpers)
+//
+// Nível / Level: Jovem / Young
+//
 // PT: Centraliza a lógica "pura" do modal LISTA (sem DOM):
 //     - Mapa de links por plataforma
 //     - Nome legível da plataforma

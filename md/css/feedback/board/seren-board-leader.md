@@ -1,14 +1,15 @@
-## 🌿 Seren — Líder do Board de Avaliações
+## 🌿 Seren — Líder do Board de Avaliações CSS
 
-**Arquivo:** `seren-board-leader.css`  
-**Nível:** Adulta
+**Nível / Level:** Adulto / Adult
 
-- **PT:** Seren coordena visualmente o Board de Avaliações. Ela não estiliza
-  componentes individuais, mas define o ritmo, o espaçamento e a
-  organização geral do board, garantindo que as especialistas
-  trabalhem em harmonia.
-- **EN:** Seren visually coordinates the Reviews Board. She does not style
-  individual components, but defines rhythm, spacing and overall
-  board structure, ensuring specialists work in harmony.
+- **PT:** Seren coordena a estrutura visual do Board de Avaliações.
+  Ela não estiliza componentes individuais, mas define o ritmo,
+  os espaçamentos e a organização geral do board, garantindo
+  consistência visual e integração entre as especialistas.
+
+- **EN:** Seren coordinates the visual structure of the Reviews Board.
+  She does not style individual components, but defines rhythm,
+  spacing and the overall organization of the board, ensuring
+  visual consistency and integration between specialists.
 
 ---

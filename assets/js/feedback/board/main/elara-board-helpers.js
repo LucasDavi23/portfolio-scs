@@ -1,18 +1,33 @@
-// /assets/js/feedback/board/main/elara-board-helpers.js
 // 🌿 Elara — Helpers do Board
+//
+// Nível / Level: Jovem / Young
+//
 // PT: Simboliza precisão silenciosa. Processa os dados do Board: normalização,
 //     seleção de imagens e paginação antes da renderização pela Selah.
+//
 // EN: Symbolizes quiet precision. Processes the Board data: normalization,
 //     image selection and pagination before Selah renders the UI.
 /* -----------------------------------------------------------------------------*/
 
 // 🌿 Dalia — lógica de imagem (helpers)
 // EN 🌿 Dalia — image logic (helpers)
-// Fornece:
+// Fornece / Provides:
 // - SanitizeUrl
 // - imgProxyUrl
 // - extractDriveId
 import { DaliaImageHelpers } from '/assets/js/feedback/board/image/dalia-image-helpers.js';
+
+// --------------------------------------------------
+// 🕰️ Juniper — utilitário de data/hora do system
+// EN 🕰️ Juniper — system date/time utility
+// Fornece / Provides:
+// - parseDateTime()
+// - hasMeaningfulTime()
+// - formatDate()
+// - formatTime()
+// - formatDateTime()
+
+import { JuniperDateTime } from '/assets/js/system/utils/juniper-date-time.js';
 
 // ------------------------------------------------------------
 // Config de resiliência de rede (compartilhada)
@@ -23,51 +38,6 @@ export const NET = {
   retryMaxAttempts: 2, // 1 tentativa + 2 retries = 3 no total (combina com FeedbackAPI)
   autoRetryAfterMs: 5000, // se online, tenta sozinho após 5s
 };
-
-// ------------------------------------------------------------
-// Render Estrelas (rating)
-// ------------------------------------------------------------
-// ------------------------------------------------------------
-// Estrelas (rating) — 5 sempre, preenchimento proporcional
-// ------------------------------------------------------------
-// export function renderStar(n = 0) {
-//   const val = Math.max(0, Math.min(+n || 0, 5));
-//   const pct = (val / 5) * 100;
-
-//   return `
-//     <span class="inline-flex items-center gap-1" aria-label="${val.toFixed(1)} de 5 estrelas">
-//       <span class="relative inline-block leading-none">
-//         <!-- estrelas vazias -->
-//         <span class="text-neutral-300 text-sm">★★★★★</span>
-
-//         <!-- estrelas preenchidas -->
-//         <span
-//           class="absolute left-0 top-0 overflow-hidden text-yellow-500 text-sm"
-//           style="width:${pct}%"
-//         >
-//           ★★★★★
-//         </span>
-//       </span>
-
-//       <span class="text-neutral-800 font-semibold text-sm">
-//         ${val.toFixed(1)}
-//       </span>
-//     </span>
-//   `;
-// }
-
-// ------------------------------------------------------------
-// Formata data ISO para dd/mm/aaaa
-// ------------------------------------------------------------
-export function formatDate(isoStr) {
-  if (!isoStr) return '';
-  const d = new Date(isoStr);
-  if (isNaN(d)) return isoStr;
-  const dd = String(d.getDate()).padStart(2, '0');
-  const mm = String(d.getMonth() + 1).padStart(2, '0');
-  const yy = d.getFullYear();
-  return `${dd}/${mm}/${yy}`;
-}
 
 // ------------------------------------------------------------
 // Skeleton de loading (linhas texto)
@@ -175,7 +145,7 @@ export function pickImagePair(item) {
   // 🇧🇷 let aqui porque pode evoluir (ex.: trocar fonte do hint no futuro)
   // 🇺🇸 let because you might change the source later (e.g., updated_at)
   // ----------------------------------------------------------
-  let cacheHint = item?.data || item?.timestamp || '';
+  let cacheHint = item?.date_ms ?? item?.date_br ?? item?.date ?? item?.timestamp ?? '';
 
   // ----------------------------------------------------------
   // Caso 2: é Drive (link/ID) → sempre usar o proxy do GAS
@@ -200,7 +170,6 @@ export function pickImagePair(item) {
 
 export const ElaraBoardHelpers = {
   NET,
-  formatDate,
   skeletonLines,
   backoff,
   pickImagePair,

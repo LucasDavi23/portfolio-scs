@@ -1,147 +1,77 @@
-# 🜁 Arquitetura Geral do Sistema
+# 📘 Arquitetura do Sistema — System (JavaScript)
 
-### Governança de Morgana — Diretora Geral
+### Governança de Morgana — Direção do Sistema
 
-Este documento apresenta o **mapa estrutural completo do sistema**,  
-mostrando todos os setores, líderes e suas subdivisões internas.  
-Morgana supervisiona tudo e garante a ordem de inicialização e modularidade.
+O **System** representa o núcleo estrutural do JavaScript da aplicação.
 
----
+Essa camada reúne a **diretoria geral, utilidades globais e especialistas reutilizáveis** que sustentam o funcionamento dos demais módulos do sistema.
 
-## 🧭 Visão Geral dos Setores
+Seu papel é garantir **organização, previsibilidade e consistência técnica**,
+permitindo que setores como Layout, Board, Form e futuros módulos operem
+sobre uma base estável.
 
-| Setor                | Líder     | Pasta Base         | Papel Técnico Resumido                                                    |
-| -------------------- | --------- | ------------------ | ------------------------------------------------------------------------- |
-| **Layout**           | Aurora 🌇 | `/layout`          | Interface principal: carrossel, navegação, modal, efeitos, foundation.    |
-| **Feedback (Board)** | Selah 🌿  | `/feedback/board`  | Sistema de avaliações: cards, lista, summary, avatares e board principal. |
-| **Sistema (Core)**   | Morgana 🜁 | `/system`          | Diretoria geral: inicialização global de todos os setores.                |
-| **Futuros setores**  | —         | `/pedidos`, `/orc` | Ex.: pedidos, orçamento, catálogo, marketplace.                           |
+A governança de **Morgana** coordena essa base sem interferir na lógica
+interna de cada setor.
 
 ---
 
-# 🧩 Estrutura detalhada sob a supervisão de Morgana
+# 🧭 Visão Geral dos Setores (System)
+
+| Setor          | Responsável | Papel                                            |
+| -------------- | ----------- | ------------------------------------------------ |
+| Direção        | Morgana     | Coordenação e inicialização do núcleo do sistema |
+| Utils          | Juniper     | Utilidades globais reutilizáveis                 |
+| Touch Guard    | Onyx        | Interpretação correta de gestos de toque         |
+| Scroll Control | Latch       | Travamento e restauração do scroll               |
+| Loading UI     | Luma        | Estados visuais globais de carregamento          |
+| Submit UI      | Stella      | Overlay de processamento para submits            |
+| Message UI     | Halo        | Componente global de mensagens                   |
+| Rating UI      | Zoe         | Representação visual de avaliações               |
 
 ---
 
-## 1) 🌇 Setor Layout (Líder: Aurora)
+# 🌸 Personas do System
 
-/layout
-| foundation/
-| └── Luna 🌙 — base do layout
-|
-| nav/submenu/
-| └── Navi 🧭 — controle do menu mobile
-|
-| effects/scroll/
-| └── Aura 🌬️ — efeitos de scroll
-|
-| modal/
-| └── Iris 👁️ — modal de imagem global
-|
-| hero/carousel/
-| ├── Nami 🎠 — controle lógico do carrossel
-| └── Yume 🌌 — animações do carrossel (futuro)
-|
-└ leader/
-└── Aurora 🌇 — coordenação do setor
-
-Aurora responde diretamente à Morgana, apenas no momento de inicialização.
+| Persona | Função                                           |
+| ------- | ------------------------------------------------ |
+| Morgana | Coordenação e inicialização do núcleo do sistema |
+| Juniper | Manipulação e formatação de datas                |
+| Onyx    | Interpretação segura de gestos de toque          |
+| Latch   | Controle de scroll para modais                   |
+| Luma    | Interface global de loading                      |
+| Stella  | Overlay de processamento de submit               |
+| Halo    | Sistema de mensagens flutuantes                  |
+| Zoe     | Representação visual de rating                   |
 
 ---
 
-## 2) 🌿 Setor Feedback (Líder: Selah)
+# 🧰 Ferramentas do System
 
-/feedback/board
-|
-| api/
-| ├── Nádia 🧬 — Core API
-| └── Naomi 🍃 — Card API (normalização)
-|
-| main/
-| ├── Selah 🌿 — UI principal do board
-| ├── Elara 🌿 — helpers do board
-| └── Lia 🌱 — preload da API
-|
-| summary/
-| ├── Abigail 🌟 — UI do summary
-| └── Athenais 🌟 — lógica do summary
-|
-| image/
-| ├── Petra 🪷 — UI de imagens
-| └── Dália 🪷 — helpers de imagem
-|
-| avatar/
-| ├── Lívia 🌷 — UI do avatar
-| └── Helena 🌷 — helpers de avatar
-|
-└ list/
-├── Mira 🌸 — List UI (modal Ver Mais)
-└── Dara 🌸 — helpers da lista
-
-Selah responde a Morgana apenas quando a diretora geral inicializa o setor completo.
+| Ferramenta | Função                                 |
+| ---------- | -------------------------------------- |
+| Logger     | Padronização e observabilidade de logs |
+| UUID       | Geração de identificadores únicos      |
 
 ---
 
-## 3) 🜁 Núcleo do Sistema (Direção Geral: Morgana)
+# 🌳 Planta do System
 
+```
 /system
-|
-| director/
-| └── Morgana 🜁 — inicialização global
-|
-| utils/
-| └── Juniper 🌿 — Date/Time Utilities (funções puras)
-|
-| ui/
-| └── Luma (Loading) 🍃 — Loading UI global (spinner / botão / ensurePaint)
-| └── Zoe (rating) ⭐ — representação visual de avaliações por estrelas
-|
-
-Morgana:
-
-- chama Aurora (Layout)
-- futuramente chamará Selah (Feedback)
-- depois chamará Pedidos, Orçamento, etc.
-- define a ordem de carregamento do sistema
-- mantém o sistema modular e escalável
-
-Juniper:
-
-- utilitário puro de data/hora
-- usado por qualquer setor (sem DOM)
-
-Luma:
-
-- UI global de loading (DOM)
-- usada por qualquer UI (Mira, Selah, etc.)
-- garante “pintura” do loading antes de fetch pesado (ensurePaint)
-
----
-
-# 🎯 Fluxo oficial de inicialização (flow chart simplificado)
-
-Morgana
-├── Aurora (Layout)
-│ ├── Luna
-│ ├── Navi
-│ ├── Aura
-│ ├── Iris
-│ ├── Nami
-│ └── Yume
 │
-├── Kendra (Feedback)
-| ├── Selah / Lia / Elara
-│ ├── Nádia / Naomi
-│ ├── Abigaíl / Athenais
-│ ├── Petra / Dália
-│ ├── Mira / Dara
-│ └── Lívia / Helena
+├─ director/
+│   └── Morgana
 │
-└── (Pedidos / Orçamentos / Catálogo) ← expansões futuras
-
-# ⭐ Conclusão
-
-Este documento serve como **mapa-mestre do sistema**.  
-Sempre que novos módulos forem criados, eles devem ser encaixados aqui.
-
----
+├─ utils/
+│   ├── Juniper
+│   ├── Onyx
+│   ├── Latch
+│   ├── Logger (tool)
+│   └── UUID (tool)
+│
+└─ ui/
+    ├── Luma
+    ├── Stella
+    ├── Halo
+    └── Zoe
+```

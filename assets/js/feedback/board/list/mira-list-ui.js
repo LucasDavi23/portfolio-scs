@@ -1,6 +1,7 @@
 // ✨ Mira — Guardiã do Modal LISTA (UI - ESModule)
-// Nível: Adulta
-//------------------------------------------------------------
+//
+// Nível: Adulto / Adult
+//
 // PT: Controla tudo que é DOM/visual do modal LISTA (“Ver mais”):
 //     - abrir/fechar o modal
 //     - carregar páginas de avaliações (via FeedbackAPI)
@@ -296,7 +297,9 @@ function renderItem(it) {
     showValue: false, // só estrelas
   });
 
-  const when = JuniperDateTime.format(it.date);
+  const when = JuniperDateTime.format(
+    it.date_ms ?? it.date_br ?? it.date_iso ?? it.dateIso ?? it.date
+  );
   const time = document.createElement('time');
   time.className = 'text-xs text-gray-500 whitespace-nowrap';
   time.textContent = when || '';

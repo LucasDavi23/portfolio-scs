@@ -1,5 +1,7 @@
-// /assets/js/feedback/board/avatar/livia-avatar-ui.js
 // 🌷 Lívia — UI do Avatar
+//
+// Nível / Level: Aprendiz / Apprentice
+//
 // PT: Responsável pela camada visual do avatar: criação do wrap, estilo e atualização das iniciais.
 // EN: Handles the visual layer of the avatar: wrap creation, styling and initials updates.
 /* -----------------------------------------------------------------------------*/

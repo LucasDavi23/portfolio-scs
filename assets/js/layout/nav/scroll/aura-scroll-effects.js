@@ -1,10 +1,17 @@
-// /js/layout/nav/scroll/aura-scroll-effects.js
 // 🌬 Aura — Efeitos de Scroll
-// Nível: Jovem (futuro)
-// PT: Ponto central para efeitos de scroll (ex.: header sticky, sombras,
-//     classes condicionais ao rolar). Atualmente vazio, pronto para crescer.
-// EN: Central point for scroll effects (e.g., sticky header, shadows,
-//     conditional classes on scroll). Currently empty, ready to grow.
+// Nível: Jovem / Young
+//
+// PT:
+// Módulo reservado para possíveis efeitos visuais ligados ao scroll
+// dentro do layout. Atualmente não possui lógica ativa.
+// Caso comportamentos dependentes de rolagem sejam necessários,
+// eles devem ser centralizados aqui.
+//
+// EN:
+// Reserved module for potential scroll-related visual effects
+// within the layout. Currently contains no active logic.
+// If scroll-based behaviors become necessary, they should
+// be centralized here.
 
 export function initScrollEffects() {
   // Ainda não há efeitos de scroll específicos além do backToTop (Luna).
@@ -13,9 +20,5 @@ export function initScrollEffects() {
 }
 
 export const AuraScrollEffects = {
-  initScrollEffects,
-
-  initScrollEffects() {
-    this.initScrollEffects();
-  },
+  init: initScrollEffects,
 };

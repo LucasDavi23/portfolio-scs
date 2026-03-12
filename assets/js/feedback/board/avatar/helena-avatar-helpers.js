@@ -1,5 +1,7 @@
-// /assets/js/feedback/board/avatar/helena-avatar-helpers.js
 // 🌷 Helena — Helpers do Avatar
+//
+// Nível / Level: Aprendiz / Apprentice
+//
 // PT: Lógica pura do avatar: tratamento de nomes, normalização e geração das iniciais.
 // EN: Pure avatar logic: name parsing, normalization and initials generation.
 /* -----------------------------------------------------------------------------*/

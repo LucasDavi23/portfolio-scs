@@ -1,14 +1,15 @@
-## 🌾 Nyla — Líder do Formulário de Feedback
+## 🌾 Nyla — Líder do Formulário de Feedback CSS
 
-**Arquivo:** `nyla-form-leader.css`  
-**Nível:** Adulta
+**Nível / Level:** Jovem / Young
 
-- **PT:** Nyla coordena o módulo do formulário de feedback.
-  Ela organiza a camada de estilos do form e importa
-  as especialistas responsáveis pela interface e
-  pelos detalhes visuais.
-- **EN:** Nyla coordinates the feedback form module. She
-  organizes the form styling layer and imports
-  specialists responsible for UI and visual details.
+- **PT:** Nyla coordena a estrutura visual do módulo de formulário de
+  feedback. Ela organiza a camada de estilos do form e centraliza
+  a importação das especialistas responsáveis pela interface
+  e pelos detalhes visuais.
+
+- **EN:** Nyla coordinates the visual structure of the feedback form
+  module. She organizes the form styling layer and centralizes
+  the import of specialists responsible for the interface
+  and visual details.
 
 ---

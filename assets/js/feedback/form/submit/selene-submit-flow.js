@@ -3,8 +3,6 @@
 //
 // Nível: Adulta
 //
-// File: selene-submit-flow.js
-//
 // PT: Executa o fluxo de envio do feedback.
 //     Selene monta o payload final, resolve rating (via Zaya),
 //     faz upload opcional de imagem (via Lyra/Daphne) e cria o feedback

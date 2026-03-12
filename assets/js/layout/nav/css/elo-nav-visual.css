@@ -1,4 +1,4 @@
-/* ==================================================
+/* -------------------------------------------------
   🎨 Elo — Navigation Visual Connector
 
   Nível: Adulta
@@ -7,7 +7,7 @@
     o estado ativo da navegação.
   EN: Handles visual indication of
     active navigation state.
-================================================== */
+------------------------------------------------ */
 /* ------------------------------
    Desktop: active underline
    - Reaproveita a linguagem do hover:underline
@@ -23,7 +23,7 @@
    - Visual discreto para indicar "você está aqui"
    - Mantém o look clean do menu
    ------------------------------ */
-#menu .nav-link.is-active {
+#mobile-menu .nav-link.is-active {
   background-color: rgb(243 244 246); /* gray-100 */
   border-radius: 0.375rem; /* rounded-md */
 }
@@ -43,15 +43,15 @@
   height: 1px;
 }
 
-/* ==================================================
+/* -------------------------------------------------
   🍔 Elo — Mobile Menu Drawer (CSS-only)
   Atua diretamente sobre #menu existente
-================================================== */
+-------------------------------------------------- */
 
 /* ------------------------------
    Backdrop (já existe no HTML)
 ------------------------------ */
-#menu-backdrop {
+#mobile-menu-backdrop {
   background: rgba(0, 0, 0, 0.42);
   opacity: 0;
   transition: opacity 220ms cubic-bezier(0.2, 0.8, 0.2, 1);
@@ -66,7 +66,7 @@
   touch-action: none;
 }
 
-#menu-backdrop.is-open {
+#mobile-menu-backdrop.is-open {
   opacity: 1;
 }
 
@@ -75,7 +75,7 @@
    - vira o drawer animado
    - e vira scroll container (pra não vazar pro fundo)
 ------------------------------ */
-#menu {
+#mobile-menu {
   /* PT: Evita clique “fantasma” quando fechado.
      EN: Prevent pointer events when closed. */
   pointer-events: none;
@@ -90,46 +90,43 @@
   overscroll-behavior: contain;
 
   /* animação base */
-  transform: translateX(16px);
-  opacity: 0;
+  transform: translateX(100%);
+  will-change: transform;
 
-  transition:
-    transform 260ms cubic-bezier(0.2, 0.9, 0.2, 1),
-    opacity 220ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  transition: transform 380ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 /* Estado aberto (JS adiciona .is-open) */
-#menu.is-open {
+#mobile-menu.is-open {
   pointer-events: auto;
   transform: translateX(0);
-  opacity: 1;
 }
 
 /* Mobile real: drawer mais compacto */
 @media (max-width: 420px) {
-  #menu {
+  #mobile-menu {
     width: min(78vw, 360px);
   }
 
-  #menu nav {
+  #mobile-menu nav {
     padding-bottom: 16px !important; /* era pb-8 */
   }
 
-  #menu .space-y-2 > * + * {
+  #mobile-menu .space-y-2 > * + * {
     margin-top: 6px !important; /* era 8px */
   }
 }
 
 /* Tablet e acima: mantém como está hoje */
 @media (min-width: 421px) {
-  #menu {
+  #mobile-menu {
     width: 100%;
     max-width: 24rem; /* sm:max-w-sm = 384px */
   }
 }
 
 /* Estado aberto */
-#menu.is-open {
+#mobile-menu.is-open {
   pointer-events: auto;
   transform: translateX(0);
   opacity: 1;
@@ -138,7 +135,7 @@
 /* ------------------------------
    Links: micro motion elegante
 ------------------------------ */
-#menu .nav-link {
+#mobile-menu .nav-link {
   opacity: 0;
   transform: translateY(6px);
 
@@ -148,33 +145,33 @@
 }
 
 /* Stagger leve (sem JS) */
-#menu.is-open .nav-link {
+#mobile-menu.is-open .nav-link {
   opacity: 1;
   transform: translateY(0);
 }
 
-#menu.is-open .nav-link:nth-child(1) {
+#mobile-menu.is-open .nav-link:nth-child(1) {
   transition-delay: 40ms;
 }
-#menu.is-open .nav-link:nth-child(2) {
+#mobile-menu.is-open .nav-link:nth-child(2) {
   transition-delay: 60ms;
 }
-#menu.is-open .nav-link:nth-child(3) {
+#mobile-menu.is-open .nav-link:nth-child(3) {
   transition-delay: 80ms;
 }
-#menu.is-open .nav-link:nth-child(4) {
+#mobile-menu.is-open .nav-link:nth-child(4) {
   transition-delay: 100ms;
 }
-#menu.is-open .nav-link:nth-child(5) {
+#mobile-menu.is-open .nav-link:nth-child(5) {
   transition-delay: 120ms;
 }
-#menu.is-open .nav-link:nth-child(6) {
+#mobile-menu.is-open .nav-link:nth-child(6) {
   transition-delay: 140ms;
 }
-#menu.is-open .nav-link:nth-child(7) {
+#mobile-menu.is-open .nav-link:nth-child(7) {
   transition-delay: 160ms;
 }
-#menu.is-open .nav-link:nth-child(8) {
+#mobile-menu.is-open .nav-link:nth-child(8) {
   transition-delay: 180ms;
 }
 
@@ -182,9 +179,9 @@
    Reduced motion
 ------------------------------ */
 @media (prefers-reduced-motion: reduce) {
-  #menu,
-  #menu-backdrop,
-  #menu .nav-link {
+  #mobile-menu,
+  #mobile-menu-backdrop,
+  #mobile-menu .nav-link {
     transition: none !important;
     transform: none !important;
   }

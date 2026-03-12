@@ -1,4 +1,4 @@
-// ==================================================
+// ---------------------------------------------------------------------------------------
 // 🧠 Sofia — Form Validation & UX State Specialist
 //
 // Nível: Jovem
@@ -26,7 +26,7 @@
 //
 //     Sofia does not process images (Athena), does not handle photo UI (Daphne),
 //     does not handle rating UI (Ayla), does not emit events and does not call API/Flow.
-// ==================================================
+// --------------------------------------------------------------------------------------
 
 // ------------------------------
 // Internal element map

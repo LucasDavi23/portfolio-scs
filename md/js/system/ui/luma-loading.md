@@ -1,56 +1,35 @@
-# 🍃 Luma — Soldado de Elite do Loading
+## 🍃 Luma — Loading UI Specialist
 
-**Camada:** System / UI  
-**Nível:** Adulta  
-**Função:** Estado visual de carregamento (global)
-
----
-
-## 🧠 Responsabilidade
+**Nível / Level:** Adulto / Adult
 
 **PT:**  
-Luma é responsável por todo estado visual de _loading_ do sistema.  
-Ela renderiza spinners, controla loading em botões e garante que o browser
-pinte o estado de carregamento antes de operações pesadas.
+Luma é responsável pelos **estados visuais de carregamento do sistema**.
 
-Não executa fetch, não valida dados e não conhece fluxos específicos
-(Mira, Selah, etc).
+Responsabilidades:
+
+- renderizar **spinners de loading**
+- aplicar **estado de loading em botões**
+- garantir que o navegador **pinte o estado visual antes de operações pesadas**
+
+Luma atua apenas na **camada visual de loading**.
+
+Ela não executa fetch,  
+não valida dados  
+e não possui conhecimento de fluxos específicos do sistema.
+
+---
 
 **EN:**  
-Luma handles all visual loading states across the system.  
-It renders spinners, toggles loading on buttons and ensures a paint frame
-before heavy operations.
+Luma handles the **visual loading states of the system**.
 
-No fetch, no data validation, no feature awareness.
+Responsibilities:
 
----
+- render **loading spinners**
+- apply **loading states to buttons**
+- ensure the browser **paints the loading state before heavy operations**
 
-## 🎯 O que a Luma faz
+Luma operates only in the **loading UI layer**.
 
-- Renderizar spinner + label (Tailwind)
-- Controlar loading em botões (`disabled`, `aria-busy`)
-- Garantir pintura do loading (`ensurePaint`)
-- Evitar `undefined` visual em labels
-
----
-
-## 🚫 O que a Luma NÃO faz
-
-- ❌ Fetch de dados
-- ❌ Validação de resposta
-- ❌ Decisão de fluxo
-- ❌ Conhecimento de modais ou páginas específicas
-
----
-
-## 🔗 Relações
-
-- **Morgana (System/Core):** autoriza e define padrões globais
-- **Mira / Selah / outras UIs:** consomem Luma para estados de carregamento
-- **Helpers (Dara, Juniper):** independentes, não acoplados
-
----
-
-## 📁 Localização
-
-/asset/js/system/ui/loading/luma-loading.js
+She does not perform fetch requests,  
+does not validate data  
+and has no knowledge of specific system flows.

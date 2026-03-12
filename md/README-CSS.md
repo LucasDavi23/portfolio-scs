@@ -1,209 +1,232 @@
-Documentação exclusiva da arquitetura CSS do sistema.
-Hierarquia visual, organização de estilos, líderes, especialistas e ponto de entrada.
+# 📘 Arquitetura CSS
+
+Este documento apresenta a **filosofia e organização da arquitetura CSS** do sistema.
+
+O projeto adota uma estrutura **modular orientada por especialistas visuais**, onde cada domínio possui responsabilidades claras, líderes definidos e uma hierarquia de estilos previsível.
+
+A arquitetura CSS foi pensada para manter:
+
+- clareza visual
+- modularidade
+- manutenção simples
+- consistência entre setores
+- escalabilidade da interface
+
+Toda a organização visual segue a identidade **Celine Dev**, aplicada como base conceitual para nomes, responsabilidades e estrutura dos estilos.
+
+---
 
 # ✨ Celine Dev — Núcleo Visual e Hierarquia CSS
 
-Este ambiente pertence exclusivamente ao desenvolvedor **Davi**.  
-Toda organização de estilos, nomenclatura, comentários e estrutura CSS
-segue a identidade **Celine Dev**.
+A arquitetura CSS do sistema entende o estilo como parte da estrutura do produto.
 
-Regras contínuas:
+Aqui, o CSS não é tratado como complemento improvisado, mas como uma camada organizada de leitura, hierarquia, aparência e consistência visual.
 
-- Sempre estruturar CSS com clareza e intenção.
-- Comentários de arquivos são **bilíngues (PT/EN)**.
-- CSS não executa lógica, apenas **forma, hierarquia e leitura visual**.
-- Prioridade máxima para organização, previsibilidade e manutenção.
-- Não criar estilos desnecessários ou duplicados.
-- Cada arquivo tem **uma responsabilidade visual clara**.
-
-Modo contínuo:
-
-- A identidade Celine Dev atua **sempre** no CSS.
-- Não existe “CSS rápido”: todo estilo faz parte do sistema.
+Cada arquivo existe para cumprir uma responsabilidade específica dentro da interface.
 
 ---
 
-## 📘 Equipe Celestial — Estrutura Visual do Sistema
-
-Os nomes simbólicos representam **papéis visuais** dentro do sistema.  
-Não representam pessoas reais — são **identidades técnicas/espirituais**
-que facilitam leitura, manutenção e didática.
-
-A identidade visual é parte do produto, não um detalhe estético.
-
----
-
-## 🧭 1. Diretrizes Gerais do CSS
+# 🧭 Diretrizes Gerais do CSS
 
 - CSS é organizado por **domínio visual**, não por tecnologia.
-- Especialistas cuidam de partes específicas.
+- Especialistas cuidam de partes específicas da interface.
 - Leaders coordenam conjuntos visuais.
-- Directors garantem ordem e ponto de entrada.
+- Directors garantem ordem, entrada e previsibilidade.
 - Nenhum arquivo mistura responsabilidades.
 - Variantes **não são personas**.
-- CSS nunca substitui JS, nem vice-versa.
+- CSS não substitui JavaScript, nem JavaScript substitui CSS.
 
 ---
 
-## 🧬 2. Persona x Estrutura (no CSS)
+# 🧬 Persona x Estrutura
 
-### **Persona (Especialista Visual)**
+## Persona (Especialista Visual)
 
-- Representa uma responsabilidade visual clara.
-- Atua sobre leitura, hierarquia, densidade ou aparência.
-- Não executa lógica nem estado.
-- Possui identidade simbólica (nome).
-- Vive dentro de um domínio (system, layout, feedback).
+Uma persona representa uma responsabilidade visual clara dentro do sistema.
 
-Ex.: Aline, Nina, Zara, Elisa.
+Ela:
 
----
+- atua sobre leitura, hierarquia, densidade ou aparência
+- não executa lógica
+- possui identidade simbólica
+- vive dentro de um domínio específico
 
-### **Leader (Coordenação Visual)**
+Exemplos:
 
-- Não estiliza detalhes.
-- Orquestra ritmo, espaçamento e integração.
-- Importa especialistas.
-- Define decisões estruturais locais ou globais.
-
-Ex.: Atlas, Seren, Nyla.
+- Aline
+- Zara
+- Elisa
 
 ---
 
-### **Director (Ordem e Entrada)**
+## Leader (Coordenação Visual)
 
-- Não estiliza nada.
-- Não define layout.
-- Centraliza imports.
-- Define ponto inicial do CSS.
-- Garante previsibilidade e modularidade.
+A leader coordena um conjunto visual.
 
-Ex.: **Morrigan**.
+Ela:
 
----
+- não estiliza detalhes isolados
+- organiza ritmo, integração e coerência do setor
+- importa especialistas
+- define decisões estruturais locais
 
-### **Arquivo Estrutural (Não-Persona)**
+Exemplos:
 
-- Base técnica do sistema.
-- Suporte estrutural.
-- Não possui identidade simbólica.
-
-Ex.: Foundation, modal-mobile, notebook-scale.
+- Atlas
+- Seren
+- Nyla
 
 ---
 
-## 🌱🌿👑 3. Níveis das Personas (Visual)
+## Director (Ordem e Entrada)
 
-### 🟢 Aprendiz
+A director atua na camada de organização da arquitetura.
 
-- Ajustes simples ou locais.
-- Apoia leitura visual.
-- Fácil de alterar ou remover.
-- Não governa nada.
+Ela:
 
-Ex.: badges, helpers locais, ajustes pontuais.
+- não estiliza componentes
+- não define layout local
+- centraliza imports
+- define o ponto de entrada
+- garante previsibilidade e modularidade
 
----
+Exemplo:
 
-### 🔵 Jovem
-
-- Responsabilidade visual bem definida.
-- Atua em subdomínios.
-- Já é reutilizável.
-- Ainda pode evoluir.
-
-Ex.: cards, texto, imagem, rating.
+- **Morrigan**
 
 ---
 
-### 🟣 Adulta
+## Arquivo Estrutural (Não-Persona)
 
-- Estrutural para o sistema visual.
-- Coordena ou define base.
-- Mudanças são raras e conscientes.
-- Se quebrar, o sistema sente.
+Arquivos estruturais oferecem suporte técnico ao sistema visual, sem identidade simbólica.
 
-Ex.: Atlas, Lexa, Vega, Seren, Nyla.
+Exemplos:
+
+- Foundation
+- modal-mobile
+- notebook-scale
 
 ---
 
-## 🧭 4. Estrutura Geral do CSS
+# 🌱 Níveis das Personas (Visual)
 
-O CSS do sistema é organizado em três grandes domínios:
+## 🟢 Aprendiz
 
-### 🜃 System
+Responsável por ajustes simples ou locais.
 
-- Base visual global
-- Tipografia
+Características:
+
+- apoio visual pontual
+- fácil de alterar ou remover
+- não governa o sistema
+
+---
+
+## 🔵 Jovem
+
+Responsabilidade visual bem definida dentro de um subdomínio.
+
+Características:
+
+- já é reutilizável
+- atua em partes específicas da interface
+- ainda pode evoluir
+
+---
+
+## 🟣 Adulta
+
+Especialista estrutural do sistema visual.
+
+Características:
+
+- coordena ou define base
+- mudanças são raras e conscientes
+- se quebrar, a interface sente
+
+---
+
+# 🧭 Domínios da Arquitetura CSS
+
+A arquitetura CSS do sistema é organizada em três grandes domínios:
+
+## 🜃 System
+
+Responsável por:
+
+- base visual global
+- tipografia
 - UI compartilhada
-- Ordem de imports
-- Ponto de entrada (Morrigan)
+- ordem de imports
+- ponto de entrada
 
-📄 Documentado em `SYSTEM-CSS.md`
-
----
-
-### 🧭 Layout
-
-- Estrutura macro
-- Layouts locais
-- Responsividade
-- Escalas e adaptação
-
-📄 Documentado em `LAYOUT-CSS.md`
+📄 Documentado em `system-css.md`
 
 ---
 
-### 🎯 Feedback
+## 🧭 Layout
 
-- Layout local da seção
-- Board (leitura das avaliações)
-- Formulário (interface visual)
-- Variantes estruturais
+Responsável por:
 
-📄 Documentado em `FEEDBACK-CSS.md`
+- estrutura macro
+- layouts locais
+- responsividade
+- escalas e adaptação
+
+📄 Documentado em `layout-css.md`
 
 ---
 
-## 🧠 5. Princípios Fundamentais
+## 🎯 Feedback
+
+Responsável por:
+
+- layout local da seção
+- board de avaliações
+- formulário
+- variantes estruturais
+
+📄 Documentado em `feedback-css.md`
+
+---
+
+# 🧠 Princípios Fundamentais
 
 - CSS é **sistema**, não decoração.
 - Layout define estrutura, não aparência.
 - UI define padrões, não contexto.
 - Tipografia define linguagem, não layout.
-- Feedback nunca redefine regras globais.
-- Nenhum domínio “manda” no outro.
+- Feedback não redefine regras globais.
+- Nenhum domínio governa o outro fora de sua responsabilidade.
 
 ---
 
-## 🔗 6. Relação com o JavaScript
+# 🔗 Relação com o JavaScript
 
-CSS e JS são **independentes**, porém **simétricos**:
+CSS e JavaScript são camadas independentes, porém conceitualmente simétricas.
 
 | JavaScript (Lógica) | CSS (Visual)         |
 | ------------------- | -------------------- |
 | Morgana             | Morrigan             |
 | Leaders de setor    | Leaders visuais      |
-| UI JS               | UI CSS (Vega)        |
+| UI JS               | UI CSS               |
 | Utils puros         | Foundation / ajustes |
 
-Cada camada evolui separadamente, mantendo alinhamento conceitual.
+Cada camada evolui de forma separada, mantendo alinhamento conceitual entre lógica e interface.
 
 ---
 
-## 🪶 7. Princípio Final
+# 🪶 Princípio Final
 
-O CSS do sistema:
+O CSS do sistema possui:
 
-- Tem hierarquia
-- Tem liderança
-- Tem identidade
-- Tem ponto de entrada
-- Não é improvisado
+- hierarquia
+- liderança
+- identidade
+- ponto de entrada
+- organização consciente
 
 Cada arquivo existe por um motivo.  
 Cada nome carrega uma responsabilidade.
 
-**Forma sem ordem vira ruído.  
-Ordem sem forma vira rigidez.  
-Aqui, os dois coexistem.**
+A forma visual não é improvisada: ela faz parte da arquitetura do produto.

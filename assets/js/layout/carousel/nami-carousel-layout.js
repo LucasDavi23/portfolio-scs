@@ -1,5 +1,5 @@
 // 🌸 Nami — Guardiã do Carrossel Principal
-// Nível: Jovem
+// Nível / Level: Jovem / Young
 //
 // PT: Nami representa fluidez, movimento e suavidade. Ela não cuida de efeitos
 //     avançados nem das animações profundas — isso é papel da Yume
@@ -24,6 +24,21 @@
 //       • ensures clean, predictable transitions.
 //     Nami keeps the carousel stable and refined, setting the stage for Yume
 //     to bring deeper animation and polish.
+
+// --------------------------------------------------
+// imports
+// --------------------------------------------------
+
+// 🎐 Yume — Animation
+// PT: Controla as animações visuais do carrossel.
+// EN: Handles the visual animations of the carousel.
+// Fornece / Provides:
+//  - applyEnter()
+//  - applyExit()
+
+import { YumeCarouselAnimations } from '/assets/js/layout/carousel/animation/yume-carousel-animations.js';
+
+// --------------------------------------------------
 
 // PT: Controla o carrossel principal: slides, setas, dots e swipe.
 // EN: Controls the main carousel: slides, arrows, dots, and swipe.
@@ -76,7 +91,7 @@ function CarouselLayout() {
   const initSlides = () => {
     items.forEach((el, idx) => {
       el.classList.remove('opacity-0', 'opacity-100', 'translate-x-5', '-translate-x-5');
-      el.classList.add('absolute', 'inset-0', 'transition-transform', 'duration-500', 'ease-out');
+      el.classList.add('absolute', 'inset-0');
 
       if (idx === 0) {
         el.classList.add('translate-x-0', 'z-10');
@@ -102,26 +117,19 @@ function CarouselLayout() {
 
     const currEl = items[i];
     const nextEl = items[target];
+    const direction = dir > 0 ? 'next' : 'prev';
 
-    nextEl.classList.remove('translate-x-0', '-translate-x-full', 'pointer-events-none');
-    nextEl.classList.add(dir > 0 ? 'translate-x-full' : '-translate-x-full', 'z-10');
+    // PT: atualiza o feedback visual imediatamente
+    // EN: updates visual feedback immediately
+    paintDots(target);
 
-    void nextEl.offsetHeight; // reflow
-
-    currEl.classList.remove('translate-x-0', 'z-10');
-    currEl.classList.add(
-      dir > 0 ? '-translate-x-full' : 'translate-x-full',
-      'z-0',
-      'pointer-events-none'
-    );
-
-    nextEl.classList.remove(dir > 0 ? 'translate-x-full' : '-translate-x-full');
-    nextEl.classList.add('translate-x-0');
+    // 🌸 Nami delega a animação para Yume
+    YumeCarouselAnimations.applyExit(currEl, direction);
+    YumeCarouselAnimations.applyEnter(nextEl, direction);
 
     const onDone = () => {
       nextEl.removeEventListener('transitionend', onDone);
       i = target;
-      paintDots(i);
       setBtnState();
       isAnimating = false;
     };

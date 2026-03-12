@@ -1,6 +1,7 @@
 // /assets/js/feedback/leader/kendra-feedback-leader.js
 // 🛡️ Kendra — Líder do Setor de Feedback Board
-// Nível: Adulta
+//
+// Nível: Adulto / Adult
 //
 // PT: Kendra coordena o setor de Feedback board. Ela não lida com detalhes como
 //     thumbs, preload ou UI diretamente — isso é responsabilidade de Lia,

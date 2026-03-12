@@ -1,8 +1,11 @@
-// ============================================================
+/* -----------------------------------------------------------------------------*/
 // 🪷 DÁLIA — Guardiã da Lógica de Imagem
+//
+// Nível / Level: Jovem / Young
+//
 // PT: Lógica pura de imagem: Drive/GAS, proxy, URLs, validação.
 // EN: Pure image logic: Drive/GAS, proxy, URLs, validation.
-// ============================================================
+/* -----------------------------------------------------------------------------*/
 
 // EndpointConfig — Configuração do Endpoint (Camada de Infra)
 // Fornece:

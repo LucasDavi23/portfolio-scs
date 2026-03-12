@@ -1,5 +1,7 @@
 // 🌟 Abigaíl — Guardiã do Summary de Avaliações
 //
+// Nível / Level: Adulto / Adult
+//
 // PT: Abigaíl representa clareza, ordem e apresentação. Ela NÃO calcula dados
 //     nem fala com a rede — isso é papel da Athenais (Athenais-summary-helpers.js).
 //     Aqui, Abigaíl cuida APENAS da interface:

@@ -1,5 +1,7 @@
-// /assets/js/feedback/board/api/card/naomi-card-api-helpers.js
 // 🌸 Naomi — Card API (helpers)
+//
+// Nível / Level: Jovem / Young
+//
 // PT: Especialista em feedback cards: monta URLs específicas do Board,
 //     chama o core da API (Nádia) e normaliza os itens em um formato
 //     único de card.
@@ -27,7 +29,7 @@ import { toPublicImageUrl } from '/assets/js/feedback/board/image/dalia-image-he
 // - setRetries()
 // - setCacheTtl()
 /* -----------------------------------------------------------------------------*/
-import { NadiaAPICore } from '/assets/js/feedback/board/api/rede/nadia-api-core-helpers.js';
+import { NadiaAPICore } from '/assets/js/feedback/board/api/network/nadia-api-core-helpers.js';
 
 /* -----------------------------------------------------------------------------*/
 // 🔹 Helper interno: garante um endpoint válido para as operações da Naomi.
@@ -38,7 +40,7 @@ import { NadiaAPICore } from '/assets/js/feedback/board/api/rede/nadia-api-core-
 function ensureEndpoint() {
   const endpoint = EndpointConfig.get();
   if (!endpoint) {
-    throw new error('FEEDBACK_ENDPOINT não definido.');
+    throw new Error('FEEDBACK_ENDPOINT não definido.');
   }
   return endpoint;
 }
@@ -71,7 +73,9 @@ function normalizeItem(x) {
   return {
     platform: String(x.platform || '').toLowerCase(),
     rating: Number(x.rating || 0),
-    date: toISO(x.date || ''),
+    // ✅ mantém os campos novos do GAS (Selah/Elara já sabem ler isso)
+    date_br: String(x.date_br || '').trim(),
+    date_ms: x.date_ms != null && x.date_ms !== '' ? Number(x.date_ms) : null,
     author: String(x.author || '').trim(),
     text: String(x.text || '').trim(),
     url: String(x.url || '').trim(),
