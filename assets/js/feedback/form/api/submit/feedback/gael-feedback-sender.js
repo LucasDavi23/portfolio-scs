@@ -1,8 +1,9 @@
+/* -----------------------------------------------------------------------------*/
 // 👨 Gael — Feedback Sender
 //
-// Nível: Jovem
+// Nível / Level: Jovem / Young
 //
-// PT: Especialista no envio do feedback para o Apps Script.
+// PT: Especialista no envio de feedback para o Apps Script.
 //     Atua como camada de proteção do envio: chama a API (Elis),
 //     interpreta respostas técnicas, classifica falhas
 //     (timeout, rede, servidor) e devolve um resultado semântico
@@ -13,149 +14,143 @@
 //     interprets technical responses, classifies failures
 //     (timeout, network, server) and returns a semantic result
 //     to the flow.
+/* -----------------------------------------------------------------------------*/
 
+/* -----------------------------------------------------------------------------*/
+// Imports
+/* -----------------------------------------------------------------------------*/
+
+/* -----------------------------------------------------------------------------*/
 // 🌿 Elis — Feedback Create Action (Gateway)
-// Provides:
-// - submitFeedbackAction
-
+// Fornece / Provides:
+// - submitFeedbackAction()
+/* -----------------------------------------------------------------------------*/
 import { ElisFeedbackApiHelpers } from '/assets/js/feedback/form/api/submit/feedback/elis-feedback-api-helpers.js';
 
-// --------------------------------------------------
+/* -----------------------------------------------------------------------------*/
 // Types
-// --------------------------------------------------
+/* -----------------------------------------------------------------------------*/
+
 /**
  * @typedef {'timeout'|'network'|'server'|'invalid_response'|'unknown'} FeedbackSendErrorType
  */
 
-/**
- * PT: Envia feedback via Elis e retorna um resultado semântico (ok / errorType).
- * EN: Sends feedback through Elis and returns a semantic result (ok / errorType).
- *
- * @param {Object} payload - PT: payload pronto do form | EN: ready form payload
- * @param {Object} [options]
- * @param {number} [options.timeoutMs] - PT/EN: timeout lógico (se suportado pelo core)
- * @returns {Promise<{ok:boolean, message:string, item:any, data:any, raw:any, errorType:FeedbackSendErrorType}>}
- */
+/* -----------------------------------------------------------------------------*/
+// Helpers
+//
+// PT: Funções auxiliares usadas internamente neste módulo.
+// EN: Helper functions used internally in this module.
+/* -----------------------------------------------------------------------------*/
 
-// --------------------------------------------------
-// Internal handlers
-// --------------------------------------------------
-
-/**
- * PT: Encapsula a chamada da Elis para não “vazar” detalhes.
- * EN: Encapsulates Elis call to avoid leaking details.
- */
+// PT: Encapsula a chamada da Elis para não expor detalhes externos.
+// EN: Encapsulates the Elis call to avoid exposing external details.
 async function sendThroughElis(payload, options) {
-  // PT: Se você quiser passar timeout por options, só funciona se a Elis/Vesper aceitarem.
-  // EN: If you want to pass timeout via options, it works only if Elis/Vesper support it.
-  //
-  // Mantemos simples: chama a action e pronto.
-  // Se no futuro a Elis aceitar {timeoutMs}, você pluga aqui.
   void options;
 
   if (
     !ElisFeedbackApiHelpers ||
     typeof ElisFeedbackApiHelpers.submitFeedbackAction !== 'function'
   ) {
-    // PT: Erro de integração (import errado / nome mudou).
-    // EN: Integration error (wrong import / renamed function).
-    throw new Error('ElisFeedbackApiHelpers.submitFeedbackAction não está disponível.');
+    throw new Error('ElisFeedbackApiHelpers.submitFeedbackAction is not available.');
   }
+
   return ElisFeedbackApiHelpers.submitFeedbackAction(payload);
 }
 
-// --------------------------------------------------
-// Internal utils
-// --------------------------------------------------
+// PT: Extrai campos padrão do retorno da Elis/Vesper.
+// EN: Extracts standard fields from Elis/Vesper response.
+function normalizeElisResponse(response) {
+  const success = Boolean(response && response.success === true);
+  const message = response && typeof response.message === 'string' ? response.message : '';
+  const data = response && 'data' in response ? response.data : null;
+  const item = response && 'item' in response ? response.item : null;
+  const raw = response && 'raw' in response ? response.raw : response;
 
-/**
- * PT: Extrai campos padrão do retorno da Elis/Vesper.
- * EN: Extracts standard fields from Elis/Vesper return.
- */
-
-function normalizeElisResponse(res) {
-  // Esperado do Vesper (pelo seu JSDoc):
-  // { success:boolean, message:string, data:any, item:any, raw:any }
-  const success = Boolean(res && res.success === true);
-  const message = res && typeof res.message === 'string' ? res.message : '';
-  const data = res && 'data' in res ? res.data : null;
-  const item = res && 'item' in res ? res.item : null;
-  const raw = res && 'raw' in res ? res.raw : res;
-
-  return { success, message, data, item, raw };
+  return {
+    success,
+    message,
+    data,
+    item,
+    raw,
+  };
 }
 
-/**
- * PT: Classifica falha quando veio resposta (success=false).
- * EN: Classifies failure when response arrived (success=false).
- *
- * @returns {FeedbackSendErrorType}
- */
+// PT: Classifica falha quando houve resposta técnica com success=false.
+// EN: Classifies failure when a technical response arrived with success=false.
+function classifyFailureFromResponse(normalizedResponse) {
+  if (!normalizedResponse) {
+    return 'invalid_response';
+  }
 
-function classifyFailureFromResponse(normalized) {
-  // PT: Se temos resposta, geralmente é "server" ou "invalid_response".
-  // EN: If we have a response, it's usually "server" or "invalid_response".
-  if (!normalized) return 'invalid_response';
+  if (typeof normalizedResponse.success !== 'boolean') {
+    return 'invalid_response';
+  }
 
-  // PT: Se o shape está muito estranho, assume invalid_response.
-  // EN: If shape is too strange, assume invalid_response.
-  if (typeof normalized.success !== 'boolean') return 'invalid_response';
-
-  // PT: success=false com message do backend → "server" (regra simples).
-  // EN: success=false with backend message → "server" (simple rule).
   return 'server';
 }
 
-function classifyFailureFromError(err) {
-  // PT: AbortError é o sinal mais comum de timeout (fetch abort).
-  // EN: AbortError is the most common timeout signal (fetch abort).
-  if (err && typeof err === 'object') {
-    const name = String(err.name || '');
-    const msg = extractErrorMessage(err).toLowerCase();
+// PT: Classifica falha a partir de exceções e erros de transporte.
+// EN: Classifies failure from exceptions and transport-level errors.
+function classifyFailureFromError(error) {
+  if (error && typeof error === 'object') {
+    const errorName = String(error.name || '');
+    const errorMessage = extractErrorMessage(error).toLowerCase();
 
-    if (name === 'AbortError') return 'timeout';
+    if (errorName === 'AbortError') {
+      return 'timeout';
+    }
 
-    // PT: Heurísticas simples (sem exagero).
-    // EN: Simple heuristics (no over-engineering).
-    if (msg.includes('timeout') || msg.includes('timed out')) return 'timeout';
-    if (msg.includes('failed to fetch') || msg.includes('networkerror') || msg.includes('network'))
+    if (errorMessage.includes('timeout') || errorMessage.includes('timed out')) {
+      return 'timeout';
+    }
+
+    if (
+      errorMessage.includes('failed to fetch') ||
+      errorMessage.includes('networkerror') ||
+      errorMessage.includes('network')
+    ) {
       return 'network';
+    }
 
-    // PT: Alguns ambientes retornam TypeError em falha de rede.
-    // EN: Some environments return TypeError on network failure.
-    if (err instanceof TypeError && (msg.includes('fetch') || msg.includes('network')))
+    if (
+      error instanceof TypeError &&
+      (errorMessage.includes('fetch') || errorMessage.includes('network'))
+    ) {
       return 'network';
+    }
   }
 
   return 'unknown';
 }
 
-/**
- * PT: Extrai mensagem humana de erro.
- * EN: Extracts a human-readable error message.
- */
-function extractErrorMessage(err) {
-  if (!err) return '';
-  if (typeof err === 'string') return err;
+// PT: Extrai uma mensagem legível de erro.
+// EN: Extracts a readable error message.
+function extractErrorMessage(error) {
+  if (!error) return '';
+  if (typeof error === 'string') return error;
 
-  if (typeof err === 'object') {
-    if (typeof err.message === 'string') return err.message;
+  if (typeof error === 'object') {
+    if (typeof error.message === 'string') {
+      return error.message;
+    }
+
     try {
-      return JSON.stringify(err);
+      return JSON.stringify(error);
     } catch {
-      return String(err);
+      return String(error);
     }
   }
 
-  return String(err);
+  return String(error);
 }
 
-// --------------------------------------------------
-// Public API (Gael)
-// --------------------------------------------------
-export async function sendFeedback(payload = {}, options = {}) {
-  // PT: Resultado padrão (evita undefined no fluxo).
-  // EN: Default result (avoids undefined in the flow).
+/* -----------------------------------------------------------------------------*/
+// Public API
+/* -----------------------------------------------------------------------------*/
+
+// PT: Envia feedback via Elis e retorna um resultado semântico.
+// EN: Sends feedback through Elis and returns a semantic result.
+async function sendFeedback(payload = {}, options = {}) {
   const baseResult = {
     ok: false,
     message: '',
@@ -167,43 +162,33 @@ export async function sendFeedback(payload = {}, options = {}) {
   };
 
   try {
-    // PT: Elis executa a action no backend (Vesper faz a rede).
-    // EN: Elis executes the backend action (Vesper handles the network).
     const response = await sendThroughElis(payload, options);
+    const normalizedResponse = normalizeElisResponse(response);
 
-    // PT: Normaliza resposta técnica.
-    // EN: Normalizes technical response.
-    const normalized = normalizeElisResponse(response);
-
-    // PT: Se o backend disse sucesso, ok.
-    // EN: If the backend said success, ok.
-    if (normalized.success === true) {
+    if (normalizedResponse.success === true) {
       return {
         ok: true,
-        message: normalized.message || 'OK',
-        item: normalized.item ?? null,
-        data: normalized.data ?? null,
-        raw: normalized.raw ?? response ?? null,
+        message: normalizedResponse.message || 'OK',
+        item: normalizedResponse.item ?? null,
+        data: normalizedResponse.data ?? null,
+        raw: normalizedResponse.raw ?? response ?? null,
         errorType: 'unknown',
       };
     }
 
-    // PT: Sucesso falso: classificar como falha semântica (servidor / invalido).
-    // EN: False success: classify as semantic failure (server / invalid).
-    const errorType = classifyFailureFromResponse(normalized);
+    const errorType = classifyFailureFromResponse(normalizedResponse);
+
     return {
       ...baseResult,
-      message: normalized.message || 'Falha ao enviar feedback.',
-      item: normalized.item ?? null,
-      data: normalized.data ?? null,
-      raw: normalized.raw ?? response ?? null,
+      message: normalizedResponse.message || 'Falha ao enviar feedback.',
+      item: normalizedResponse.item ?? null,
+      data: normalizedResponse.data ?? null,
+      raw: normalizedResponse.raw ?? response ?? null,
       errorType,
     };
-  } catch (err) {
-    // PT: Exceções/erros de rede/timeout/etc.
-    // EN: Exceptions/network errors/timeout/etc.
-    const errorType = classifyFailureFromError(err);
-    const message = extractErrorMessage(err) || 'Erro inesperado ao enviar feedback.';
+  } catch (error) {
+    const errorType = classifyFailureFromError(error);
+    const message = extractErrorMessage(error) || 'Erro inesperado ao enviar feedback.';
 
     return {
       ...baseResult,
@@ -213,9 +198,9 @@ export async function sendFeedback(payload = {}, options = {}) {
   }
 }
 
-// --------------------------------------------------
-// Persona export
-// --------------------------------------------------
+/* -----------------------------------------------------------------------------*/
+// Export
+/* -----------------------------------------------------------------------------*/
 
 export const GaelFeedbackSender = {
   sendFeedback,

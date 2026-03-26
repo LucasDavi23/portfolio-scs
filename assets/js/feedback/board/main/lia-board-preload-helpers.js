@@ -1,153 +1,158 @@
-// 🌱 Lia — Aprendiz do Board (Preload)
+/* -----------------------------------------------------------------------------*/
+// 🌱 Lia — Board Preload
 //
 // Nível / Level: Aprendiz / Apprentice
 //
-// PT: Irmã mais nova da Selah. Responsável por buscar o primeiro lote de cards
-//     do mural utilizando a Naomi (CardAPI) e manter um cache leve de curto prazo,
-//     garantindo que o Board fique rápido e eficiente após o primeiro acesso.
+// PT: Responsável pelo aquecimento inicial do Board e pelo preload leve
+//     da primeira página via Naomi, usando um cache compartilhado.
 //
-// EN: Younger sister of Selah. Responsible for fetching the initial batch of cards
-//     through Naomi (CardAPI) and maintaining a short-lived cache to keep the Board
-//     fast and responsive after the first load. Only handles warm-up logic — no DOM.
+// EN: Responsible for the initial Board warm-up and light first-page
+//     preload through Naomi, using a shared cache.
+/* -----------------------------------------------------------------------------*/
 
-/**
- * Platforms to warm up.
- * PT: Lista de plataformas usadas no sistema de feedback.
- * EN: List of platforms used by the feedback system.
- */
-
+/* -----------------------------------------------------------------------------*/
+// Platforms
+//
+// PT: Plataformas usadas no sistema de feedback.
+// EN: Platforms used by the feedback system.
+/* -----------------------------------------------------------------------------*/
 const PLATFORMS = ['scs', 'ml', 'shopee', 'google'];
 
-/**
- * Interval for periodic warm-up (5 minutes).
- * PT: Intervalo do reaquecimento (5 min).
- * EN: Rewarm interval (5 min).
- */
+/* -----------------------------------------------------------------------------*/
+// Warm Interval
+//
+// PT: Intervalo do reaquecimento periódico.
+// EN: Periodic rewarm interval.
+/* -----------------------------------------------------------------------------*/
 const WARM_INTERVAL_MS = 5 * 60 * 1000;
 
-/**
- * Warm-up a single platform using both list() and listMeta().
- * PT: Aquece uma única plataforma usando list() e listMeta().
- * EN: Warm a single platform using list() and listMeta().
- */
-async function warmSinglePlatform(api, platform, bust) {
-  const card = api.list(platform, 1, 1, { fast: 1, _bust: bust });
-  const meta = api.listMeta(platform, 1, 1, { fast: 0, _bust: bust });
-
-  await Promise.allSettled([card, meta]);
+/* -----------------------------------------------------------------------------*/
+// API Validation
+//
+// PT: Valida se a API possui os métodos necessários.
+// EN: Validates whether the API has the required methods.
+/* -----------------------------------------------------------------------------*/
+function hasListApi(api) {
+  return !!api && typeof api.list === 'function';
 }
 
-/**
- * Warm all platforms once.
- * PT: Aquece todas as plataformas uma vez.
- * EN: Warm all platforms once.
- */
-export async function warmOnce(api) {
-  if (!api || typeof api.list !== 'function' || typeof api.listMeta !== 'function') {
-    console.warn('[Lia] Invalid API provided to warmOnce.');
-    return;
-  }
+function hasWarmApi(api) {
+  return hasListApi(api) && typeof api.listMeta === 'function';
+}
 
-  const bust = Date.now(); // PT: Valor para bust de cache // EN: Value for cache busting
-  const tasks = PLATFORMS.map((p) => warmSinglePlatform(api, p, bust)); // PT: Mapeia plataformas para tarefas de aquecimento // EN: Map platforms to warm-up tasks
+/* -----------------------------------------------------------------------------*/
+// Warm Single Platform
+//
+// PT: Aquece uma única plataforma com list() e listMeta().
+// EN: Warms a single platform using list() and listMeta().
+/* -----------------------------------------------------------------------------*/
+async function warmSinglePlatform(api, platform, cacheBust) {
+  const cardRequest = api.list(platform, 1, 1, { fast: 1, _bust: cacheBust });
+  const metaRequest = api.listMeta(platform, 1, 1, { fast: 0, _bust: cacheBust });
+
+  await Promise.allSettled([cardRequest, metaRequest]);
+}
+
+/* -----------------------------------------------------------------------------*/
+// Warm Once
+//
+// PT: Aquece todas as plataformas uma vez.
+// EN: Warms all platforms once.
+/* -----------------------------------------------------------------------------*/
+async function warmOnce(api) {
+  if (!hasWarmApi(api)) return;
+
+  const cacheBust = Date.now();
+  const tasks = PLATFORMS.map((platform) => warmSinglePlatform(api, platform, cacheBust));
+
   await Promise.allSettled(tasks);
 }
 
-/**
- * Start the periodic warm loop (every 5 minutes).
- * Returns a function to stop the loop.
- *
- * PT: Inicia o loop de reaquecimento periódico (a cada 5 min).
- *     Retorna uma função para parar o loop.
- *
- * EN: Starts the periodic warm-up loop (every 5 minutes).
- *     Returns a function to stop the loop.
- */
-export function startWarmLoop(api, intervalMs = WARM_INTERVAL_MS) {
-  if (!api || typeof api.list !== 'function' || typeof api.listMeta !== 'function') {
-    console.warn('[Lia] Invalid API provided to startWarmLoop.');
-    return () => {};
-  }
+/* -----------------------------------------------------------------------------*/
+// Start Warm Loop
+//
+// PT: Inicia o loop de reaquecimento periódico.
+// Retorna uma função para encerrar o loop.
+//
+// EN: Starts the periodic warm-up loop.
+// Returns a function to stop the loop.
+/* -----------------------------------------------------------------------------*/
+function startWarmLoop(api, intervalMs = WARM_INTERVAL_MS) {
+  if (!hasWarmApi(api)) return () => {};
 
   let warming = false;
 
-  const timer = setInterval(async () => {
-    if (warming) return; // PT: Já está aquecendo // EN: Already warming
+  const intervalId = setInterval(async () => {
+    if (warming) return;
     warming = true;
 
     try {
-      const bust = Date.now(); // PT: Valor para bust de cache // EN: Value for cache busting
-      const tasks = PLATFORMS.map((p) => warmSinglePlatform(api, p, bust)); // PT: Mapeia plataformas para tarefas de aquecimento // EN: Map platforms to warm-up tasks
+      const cacheBust = Date.now();
+      const tasks = PLATFORMS.map((platform) => warmSinglePlatform(api, platform, cacheBust));
+
       await Promise.allSettled(tasks);
     } finally {
       warming = false;
     }
   }, intervalMs);
 
-  return () => clearInterval(timer); // PT: Função para parar o loop // EN: Function to stop the loop
+  return () => clearInterval(intervalId);
 }
 
-/**
- * Build the cache key for a given platform/page/config.
- * PT: Monta a chave usada no cache global (ex.: "scs:1:1").
- * EN: Builds the key used in the global cache (e.g. "scs:1:1").
- */
-// makeCAcheKey = criarChaveDeCache
-export function makeCacheKey(platform, page = 1, perPage = 1) {
+/* -----------------------------------------------------------------------------*/
+// Cache Key
+//
+// PT: Monta a chave usada no cache compartilhado.
+// EN: Builds the key used in the shared cache.
+/* -----------------------------------------------------------------------------*/
+function makeCacheKey(platform, page = 1, perPage = 1) {
   return `${platform}:${page}:${perPage}`;
 }
 
-/**
- * Ensure there is a global in-memory cache for feedback.
- *
- * PT: Garante que exista um Map global em window.FeedbackCache.
- *     Retorna sempre a mesma instância (compartilhada com o modal, mural, etc.).
- *
- * EN: Ensures there is a global Map at window.FeedbackCache.
- *     Always returns the same instance (shared with modal, board, etc.).
- */
-export function ensureCache(globalObj = window) {
-  if (!globalObj.FeedbackCache) {
-    globalObj.FeedbackCache = new Map(); // PT: Cria o cache global // EN: Create the global cache
+/* -----------------------------------------------------------------------------*/
+// Shared Cache
+//
+// PT: Garante um Map compartilhado para preload/cache em globalObject.FeedbackCache.
+// EN: Ensures a shared Map for preload/cache at globalObject.FeedbackCache.
+/* -----------------------------------------------------------------------------*/
+function ensureCache(globalObject = globalThis) {
+  if (!globalObject.FeedbackCache) {
+    globalObject.FeedbackCache = new Map();
   }
-  return globalObj.FeedbackCache;
+
+  return globalObject.FeedbackCache;
 }
 
-/**
- * Preload the first page for each platform into the shared cache.
- *
- * PT: Pré-carrega a primeira página de cada plataforma no cache global
- *     (window.FeedbackCache), para o modal/lista poder abrir imediatamente
- *     usando esses dados já aquecidos.
- *
- * EN: Preloads the first page for each platform into the global cache
- *     (window.FeedbackCache), so the list/modal can open instantly using
- *     this warmed-up data.
- */
-export async function preloadFirstPageToCache(api, platforms = PLATFORMS) {
-  if (!api || typeof api.list !== 'function') {
-    // PT: Valida a API // EN: Validate the API
-    console.warn('[Lia] Invalid API provided to preloadFirstPageToCache.');
-    return;
-  }
+/* -----------------------------------------------------------------------------*/
+// Preload First Page
+//
+// PT: Pré-carrega a primeira página de cada plataforma no cache compartilhado.
+// EN: Preloads the first page of each platform into the shared cache.
+/* -----------------------------------------------------------------------------*/
+async function preloadFirstPageToCache(api, platforms = PLATFORMS) {
+  if (!hasListApi(api)) return;
 
   const cache = ensureCache();
-  const PAGE = 1;
-  const PER_PAGE = 1; // PT: Número de cards por página // EN: Number of cards per page
+  const page = 1;
+  const perPage = 1;
 
-  // tasks = tarefas
-  const tasks = platforms.map(async (plat) => {
+  const tasks = platforms.map(async (platform) => {
     try {
-      const items = await api.list(plat, PAGE, PER_PAGE, { fast: 1 });
-      const key = makeCacheKey(plat, PAGE, PER_PAGE);
-      cache.set(key, items); // PT: Armazena no cache global // EN: Store in global cache
-    } catch (error) {
-      console.warn(`[Lia] Failed to preload feedback for platform ${plat}:`, error);
+      const items = await api.list(platform, page, perPage, { fast: 1 });
+      const key = makeCacheKey(platform, page, perPage);
+      cache.set(key, items);
+    } catch {
+      // PT: Falha de preload não deve quebrar o Board.
+      // EN: Preload failure should not break the Board.
     }
   });
-  await Promise.allSettled(tasks); // PT: Aguarda todas as tarefas // EN: Wait for all tasks
+
+  await Promise.allSettled(tasks);
 }
 
+/* -----------------------------------------------------------------------------*/
+// Export
+/* -----------------------------------------------------------------------------*/
 export const LiaPreload = {
   warmOnce,
   startWarmLoop,

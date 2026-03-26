@@ -1,6 +1,7 @@
 // ✨ Mira — Guardiã do Modal LISTA (UI - ESModule)
-// Nível: Adulta
-//------------------------------------------------------------
+//
+// Nível: Adulto / Adult
+//
 // PT: Controla tudo que é DOM/visual do modal LISTA (“Ver mais”):
 //     - abrir/fechar o modal
 //     - carregar páginas de avaliações (via FeedbackAPI)
@@ -37,6 +38,16 @@
 //   - observeThumbs()
 
 import { PetraImageUI } from '/assets/js/feedback/board/image/petra-image-ui.js';
+
+// -----------------------------------------------------------------------------
+
+// Dalia — Image Helpers (Lógica pura, sem DOM)
+// PT: Centraliza a lógica "pura" de imagem (sem DOM):
+// EN: Centralizes the "pure" image logic (no DOM):
+// Fornece / Provides:
+// - FALLBACK_IMG
+
+import { DaliaImageHelpers } from '/assets/js/feedback/board/image/dalia-image-helpers.js';
 
 // -----------------------------------------------------------------------------
 
@@ -98,6 +109,22 @@ import { LumaLoading } from '/assets/js/system/ui/loading/luma-loading';
 
 import { ZoeRating } from '/assets/js/system/ui/rating/zoe-rating.js';
 
+// -----------------------------------------------------------------------------
+// ✨ Latch — Body Scroll Lock (System Utils)
+// Provides:
+//  - lockBodyScroll()
+//  - unlockBodyScroll()
+//  - getScrollLockCount()
+
+import { LatchRootScroll } from '/assets/js/system/utils/latch-root-scroll-lock.js';
+
+// -----------------------------------------------------------------------------
+// 🕯️ Vela — Modal Motion (System Utils)
+// Provides:
+// openModalMotion,
+// closeModalMotion,
+import { VelaModalMotion } from '/assets/js/layout/modal/vela-modal-motion.js';
+
 // ==========================
 // 1) HELPERS BÁSICOS DE DOM
 // ==========================
@@ -108,6 +135,11 @@ const qs = (selector, root = document) => root.querySelector(selector); // root 
 /** PT: Atalho para querySelectorAll em array. EN: Shorthand to get an array. */
 const qsa = (selector, root = document) => Array.from(root.querySelectorAll(selector)); // root opcional
 
+/** PT: Retorna o limite padrão baseado na largura da tela. EN: Returns default limit based on screen width. */
+function getDefaultLimit() {
+  return window.matchMedia('(max-width: 639px)').matches ? 8 : 12;
+}
+
 // ==========================
 // 2) ESTADO DO MODAL
 // ==========================
@@ -116,7 +148,7 @@ const state = {
   // estado inicial do modal
   plat: 'scs', // plataforma atual (scs, google, facebook, etc)
   page: 1, // pagina atual
-  limit: 5, // itens por página
+  limit: 5, // fallback (open() define 8 mobile / 12 desktop)
   hasMore: false, // se há mais páginas
   loading: false, // se há requisição em andamento
   total: undefined, // total real (fast:0), opcional
@@ -135,7 +167,8 @@ let els = null; // refs de DOM (inicializado no init)
 function bindElements(root = document) {
   els = {
     // objeto para guardar refs de DOM / object to hold DOM refs
-    modal: qs('#modalFeedback'), // modal container
+    modal: qs('#modalFeedback', root), // modal container
+    panel: qs('#modalFeedbackPanel', root), // painel do modal
     titulo: qs('#modalFeedbackTitulo'), // título do modal
     sub: qs('#modalFeedbackSub'), // subtítulo do modal
     list: qs('#modalFeedbackList'), // <ul> da list
@@ -171,12 +204,13 @@ function renderItem(it) {
   const btnThumb = document.createElement('button');
   btnThumb.type = 'button';
   btnThumb.className =
-    'thumb-container relative w-16 h-12 rounded-md overflow-hidden border border-gray-200 bg-white shrink-0 hidden';
+    'thumb-container relative w-[84px] aspect-[2/2] rounded-md overflow-hidden border border-gray-200 bg-gray-50 p-1 hidden';
+
   btnThumb.setAttribute('data-owner', 'mira-list');
 
   const img = document.createElement('img');
   img.alt = 'Foto enviada pelo cliente';
-  img.className = 'h-full w-full object-cover';
+  img.className = 'h-full w-full object-contain';
   img.loading = 'eager';
   img.decoding = 'async';
   img.referrerPolicy = 'no-referrer';
@@ -213,6 +247,10 @@ function renderItem(it) {
           const ok = !btnThumb.classList.contains('hidden');
           if (!ok) return;
 
+          // ✅ mostra divisor + media quando thumb está ok
+          divider.classList.remove('hidden');
+          mediaRow.classList.remove('hidden');
+
           // ✅ SRC FINAL vira fonte do modal (igual Selah)
           const finalUrlForModal = img.src;
           if (finalUrlForModal) {
@@ -228,6 +266,12 @@ function renderItem(it) {
         })
         .catch((err) => {
           console.warn('[MIRA thumb] falhou após retries', { err, sourceForThumb, it });
+
+          // mantém oculto (sem imagem)
+          btnThumb.classList.add('hidden');
+          divider.classList.add('hidden');
+          mediaRow.classList.add('hidden');
+
           img.src = DaliaImageHelpers.FALLBACK_IMG;
           btnThumb.classList.remove('js-open-modal');
           // opcional: tenta recuperar mesmo assim
@@ -248,12 +292,14 @@ function renderItem(it) {
 
   const rating = document.createElement('span');
   rating.className = 'shrink-0';
-  rating.innerHTML = ZoeRating.renderRating(it.estrelas || 0, {
+  rating.innerHTML = ZoeRating.renderRating(it.rating || 0, {
     size: 'sm', // lista/modal → discreto
     showValue: false, // só estrelas
   });
 
-  const when = JuniperDateTime.format(it.data);
+  const when = JuniperDateTime.format(
+    it.date_ms ?? it.date_br ?? it.date_iso ?? it.dateIso ?? it.date
+  );
   const time = document.createElement('time');
   time.className = 'text-xs text-gray-500 whitespace-nowrap';
   time.textContent = when || '';
@@ -261,22 +307,32 @@ function renderItem(it) {
   meta.appendChild(time);
 
   const txt = document.createElement('p');
-  txt.className = 'mt-1 text-gray-900 leading-6';
-  txt.textContent = it.texto || '';
+  txt.className = 'mt-0 text-gray-900 leading-6';
+  txt.textContent = it.text || '';
 
-  const autor = document.createElement('p');
-  autor.className = 'mt-1 text-xs text-gray-500';
-  autor.textContent = it.autor ? `- ${it.autor}` : '';
+  const author = document.createElement('p');
+  author.className = 'mt-0 text-xs text-gray-500';
+  author.textContent = it.author ? `- ${it.author}` : '';
 
   body.appendChild(meta);
   body.appendChild(txt);
-  body.appendChild(autor);
+  body.appendChild(author);
   line.appendChild(body);
 
-  const right = document.createElement('div');
-  right.className = 'text-right text-xs text-gray-400';
-  line.appendChild(right);
+  // Linha divisória
+  const divider = document.createElement('div');
+  divider.className = 'mt-0 pt-2 hidden';
 
+  // Linha da imagem
+  const mediaRow = document.createElement('div');
+  mediaRow.className = 'mt-0 hidden';
+
+  // adiciona a imagem à linha
+  mediaRow.appendChild(btnThumb);
+  divider.appendChild(mediaRow);
+  line.appendChild(divider);
+
+  // adiciona linha ao <li>
   li.appendChild(line);
   return li;
 }
@@ -371,12 +427,16 @@ async function searchTotalIfNecessary() {
 // ==========================
 
 export function open(plat) {
+  // inicializa se ainda não foi (passa root para bindElements)
+  if (!initialized) ListModal(document);
+
   // reset de estado // reset state
 
   state.plat = plat || 'scs'; // plataforma
   state.page = 1; // página 1
   state.hasMore = false; // sem mais páginas
   state.total = undefined; // total desconhecido
+  state.limit = getDefaultLimit(); // itens por página baseado na tela
 
   // header + limpar UI
   els.titulo.textContent = DaraListHelpers.getPlatformLabel(state.plat);
@@ -403,9 +463,17 @@ export function open(plat) {
   // abrir Modal
   els.modal.classList.remove('hidden'); // mostra modal
   els.modal.classList.add('flex'); // mostra modal
-  document.body.style.overflow = 'hidden'; // trava scroll body
-
+  // 🔒 TRAVA SCROLL (Latch)
+  LatchRootScroll.lockScroll();
   console.log('[Mira List] open()', { plat: state.plat });
+
+  // 🎞️ Motion (Vela)
+  if (els.modal && els.panel) {
+    VelaModalMotion.openModalMotion({
+      rootEl: els.modal,
+      panelEl: els.panel,
+    });
+  }
 
   // desativar "Carregar mais" até terminar 1ª carga
   if (els.btnMore) {
@@ -445,14 +513,31 @@ export function open(plat) {
   searchTotalIfNecessary();
 }
 
-export function close() {
-  els.modal.classList.add('hidden');
-  els.modal.classList.remove('flex');
-  document.body.style.overflow = '';
+let isClosing = false; // flag para evitar múltiplos closes
 
-  setTimeout(() => {
-    els.list.innerHTML = '';
-  }, 100);
+export async function close() {
+  if (isClosing) return; // já está fechando
+  isClosing = true;
+
+  // 🎞️ Motion (Vela) — fecha primeiro, esconde depois
+  if (els.modal && els.panel) {
+    await VelaModalMotion.closeModalMotion({
+      rootEl: els.modal,
+      panelEl: els.panel,
+    });
+  }
+
+  if (els?.modal) {
+    els.modal.classList.add('hidden');
+    els.modal.classList.remove('flex');
+  }
+
+  // 🔓 LIBERA SCROLL (Latch)
+  LatchRootScroll.unlockScroll();
+
+  els.list.innerHTML = '';
+
+  isClosing = false; // reset flag para permitir reabrir
 }
 
 // ==========================
@@ -582,7 +667,7 @@ function ListModal(root = document) {
   if (initialized) return; // já inicializado
   initialized = true;
 
-  bindElements(); // vincula refs de DOM
+  bindElements(root); // vincula refs de DOM
 
   // Delegação para abrir o modal via [data-action="ver-mais"]
   root.addEventListener('click', (e) => {
@@ -601,14 +686,19 @@ function ListModal(root = document) {
     open(plat);
   });
 
-  els.btnClose?.addEventListener('click', close); // fechar botão
+  els.btnClose?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    close();
+  });
 
   els.modal?.addEventListener('click', (e) => {
-    if (e.target === els.modal) close(); // backdrop
+    if (e.target === els.modal) close();
   });
 
   window.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') close();
+    if (e.key === 'Escape' && !els.modal.classList.contains('hidden')) {
+      close();
+    }
   });
 
   // Paginar

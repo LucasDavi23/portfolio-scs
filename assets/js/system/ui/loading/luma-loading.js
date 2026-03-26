@@ -1,34 +1,48 @@
-// 🍃 Luma — Soldado de Elite do Loading (System/UI - ESModule)
-// Nível: Adulta
-//------------------------------------------------------------
-// PT: UI global de loading reutilizável (DOM).
-//     - spinner + label (Tailwind)
-//     - loading em botão
-//     - ensurePaint() para garantir render antes do fetch pesado
+// 🍃 Luma — Loading UI
 //
-// EN: Global reusable loading UI (DOM).
-//     - spinner + label (Tailwind)
-//     - button loading state
-//     - ensurePaint() to force paint before heavy fetch/render
-//------------------------------------------------------------
+// Nível / Level: Adulta / Adult
+//
+// PT: Controla o loading visual de containers e botões.
+// EN: Controls visual loading for containers and buttons.
 
-// 🇧🇷 Garante 1 frame para o loading "pintar" antes do trabalho pesado.
-// 🇺🇸 Ensures one paint frame so loading paints before heavy work.
+/* -----------------------------------------------------------------------------*/
+// Paint Helpers
+//
+// PT: Garante renderização antes de tarefas pesadas.
+// EN: Ensures rendering before heavy tasks.
+/* -----------------------------------------------------------------------------*/
 
-export function ensurePaint() {
+// PT: Aguarda um frame para o loading aparecer.
+// EN: Waits one frame so loading can render.
+function ensurePaint() {
   return new Promise((resolve) => requestAnimationFrame(() => resolve()));
 }
 
-// 🇧🇷 Sanitiza label para evitar "undefined".
-// 🇺🇸 Sanitizes label to avoid "undefined".
-export function safeLabel(label, fallback = 'Loading...') {
+/* -----------------------------------------------------------------------------*/
+// Label Helpers
+//
+// PT: Normaliza textos usados no loading.
+// EN: Normalizes loading text labels.
+/* -----------------------------------------------------------------------------*/
+
+// PT: Garante uma label válida.
+// EN: Ensures a valid label.
+function safeLabel(label, fallback = 'Loading...') {
   return typeof label === 'string' && label.trim() ? label : fallback;
 }
 
-// 🇧🇷 HTML do spinner minimalista (estilo escolhido).
-// 🇺🇸 Minimal spinner HTML (chosen style).
-export function spinnerHTML(label = 'loading...') {
+/* -----------------------------------------------------------------------------*/
+// Spinner Markup
+//
+// PT: Gera o HTML do spinner.
+// EN: Generates spinner HTML.
+/* -----------------------------------------------------------------------------*/
+
+// PT: Retorna o HTML do spinner.
+// EN: Returns spinner HTML.
+function spinnerHTML(label = 'Loading...') {
   const safe = safeLabel(label);
+
   return `
     <div class="inline-flex items-center gap-2 text-sm text-slate-600">
       <svg aria-hidden="true"
@@ -66,44 +80,66 @@ export function spinnerHTML(label = 'loading...') {
   `;
 }
 
-// 🇧🇷 Renderiza loading dentro de um container (substitui conteúdo).
-// 🇺🇸 Renders loading inside a container (replaces content).
-export function renderLoading(containerEl, label) {
+/* -----------------------------------------------------------------------------*/
+// Container Loading
+//
+// PT: Controla loading em containers.
+// EN: Controls loading in containers.
+/* -----------------------------------------------------------------------------*/
+
+// PT: Renderiza loading no container.
+// EN: Renders loading inside the container.
+function renderLoading(containerEl, label) {
   if (!containerEl) return;
   containerEl.innerHTML = spinnerHTML(label);
 }
 
-// 🇧🇷 Limpa container.
-// 🇺🇸 Clears container.
-export function clearLoading(containerEl) {
+// PT: Limpa o loading do container.
+// EN: Clears container loading.
+function clearLoading(containerEl) {
   if (!containerEl) return;
   containerEl.innerHTML = '';
 }
 
-// 🇧🇷 Alterna loading em botão, preservando o HTML original.
-// 🇺🇸 Toggles loading on a button, preserving original HTML.
-export function setButtonLoading(btnEl, isLoading, label = 'Loading...') {
-  if (!btnEl) return;
+/* -----------------------------------------------------------------------------*/
+// Button Loading
+//
+// PT: Controla loading visual em botões.
+// EN: Controls visual loading in buttons.
+/* -----------------------------------------------------------------------------*/
 
-  const on = !!isLoading;
+// PT: Ativa ou desativa loading no botão.
+// EN: Toggles loading state on the button.
+function setButtonLoading(buttonEl, isLoading, label = 'Loading...') {
+  if (!buttonEl) return;
 
-  if (on) {
-    // Salva HTML original (se ainda não salvo)
-    if (!btnEl.dataset.originalHtml) btnEl.dataset.originalHtml = btnEl.innerHTML;
-    btnEl.disabled = true;
-    btnEl.classList.add('opacity-80', 'cursor-not-allowed');
-    btnEl.innerHTML = spinnerHTML(label);
-    btnEl.setAttribute('aria-busy', 'true');
+  const isActive = !!isLoading;
+
+  if (isActive) {
+    if (!buttonEl.dataset.originalHtml) {
+      buttonEl.dataset.originalHtml = buttonEl.innerHTML;
+    }
+
+    buttonEl.disabled = true;
+    buttonEl.classList.add('opacity-80', 'cursor-not-allowed');
+    buttonEl.innerHTML = spinnerHTML(label);
+    buttonEl.setAttribute('aria-busy', 'true');
   } else {
-    // Restaura HTML original (se houver)
-    btnEl.disabled = false;
-    btnEl.classList.remove('opacity-80', 'cursor-not-allowed');
+    buttonEl.disabled = false;
+    buttonEl.classList.remove('opacity-80', 'cursor-not-allowed');
 
-    const original = btnEl.dataset.originalHtml;
-    if (original) btnEl.innerHTML = original;
-    btnEl.removeAttribute('aria-busy');
+    const originalHtml = buttonEl.dataset.originalHtml;
+    if (originalHtml) {
+      buttonEl.innerHTML = originalHtml;
+    }
+
+    buttonEl.removeAttribute('aria-busy');
   }
 }
+
+/* -----------------------------------------------------------------------------*/
+// Export
+/* -----------------------------------------------------------------------------*/
 
 export const LumaLoading = {
   ensurePaint,
@@ -113,8 +149,3 @@ export const LumaLoading = {
   clearLoading,
   setButtonLoading,
 };
-
-// ------------------------------------------------------------
-// Fim do arquivo
-// End of file
-//------------------------------------------------------------

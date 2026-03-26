@@ -1,224 +1,174 @@
-// ==================================================
+/* -----------------------------------------------------------------------------*/
 // 🌙 Aura — Feedback FORM Leader
-// Nível: Adulta
 //
-// File: aura-form-leader.js
+// Nível / Level: Adulta / Adult
 //
-// PT: Aura coordena o setor FORM do feedback. Ela não implementa UI,
-//     não valida domínio profundo, não processa imagem e não chama rede diretamente.
+// PT: Aura coordena o setor FORM do feedback.
+//     Não implementa UI, não valida domínio profundo,
+//     não processa imagem e não chama rede diretamente.
 //     Sua função é garantir que cada especialista do FORM execute seu papel
-//     no momento certo, mantendo o formulário estável, previsível e fácil de manter.
+//     no momento certo, mantendo o formulário estável,
+//     previsível e fácil de manter.
 //
-// EN: Aura coordinates the Feedback FORM sector. She does not implement UI,
-//     does not run deep domain validation, does not process images and does not call
-//     network APIs directly. Her role is to ensure each FORM specialist runs
-//     at the right time, keeping the form stable, predictable and maintainable.
-// ==================================================
+// EN: Aura coordinates the Feedback FORM sector.
+//     She does not implement UI, does not run deep domain validation,
+//     does not process images and does not call network APIs directly.
+//     Her role is to ensure each FORM specialist runs at the right time,
+//     keeping the form stable, predictable and maintainable.
+/* -----------------------------------------------------------------------------*/
 
-/* ------------------------------------------------------------------
- * Imports (organized by responsibility)
- * ------------------------------------------------------------------ */
+/* -----------------------------------------------------------------------------*/
+// Imports
+/* -----------------------------------------------------------------------------*/
 
-/* --------------------------------------------------
- * 🌙 Liora — Form Controller
- * PT: Conecta listeners do form e delega para especialistas.
- * EN: Wires form listeners and delegates to specialists.
- * Provides:
- *  - initController()
- * -------------------------------------------------- */
+/* -----------------------------------------------------------------------------*/
+// 🌙 Liora — Form Flow Conductor
+// Fornece / Provides:
+// - attachFormController()
+/* -----------------------------------------------------------------------------*/
 import { LioraFormController } from '/assets/js/feedback/form/controller/liora-form-controller.js';
 
-/* --------------------------------------------------
- * 🧾 Selene — Submit Flow
- * PT: Executa o pipeline de envio (rating -> validação -> imagem -> API).
- * EN: Runs the submit pipeline (rating -> validation -> image -> API).
- * Provides:
- *  - submitFeedback()
- * -------------------------------------------------- */
-import { SeleneSubmitFlow } from '/assets/js/feedback/form/submit/selene-submit-flow.js';
-
-/* --------------------------------------------------
- * ✨ Ayla — Rating Stars UI
- * PT: UI das estrelas (clique/toggle/limpar) e sincronização com hidden.
- * EN: Stars UI (click/toggle/clear) and sync with hidden input.
- * Provides:
- *  - attachStarsUI()
- *  - resetStars()
- * -------------------------------------------------- */
+/* -----------------------------------------------------------------------------*/
+// ⭐ Ayla — Form Rating UI Specialist
+// Fornece / Provides:
+// - attachStarsUI()
+/* -----------------------------------------------------------------------------*/
 import { AylaRatingStarsUI } from '/assets/js/feedback/form/rating/ayla-rating-stars-ui.js';
 
-/* --------------------------------------------------
- * 📷 Daphne — Photo Label UI
- * PT: Atualiza label do input file, cria thumb e dispara evento do modal.
- * EN: Updates file label, builds thumb and dispatches modal event.
- * Provides:
- *  - attachPhotoLabelUI()
- * -------------------------------------------------- */
+/* -----------------------------------------------------------------------------*/
+// 📷 Daphne — Photo UI Specialist
+// Fornece / Provides:
+// - attachPhotoUI()
+/* -----------------------------------------------------------------------------*/
 import { DaphnePhotoUI } from '/assets/js/feedback/form/image/daphne-photo-ui.js';
 
-/* --------------------------------------------------
- * ✨ Irene — Photo Preview UX
- * PT: Padroniza preview como card e abre modal ao clicar/teclar.
- * EN: Styles preview as a card and opens modal on click/keyboard.
- * Provides:
- *  - attachPhotoPreviewUX()
- * -------------------------------------------------- */
+/* -----------------------------------------------------------------------------*/
+// ✨ Irene — Photo Preview UX
+// Fornece / Provides:
+// - attachPhotoPreviewUX()
+/* -----------------------------------------------------------------------------*/
 import { IrenePhotoPreviewUX } from '/assets/js/feedback/form/ux/irene-photo-preview-ux.js';
 
-/* --------------------------------------------------
- * 🧮 Mina — Comment Counter UX
- * PT: Atualiza contador de caracteres do comentário.
- * EN: Updates the comment character counter.
- * Provides:
- *  - attachCommentCounterUX()
- * -------------------------------------------------- */
+/* -----------------------------------------------------------------------------*/
+// 🧮 Mina — Comment Counter UX
+// Fornece / Provides:
+// - attachCommentCounterUX()
+/* -----------------------------------------------------------------------------*/
 import { MinaCommentCounterUX } from '/assets/js/feedback/form/ux/mina-comment-counter-ux.js';
 
-/* ------------------------------------------------------------------
-/* --------------------------------------------------
- * 🧠 Sofia — Form Validation & UX State
- * PT: Validação básica + estado visual + auto-clear.
- * EN: Basic validation + visual state + auto-clear wiring.
- * Provides:
- *  - attachAutoClearFieldErrors()
- * -------------------------------------------------- */
+/* -----------------------------------------------------------------------------*/
+// 🧠 Sofia — Form Validation & UX State Specialist
+// Fornece / Provides:
+// - attachAutoClearFieldErrors()
+/* -----------------------------------------------------------------------------*/
 import { SofiaFormValidationUI } from '/assets/js/feedback/form/validation/sofia-form-validation-ui.js';
 
-/* ------------------------------------------------------------------
- * Small runtime helper
- * ------------------------------------------------------------------ */
+/* -----------------------------------------------------------------------------*/
+// 📘 Logger — System Observability Layer
+// Fornece / Provides:
+// - warn()
+/* -----------------------------------------------------------------------------*/
+import { Logger } from '/assets/js/system/core/logger.js';
 
-/**
- * PT: Helper simples para rodar algo quando o DOM estiver pronto.
- * EN: Small helper to run a callback when DOM is ready.
- */
-function onDomReady(fn) {
+/* -----------------------------------------------------------------------------*/
+// Helpers
+//
+// PT: Funções auxiliares usadas internamente pela Aura.
+// EN: Helper functions used internally by Aura.
+/* -----------------------------------------------------------------------------*/
+
+// PT: Executa uma função quando o DOM estiver pronto.
+// EN: Runs a function once the DOM is ready.
+function onDomReady(callback) {
   if (document.readyState !== 'loading') {
-    fn();
-  } else {
-    document.addEventListener('DOMContentLoaded', fn, { once: true });
+    callback();
+    return;
+  }
+
+  document.addEventListener('DOMContentLoaded', callback, { once: true });
+}
+
+// PT: Executa uma etapa de inicialização com proteção de erro.
+// EN: Runs an initialization step with safe error protection.
+function runInitStep(stepName, callback) {
+  try {
+    callback();
+  } catch (error) {
+    Logger.warn('FORM', 'Aura', `Failed to initialize ${stepName}`, error);
   }
 }
 
-/* ------------------------------------------------------------------
- * Init steps (Aura only wires; specialists do the work)
- * ------------------------------------------------------------------ */
-
-/**
- * PT: Irene — UX do preview (card + abrir modal).
- * EN: Irene — photo preview UX (card + open modal).
- */
+// PT: Inicializa a UX de preview da foto.
+// EN: Initializes the photo preview UX.
 function initIrenePhotoPreviewUX() {
-  console.log('[Aura] initIrenePhotoPreviewUX: calling attach...');
-
-  try {
+  runInitStep('IrenePhotoPreviewUX', () => {
     IrenePhotoPreviewUX.attachPhotoPreviewUX();
-    console.log('[Aura] initIrenePhotoPreviewUX: attach called');
-  } catch (err) {
-    console.warn('[Aura] Error initializing IrenePhotoPreviewUX:', err);
-  }
+  });
 }
 
-/**
- * PT: Mina — UX do contador de caracteres do comentário.
- * EN: Mina — comment character counter UX.
- */
+// PT: Inicializa o contador de caracteres do comentário.
+// EN: Initializes the comment character counter.
 function initMinaCommentCounterUX() {
-  try {
+  runInitStep('MinaCommentCounterUX', () => {
     MinaCommentCounterUX.attachCommentCounterUX();
-  } catch (err) {
-    console.warn('[Aura] Error initializing MinaCommentCounterUX:', err);
-  }
+  });
 }
 
-/**
- * PT: Daphne — UI do label + thumb/preview base da foto.
- * EN: Daphne — file label + thumb/base preview UI.
- */
+// PT: Inicializa a UI base da foto.
+// EN: Initializes the base photo UI.
 function initDaphnePhotoUI() {
-  try {
+  runInitStep('DaphnePhotoUI', () => {
     DaphnePhotoUI.attachPhotoUI();
-  } catch (err) {
-    console.warn('[Aura] Error initializing DaphnePhotoUI:', err);
-  }
+  });
 }
 
-/**
- * PT: Ayla — UI das estrelas (rating).
- * EN: Ayla — rating stars UI.
- */
+// PT: Inicializa a UI das estrelas de avaliação.
+// EN: Initializes the rating stars UI.
 function initAylaRatingStarsUI() {
-  try {
+  runInitStep('AylaRatingStarsUI', () => {
     AylaRatingStarsUI.attachStarsUI();
-  } catch (err) {
-    console.warn('[Aura] Error initializing AylaRatingStarsUI:', err);
-  }
+  });
 }
 
-/**
- * PT: Sofia — auto-clear de erros e UX state base.
- * EN: Sofia — auto-clear field errors and base UX state.
- */
+// PT: Inicializa o auto-clear de erros do formulário.
+// EN: Initializes the form error auto-clear behavior.
 function initSofiaFormValidationUI() {
-  try {
+  runInitStep('SofiaFormValidationUI', () => {
     SofiaFormValidationUI.attachAutoClearFieldErrors();
-  } catch (err) {
-    console.warn('[Aura] Error initializing SofiaFormValidationUI:', err);
-  }
+  });
 }
 
-/**
- * PT: Liora — Controller do FORM (apenas eventos).
- *     Liora não "controla" especialistas. Ela apenas liga o submit
- *     e delega para Selene (submit flow).
- * EN: Liora — FORM controller (events only).
- *     Liora does not "control" specialists. She only wires submit
- *     and delegates to Selene (submit flow).
- */
-function initLioraController() {
-  try {
-    LioraFormController.attachFormController(); // sem options
-  } catch (err) {
-    console.warn('[Aura] Error initializing LioraFormController:', err);
-  }
+// PT: Inicializa o controller do formulário.
+// EN: Initializes the form controller.
+function initLioraFormController() {
+  runInitStep('LioraFormController', () => {
+    LioraFormController.attachFormController();
+  });
 }
 
-/**
- * PT: Função principal da Aura: é aqui que todo o FORM é amarrado
- *     quando o DOM estiver pronto.
- * EN: Aura main function: this is where the entire FORM is wired
- *     once the DOM is ready.
- */
+// PT: Amarra todas as etapas de inicialização do FORM.
+// EN: Wires all FORM initialization steps.
 function bootstrapForm() {
-  // 1) Irene — UX do preview (card + modal)
   initIrenePhotoPreviewUX();
-
-  // 2) Mina — UX do contador de comentário
   initMinaCommentCounterUX();
-
-  // 3) Daphne — UI do label + thumb/preview base da foto
   initDaphnePhotoUI();
-
-  // 4) Ayla — UI das estrelas (rating)
   initAylaRatingStarsUI();
-
-  // 5) Sofia — auto-clear de erros e UX state base
   initSofiaFormValidationUI();
-
-  // 6) Liora — controller (apenas eventos + submit)
-  initLioraController();
+  initLioraFormController();
 }
 
-/* ------------------------------------------------------------------
- * Public Leader API
- * ------------------------------------------------------------------ */
+/* -----------------------------------------------------------------------------*/
+// Export
+/* -----------------------------------------------------------------------------*/
 
 export const AuraFormLeader = {
-  /**
-   * PT: Inicializa o setor FORM do feedback. Deve ser chamada pela Morgana.
-   * EN: Initializes the feedback FORM sector. Should be called by Morgana.
-   */
+  // PT: Inicializa o setor FORM do feedback.
+  // EN: Initializes the feedback FORM sector.
   initForm() {
-    onDomReady(() => bootstrapForm());
+    onDomReady(bootstrapForm);
   },
+
+  // PT: Exposto para debug e uso controlado.
+  // EN: Exposed for debug and controlled use.
+  bootstrapForm,
 };

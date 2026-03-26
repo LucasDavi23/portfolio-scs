@@ -1,5 +1,7 @@
 // 🌟 Abigaíl — Guardiã do Summary de Avaliações
 //
+// Nível / Level: Adulto / Adult
+//
 // PT: Abigaíl representa clareza, ordem e apresentação. Ela NÃO calcula dados
 //     nem fala com a rede — isso é papel da Athenais (Athenais-summary-helpers.js).
 //     Aqui, Abigaíl cuida APENAS da interface:
@@ -18,6 +20,10 @@
 //       • orchestrates the overall flow (cache → network → DOM),
 //       • and allows manual refreshes.
 
+// -------------------------------------------------------------
+// imports / importações
+// -------------------------------------------------------------
+
 // EndpointConfig — Configuração do Endpoint (Camada de Infra)
 // Fornece:
 // - set(url)
@@ -28,38 +34,45 @@ import { EndpointConfig } from '/assets/js/feedback/core/config/feedback-endpoin
 // Athenais — Summary Helpers (Logic Layer)
 // Athenais fornece:
 // - loadSummaryFromCache()
+// - loadSummarySnapshot()
 // - saveSummarytoCache()
 // - fetchSummaryWithRetry()
+// - fetchSummaryMetaWithRetry()
 // - buildSummaryFromResponse()
-/* -----------------------------------------------------------------------------*/
-import { AthenaisSummaryHelpers } from '../athenais-summary-helpers.js';
+
+import { AthenaisSummaryHelpers } from '/assets/js/feedback/board/summary/athenais-summary-helpers.js';
 
 // -----------------------------------------------------------------------------
-// AbigailSummaryUI — Summary UI (Presentation Layer)
-// Provides:
-// - initSummaryUI()
+// ⭐ Zoe — rating UI do system (avaliações por estrelas)
+// EN ⭐ Zoe — system rating UI (star-based ratings)
+// Fornece:
+//  - renderRating()
+//  - normalizeRating()
+//  - mountInput()
+
+import { ZoeRating } from '/assets/js/system/ui/rating/zoe-rating.js';
+
 // -----------------------------------------------------------------------------
+
 console.log('summary.js: carregado / loaded. (Abigaíl entrou em ação)');
-
-// PT: Endpoint global definido em feedbackAPI.js (exposto no window).
-// EN: Global endpoint defined in feedbackAPI.js (exposed on window).
-const ENDPOINT = EndpointConfig.get();
-
-// PT: Se por algum motivo o endpoint não existir, avisamos e abortamos.
-// EN: If for some reason the endpoint is missing, we warn and abort.
-if (!ENDPOINT) {
-  console.warn('summary.js: FEEDBACK_ENDPOINT não definido / not defined.');
-} else {
-  // PT: Esperamos o DOM ficar pronto.
-  // EN: We wait for the DOM to be ready.
-  document.addEventListener('DOMContentLoaded', () => {
-    initSummaryUI();
-  });
-}
 
 // PT: Função principal de inicialização da UI do summary.
 // EN: Main initialization function for the summary UI.
 function initSummaryUI() {
+  // -------------------------------------------------------------------
+  // 0. Verifica se o endpoint está definido
+  // -------------------------------------------------------------------
+  // PT: Endpoint global definido em feedbackAPI.js (exposto no window).
+  // EN: Global endpoint defined in feedbackAPI.js (exposed on window).
+  const ENDPOINT = EndpointConfig.get();
+
+  // PT: Se por algum motivo o endpoint não existir, avisamos e abortamos.
+  // EN: If for some reason the endpoint is missing, we warn and abort.
+  if (!ENDPOINT) {
+    console.warn('summary.js: FEEDBACK_ENDPOINT não definido / not defined.');
+    return;
+  }
+
   // ============================================================
   // 1. CAPTURA DOS ELEMENTOS DO DOM
   // ============================================================
@@ -132,12 +145,19 @@ function initSummaryUI() {
     // EN: We display the average with 1 decimal place, using comma.
     avgEl.textContent = avg.toFixed(1).replace('.', ','); // PT: Exibe média.
 
-    // PT: Calcula estrelas cheias (arredondadas).
-    // EN: Computes filled stars (rounded).
-    const fullStars = Math.round(avg); // PT: Arredonda média para estrelas.
-    const clamped = Math.max(0, Math.min(5, fullStars)); // PT: Garante entre 0 e 5.
+    // // PT: Calcula estrelas cheias (arredondadas).
+    // // EN: Computes filled stars (rounded).
+    // const fullStars = Math.round(avg); // PT: Arredonda média para estrelas.
+    // const clamped = Math.max(0, Math.min(5, fullStars)); // PT: Garante entre 0 e 5.
 
-    starsEl.textContent = '★★★★★'.slice(0, clamped) + '☆☆☆☆☆'.slice(clamped, 5); // PT: Exibe estrelas.
+    // starsEl.textContent = '★★★★★'.slice(0, clamped) + '☆☆☆☆☆'.slice(clamped, 5); // PT: Exibe estrelas.
+
+    // PT: Estrelas são responsabilidade do System UI (Zoe)
+    // EN: Stars are owned by the System UI (Zoe)
+    starsEl.innerHTML = ZoeRating.renderRating(avg, {
+      showValue: false, // PT: a média já aparece no avgEl
+      size: 'lg', // PT: tamanho maior no summary
+    });
 
     // PT: Total de avaliações.
     // EN: Total number of reviews.
@@ -164,7 +184,11 @@ function initSummaryUI() {
   // EN: Fully empty and safe state (when literally nothing works).
   function applyEmptyFallbackToDom() {
     avgEl.textContent = '-'; // PT: Média vazia.
-    starsEl.textContent = '★★★★★'; // PT: Estrelas vazias.
+    starsEl.innerHTML = ZoeRating.renderRating(0, {
+      showValue: false,
+      size: 'lg',
+    }); // PT: Estrelas vazias.
+
     totalEl.textContent = '0'; // PT: Total zero.
 
     for (let star = 1; star <= 5; star++) {
@@ -204,7 +228,9 @@ function initSummaryUI() {
     }
 
     try {
-      const data = await AthenaisSummaryHelpers.fetchSummaryWithRetry(); // PT: Tenta buscar da rede.
+      const data = await AthenaisSummaryHelpers.fetchSummaryMetaWithRetry({
+        forceFresh: forceNetwork,
+      }); // PT: Tenta buscar da rede.
       console.log('📦 Dados brutos do GAS (summary):', data);
       const summary = AthenaisSummaryHelpers.buildSummaryFromResponse(data);
       console.log('📊 Summary calculado:', summary);
@@ -218,15 +244,39 @@ function initSummaryUI() {
       console.error('summary.js: falha ao atualizar summary / update failed:', err);
 
       if (!usedCache) {
-        // PT: Se não usamos cache, aplicamos fallback vazio.
-        // PT: Se não tínhamos cache, mostramos fallback totalmente vazio.
-        // EN: If there was no cache, we show a fully empty fallback.
-        applyEmptyFallbackToDom();
+        const snapshot = AthenaisSummaryHelpers.loadSummarySnapshot();
+        // PT: Se não usamos cache, tentamos restaurar o último estado válido
+        //     via snapshot. Só exibimos o fallback vazio se nunca houve dados.
+        // EN: If cache was not used, we try to restore the last known valid
+        //     state via snapshot. Only show empty fallback if no data ever existed.
+        if (snapshot) {
+          // PT: Usa o último estado válido conhecido (snapshot),
+          //     evitando UI vazia por falha transitória de rede.
+          // EN: Uses the last known valid state (snapshot),
+          //     preventing empty UI due to transient network failure.
+          applySummaryToDOM(snapshot);
+        } else {
+          // Nunca carregou nada na vida
+          // nem cache, nem snapshot
+          applyEmptyFallbackToDom();
+        }
       }
-      // PT: Se já havia cache aplicado, simplesmente mantemos o que está.
-      // EN: If cache was already applied, we silently keep it.
+      // PT: Se o cache já foi aplicado, mantém o estado atual sem alterar a UI.
+      // EN: If cache was already applied, keep the current UI state unchanged.
     }
   }
+
+  // -------------------------------------------------------------
+  // Realtime: summary escuta novos feedbacks confirmados
+  // -------------------------------------------------------------
+  let summaryRefreshTimer = null;
+
+  window.addEventListener('feedback:committed', () => {
+    clearTimeout(summaryRefreshTimer);
+    summaryRefreshTimer = setTimeout(() => {
+      loadSummary({ forceNetwork: true });
+    }, 250);
+  });
 
   // PT: Expondo uma função global opcional para “forçar” atualização
   //     (útil após envio de novo feedback).

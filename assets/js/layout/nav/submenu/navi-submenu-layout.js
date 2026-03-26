@@ -1,102 +1,113 @@
-// /js/layout/nav/submenu/navi-submenu-layout.js
-// 🧭 Navi — Submenu / Menu Mobile
-// Nível: Aprendiz
-// PT: Controla o menu mobile: abrir/fechar, backdrop, ESC e scroll suave
-//     para links âncora.
-// EN: Controls the mobile menu: open/close, backdrop, ESC key and smooth
-//     scrolling for anchor links.
+// 🧭 Navi — Submenu Layout
+//
+// Nível / Level: Aprendiz / Apprentice
+//
+// PT: Controla abertura e fechamento do menu mobile.
+// EN: Controls mobile menu open and close.
+
+/* -----------------------------------------------------------------------------*/
+// Constants
+//
+// PT: Classe de estado do menu mobile.
+// EN: Mobile menu state class.
+/* -----------------------------------------------------------------------------*/
 
 const OPEN_CLASS = 'is-open';
-const DESKTOP_MIN = 640; // Tailwind sm
 
-function isDesktop() {
-  return window.innerWidth >= DESKTOP_MIN;
-}
+/* -----------------------------------------------------------------------------*/
+// Menu Actions
+//
+// PT: Controla abertura e fechamento do menu.
+// EN: Controls menu open and close.
+/* -----------------------------------------------------------------------------*/
 
-// Função para abrir o menu
-// Function to open the menu
+// PT: Abre o menu mobile.
+// EN: Opens the mobile menu.
 function openMenu({ menu, backdrop }) {
-  // PT: Se o botão existe e foi clicado, abre.
-  // EN: If the button exists and was clicked, open.
-
   menu.classList.remove('hidden');
   backdrop.classList.remove('hidden');
+
   document.body.classList.add('overflow-hidden');
 
-  // PT: ativa animação no próximo frame
-  // EN: enable animation next frame
+  // PT: Ativa animação no próximo frame.
+  // EN: Enables animation on the next frame.
   requestAnimationFrame(() => {
     menu.classList.add(OPEN_CLASS);
     backdrop.classList.add(OPEN_CLASS);
   });
 }
 
-// Função para fechar o menu
-// Function to close the menu
+// PT: Fecha o menu mobile.
+// EN: Closes the mobile menu.
 function closeMenu({ menu, backdrop }) {
-  // PT: remove animação primeiro
-  // EN: remove animation first
   menu.classList.remove(OPEN_CLASS);
   backdrop.classList.remove(OPEN_CLASS);
 
   document.body.classList.remove('overflow-hidden');
 
-  // PT: espera transição e depois oculta
-  // EN: wait transition then hide
-  const HIDE_DELAY = 280; // casa com o CSS (260ms)
-  window.setTimeout(() => {
+  // PT: Espera a transição terminar antes de ocultar.
+  // EN: Waits for transition to finish before hiding.
+  const hideDelayMs = 280;
+
+  setTimeout(() => {
     menu.classList.add('hidden');
     backdrop.classList.add('hidden');
-  }, HIDE_DELAY);
+  }, hideDelayMs);
 }
 
-// Inicializa o menu mobile
-// Initializes the mobile menu
-export function initSubmenu() {
+/* -----------------------------------------------------------------------------*/
+// Initialization
+//
+// PT: Inicializa eventos e estado do menu mobile.
+// EN: Initializes mobile menu events and state.
+/* -----------------------------------------------------------------------------*/
+
+// PT: Inicializa o submenu mobile.
+// EN: Initializes the mobile submenu.
+function initSubmenu() {
   const menuToggle = document.getElementById('mobile-menu-toggle');
-  const closeBtn = document.getElementById('mobile-menu-close');
+  const closeButton = document.getElementById('mobile-menu-close');
   const menu = document.getElementById('mobile-menu');
   const backdrop = document.getElementById('mobile-menu-backdrop');
 
   if (!menu || !backdrop) return;
 
-  const ctx = { menu, backdrop };
+  const context = { menu, backdrop };
 
-  // PT: estado inicial consistente
-  // EN: consistent initial state
   menu.classList.add('hidden');
   backdrop.classList.add('hidden');
   menu.classList.remove(OPEN_CLASS);
   backdrop.classList.remove(OPEN_CLASS);
 
   if (menuToggle) {
-    menuToggle.addEventListener('click', () => openMenu(ctx));
+    menuToggle.addEventListener('click', () => openMenu(context));
   }
 
-  if (closeBtn) {
-    closeBtn.addEventListener('click', () => closeMenu(ctx));
+  if (closeButton) {
+    closeButton.addEventListener('click', () => closeMenu(context));
   }
 
-  backdrop.addEventListener('click', () => closeMenu(ctx));
+  backdrop.addEventListener('click', () => closeMenu(context));
 
-  window.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') closeMenu(ctx);
+  // PT: Fecha o menu ao pressionar ESC.
+  // EN: Closes menu on ESC key.
+  addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') closeMenu(context);
   });
 
-  // Fecha ao clicar em qualquer link do menu + faz scroll suave para âncoras
-  // Closes when clicking any menu link + smooth scroll for anchors
-  menu.addEventListener('click', (e) => {
-    const a = e.target.closest('a');
-    if (!a) return;
+  // PT: Fecha ao clicar em links do menu e trata âncoras.
+  // EN: Closes on menu link click and handles anchors.
+  menu.addEventListener('click', (event) => {
+    const link = event.target.closest('a');
+    if (!link) return;
 
-    const href = a.getAttribute('href');
+    const href = link.getAttribute('href');
 
-    // PT: Fecha o menu primeiro
-    // EN: Close first
-    closeMenu(ctx);
+    closeMenu(context);
 
     if (href && href.startsWith('#')) {
-      e.preventDefault();
+      event.preventDefault();
+
       const target = document.querySelector(href);
       if (target) {
         setTimeout(() => {
@@ -106,13 +117,17 @@ export function initSubmenu() {
     }
   });
 
-  // ✅ Fecha se entrar em desktop (ex: rotacionar tablet / resize)
-  // ✅ Auto close when switching to desktop
-  window.addEventListener('resize', () => {
-    const toggleVisible = !!menuToggle && menuToggle.offsetParent !== null;
-    if (!toggleVisible) closeMenu(ctx);
+  // PT: Fecha o menu ao voltar para desktop.
+  // EN: Closes menu when returning to desktop.
+  addEventListener('resize', () => {
+    const isToggleVisible = !!menuToggle && menuToggle.offsetParent !== null;
+    if (!isToggleVisible) closeMenu(context);
   });
 }
+
+/* -----------------------------------------------------------------------------*/
+// Export
+/* -----------------------------------------------------------------------------*/
 
 export const NaviSubmenuLayout = {
   initSubmenu,

@@ -1,50 +1,65 @@
-// ==================================================
+/* -----------------------------------------------------------------------------*/
 // 📷 Daphne — Photo UI Specialist
 //
-// Nível: Jovem
+// Nível / Level: Jovem / Young
 //
-// File: daphne-photo-ui.js
+// PT: Controla a UI da foto no formulário (input file, label e preview).
+//     Atualiza o texto do label, gera a thumb usando URL.createObjectURL
+//     e integra com o modal emitindo um CustomEvent.
+//     Não valida domínio, não converte ou comprime imagem,
+//     não chama API/GAS e não faz upload.
 //
-// PT: Controla a UI da foto no formulário (input file + label + preview).
-//     Daphne atualiza o texto do label, gera a thumb (preview) usando
-//     URL.createObjectURL e integra com o modal emitindo um CustomEvent.
-//     Ela não valida domínio, não converte/comprime imagem (isso é Athena),
-//     não chama API/GAS e não faz upload — UI apenas.
-//
-// EN: Controls the photo UI in the form (file input + label + preview).
-//     Daphne updates the label text, builds the thumbnail preview using
-//     URL.createObjectURL and integrates with the modal by emitting a CustomEvent.
-//     She does not validate domain, does not convert/compress images (Athena does),
-//     does not call APIs/GAS and does not upload — UI only.
-// ==================================================
+// EN: Controls the photo UI in the form (file input, label and preview).
+//     Updates the label text, builds the thumbnail using URL.createObjectURL
+//     and integrates with the modal by emitting a CustomEvent.
+//     Does not validate domain, does not convert or compress images,
+//     does not call APIs/GAS and does not upload.
+/* -----------------------------------------------------------------------------*/
 
-let inputEl = null;
-let labelEl = null;
-let previewEl = null;
+/* -----------------------------------------------------------------------------*/
+// Imports
+/* -----------------------------------------------------------------------------*/
+
+/* -----------------------------------------------------------------------------*/
+// 📘 Logger — System Observability Layer
+// Fornece / Provides:
+// - warn()
+/* -----------------------------------------------------------------------------*/
+import { Logger } from '/assets/js/system/core/logger.js';
+
+/* -----------------------------------------------------------------------------*/
+// 📡 App Events — System Tool
+// Fornece / Provides:
+// - emitAppEvent()
+// - onAppEvent()
+// - offAppEvent()
+/* -----------------------------------------------------------------------------*/
+import { AppEvents } from '/assets/js/system/events/appEvents.js';
+
+/* -----------------------------------------------------------------------------*/
+// Helpers
+//
+// PT: Estado interno e funções auxiliares da UI de foto.
+// EN: Internal state and helper functions for photo UI.
+/* -----------------------------------------------------------------------------*/
+
+let inputElement = null;
+let labelElement = null;
+let previewElement = null;
 
 let isAttached = false;
 let currentObjectUrl = null;
 
-// PT: mantém refs dos handlers para detach seguro
-// EN: keep handler refs for safe detach
-
 let onInputChangeRef = null;
 let onPreviewClickRef = null;
-
-// PT: handler do evento global de limpeza (pedido vindo da Irene)
-// EN: global clear event handler (request coming from Irene)
 let onClearRequestRef = null;
 
-// PT: botão X do input (limpar seleção)
-// EN: input clear (X) button
-let inputClearBtnEl = null;
+let inputClearButtonElement = null;
 let onInputClearClickRef = null;
 let onInputClearKeydownRef = null;
 
-// ------------------------------
-// Internal helpers (UI only)
-// ------------------------------
-
+// PT: Libera a Object URL atual, se existir.
+// EN: Releases the current Object URL, if present.
 function revokeCurrentObjectUrl() {
   if (currentObjectUrl) {
     URL.revokeObjectURL(currentObjectUrl);
@@ -52,88 +67,95 @@ function revokeCurrentObjectUrl() {
   }
 }
 
+// PT: Atualiza o preview visual da foto selecionada.
+// EN: Updates the visual preview of the selected photo.
 function renderPhotoPreview(file) {
-  if (!previewEl) {
-    console.warn('[Daphne] previewEl not found. renderPhotoPreview skipped.');
+  if (!previewElement) {
+    Logger.warn('FORM', 'Daphne', 'preview element not found during renderPhotoPreview');
     return;
   }
 
-  // PT: remove apenas a <img> (não destrói camadas de UX, ex: botão X da Irene)
-  // EN: remove only the <img> (does not destroy UX layers, e.g., Irene's X button)
-  const existingImg = previewEl.querySelector('img');
-  if (existingImg) existingImg.remove();
+  const existingImage = previewElement.querySelector('img');
+
+  if (existingImage) {
+    existingImage.remove();
+  }
 
   revokeCurrentObjectUrl();
 
   if (!file) {
-    previewEl.dataset.full = '';
+    previewElement.dataset.full = '';
     return;
   }
 
   const objectUrl = URL.createObjectURL(file);
   currentObjectUrl = objectUrl;
 
-  const img = new Image();
-  img.src = objectUrl;
-  img.alt = 'Image preview';
-  img.className = 'max-w-full max-h-full object-cover rounded-md';
+  const imageElement = new Image();
+  imageElement.src = objectUrl;
+  imageElement.alt = 'Image preview';
+  imageElement.className = 'max-w-full max-h-full object-cover rounded-md';
 
-  previewEl.appendChild(img);
-  previewEl.dataset.full = objectUrl;
+  previewElement.appendChild(imageElement);
+  previewElement.dataset.full = objectUrl;
 }
 
+// PT: Atualiza o texto do label e a visibilidade do botão de limpar.
+// EN: Updates the label text and the visibility of the clear button.
 function updatePhotoLabel(file) {
-  if (!labelEl) {
-    console.warn('[Daphne] labelEl not found. updatePhotoLabel skipped.');
+  if (!labelElement) {
+    Logger.warn('FORM', 'Daphne', 'label element not found during updatePhotoLabel');
     return;
   }
 
-  labelEl.textContent = file ? file.name : 'Nenhuma Foto Selecionada';
+  labelElement.textContent = file ? file.name : 'Nenhuma Foto Selecionada';
 
-  // PT: X só aparece quando há arquivo selecionado
-  // EN: X only shows when a file is selected
-  if (inputClearBtnEl) {
-    if (file) inputClearBtnEl.classList.remove('hidden');
-    else inputClearBtnEl.classList.add('hidden');
+  if (inputClearButtonElement) {
+    if (file) {
+      inputClearButtonElement.classList.remove('hidden');
+    } else {
+      inputClearButtonElement.classList.add('hidden');
+    }
   }
 }
 
-// PT: remove listeners do botão X (sem remover do DOM)
-// EN: removes X button listeners (without removing from DOM)
+// PT: Remove listeners do botão de limpar sem remover o elemento do DOM.
+// EN: Removes clear-button listeners without removing the DOM element.
 function detachInputClearButtonHandlers() {
-  if (!inputClearBtnEl) return;
+  if (!inputClearButtonElement) {
+    return;
+  }
 
   if (onInputClearClickRef) {
-    inputClearBtnEl.removeEventListener('click', onInputClearClickRef);
+    inputClearButtonElement.removeEventListener('click', onInputClearClickRef);
   }
+
   if (onInputClearKeydownRef) {
-    inputClearBtnEl.removeEventListener('keydown', onInputClearKeydownRef);
+    inputClearButtonElement.removeEventListener('keydown', onInputClearKeydownRef);
   }
 
   onInputClearClickRef = null;
   onInputClearKeydownRef = null;
 }
 
-// PT: garante botão X ao lado do input (limpa seleção)
-// EN: ensures an X button next to the input (clears selection)
+// PT: Garante a existência do botão de limpar ao lado do input.
+// EN: Ensures the clear button exists next to the input.
 function ensureInputClearButton() {
-  const rowEl = document.getElementById('photo-ui-row');
+  const rowElement = document.getElementById('photo-ui-row');
 
-  if (!rowEl) {
-    console.warn('[Daphne] photo-ui-row not found. Input clear button skipped.');
+  if (!rowElement) {
+    Logger.warn('FORM', 'Daphne', 'photo-ui-row not found while ensuring clear button');
     return;
   }
 
-  // PT: tenta achar no DOM (evita duplicar)
-  // EN: tries to find in the DOM (avoids duplicates)
-  inputClearBtnEl = rowEl.querySelector('[data-input-clear]');
+  inputClearButtonElement = rowElement.querySelector('[data-input-clear]');
 
-  if (!inputClearBtnEl) {
-    inputClearBtnEl = document.createElement('button');
-    inputClearBtnEl.type = 'button';
-    inputClearBtnEl.setAttribute('aria-label', 'Clear photo');
-    inputClearBtnEl.setAttribute('data-input-clear', '');
-    inputClearBtnEl.innerHTML = `
+  if (!inputClearButtonElement) {
+    inputClearButtonElement = document.createElement('button');
+    inputClearButtonElement.type = 'button';
+    inputClearButtonElement.setAttribute('aria-label', 'Clear photo');
+    inputClearButtonElement.setAttribute('data-input-clear', '');
+    inputClearButtonElement.innerHTML = `
       <svg viewBox="0 0 24 24" class="w-3.5 h-3.5" aria-hidden="true">
         <path
           d="M6 6l12 12M18 6l-12 12"
@@ -144,9 +166,7 @@ function ensureInputClearButton() {
       </svg>
     `;
 
-    // PT: estilo básico do X (ajuste se quiser)
-    // EN: basic X styling (tweak as needed)
-    inputClearBtnEl.classList.add(
+    inputClearButtonElement.classList.add(
       'hidden',
       'absolute',
       'right-28',
@@ -166,145 +186,147 @@ function ensureInputClearButton() {
       'select-none'
     );
 
-    rowEl.appendChild(inputClearBtnEl);
+    rowElement.appendChild(inputClearButtonElement);
   }
 
-  // PT: evita duplicar listeners se ensure rodar mais de uma vez
-  // EN: prevents duplicated listeners if ensure runs more than once
   detachInputClearButtonHandlers();
 
-  // PT: handlers com refs para detach seguro
-  // EN: handlers with refs for safe detach
-  onInputClearClickRef = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
+  onInputClearClickRef = (event) => {
+    event.preventDefault();
+    event.stopPropagation();
     clearPhotoUI();
   };
 
-  onInputClearKeydownRef = (e) => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      e.stopPropagation();
+  onInputClearKeydownRef = (event) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      event.stopPropagation();
       clearPhotoUI();
     }
   };
 
-  inputClearBtnEl.addEventListener('click', onInputClearClickRef);
-  inputClearBtnEl.addEventListener('keydown', onInputClearKeydownRef);
+  inputClearButtonElement.addEventListener('click', onInputClearClickRef);
+  inputClearButtonElement.addEventListener('keydown', onInputClearKeydownRef);
 }
 
+// PT: Emite o evento para abrir o modal da imagem.
+// EN: Emits the event used to open the image modal.
 function emitPhotoModalEvent(src) {
-  window.dispatchEvent(
-    new CustomEvent('modal:imagem', {
-      detail: { src, alt: 'Uploaded photo' },
-    })
-  );
+  AppEvents.emitAppEvent('modal:imagem', {
+    src,
+    alt: 'Uploaded photo',
+  });
 }
 
-// ------------------------------
-// Public API (Daphne)
-// ------------------------------
+/* -----------------------------------------------------------------------------*/
+// Public API
+/* -----------------------------------------------------------------------------*/
 
+// PT: Anexa a UI da foto ao formulário.
+// EN: Attaches photo UI to the form.
 function attachPhotoUI(options = {}) {
-  if (isAttached) return;
+  if (isAttached) {
+    return;
+  }
 
   const { inputId = 'photo', labelId = 'photo-label', previewId = 'photo-preview' } = options;
 
-  inputEl = document.getElementById(inputId);
-  labelEl = document.getElementById(labelId);
-  previewEl = document.getElementById(previewId);
+  inputElement = document.getElementById(inputId);
+  labelElement = document.getElementById(labelId);
+  previewElement = document.getElementById(previewId);
 
-  if (!inputEl || !labelEl || !previewEl) {
-    console.warn('[Daphne] Missing DOM refs. attachPhotoUI aborted.', {
-      inputEl,
-      labelEl,
-      previewEl,
+  if (!inputElement || !labelElement || !previewElement) {
+    Logger.warn('FORM', 'Daphne', 'missing DOM refs during attachPhotoUI', {
+      inputElement,
+      labelElement,
+      previewElement,
     });
     return;
   }
 
   ensureInputClearButton();
 
-  // PT: Change no input file → atualiza label e preview
-  // EN: File input change → update label and preview
   onInputChangeRef = () => {
-    const file = inputEl.files?.[0] || null;
+    const file = inputElement.files?.[0] || null;
     updatePhotoLabel(file);
     renderPhotoPreview(file);
   };
 
-  inputEl.addEventListener('change', onInputChangeRef);
+  inputElement.addEventListener('change', onInputChangeRef);
 
-  // PT: Clique no preview → emite evento para o modal
-  // EN: Preview click → emits event for the modal
   onPreviewClickRef = () => {
-    const url = previewEl.dataset.full;
-    if (!url) return;
+    const url = previewElement.dataset.full;
+
+    if (!url) {
+      return;
+    }
+
     emitPhotoModalEvent(url);
   };
 
-  previewEl.addEventListener('click', onPreviewClickRef);
+  previewElement.addEventListener('click', onPreviewClickRef);
 
-  // PT: Irene solicita limpeza via evento global → Daphne executa o reset
-  // EN: Irene requests clearing via global event → Daphne performs the reset
   onClearRequestRef = () => clearPhotoUI();
-  window.addEventListener('feedback:photo:clear-request', onClearRequestRef);
+  AppEvents.onAppEvent('feedback:photo:clear-request', onClearRequestRef);
 
-  // Initial sync
   onInputChangeRef();
 
   isAttached = true;
 }
 
+// PT: Limpa a UI da foto selecionada.
+// EN: Clears the selected photo UI.
 function clearPhotoUI() {
   if (!isAttached) {
-    console.warn('[Daphne] clearPhotoUI called while not attached.');
+    Logger.warn('FORM', 'Daphne', 'clearPhotoUI called while UI is not attached');
     return;
   }
 
-  if (!inputEl || !labelEl || !previewEl) {
-    console.warn('[Daphne] clearPhotoUI missing DOM refs.', { inputEl, labelEl, previewEl });
+  if (!inputElement || !labelElement || !previewElement) {
+    Logger.warn('FORM', 'Daphne', 'missing DOM refs during clearPhotoUI', {
+      inputElement,
+      labelElement,
+      previewElement,
+    });
     return;
   }
 
-  if (inputEl) inputEl.value = '';
+  inputElement.value = '';
   updatePhotoLabel(null);
   renderPhotoPreview(null);
 }
 
+// PT: Remove listeners e limpa refs da UI da foto.
+// EN: Removes listeners and clears refs from photo UI.
 function detachPhotoUI() {
-  if (!isAttached) return;
-
-  if (inputEl && onInputChangeRef) {
-    inputEl.removeEventListener('change', onInputChangeRef);
+  if (!isAttached) {
+    return;
   }
 
-  if (previewEl && onPreviewClickRef) {
-    previewEl.removeEventListener('click', onPreviewClickRef);
+  if (inputElement && onInputChangeRef) {
+    inputElement.removeEventListener('change', onInputChangeRef);
   }
 
-  // PT: remove listener do evento global de limpeza
-  // EN: remove global clear event listener
+  if (previewElement && onPreviewClickRef) {
+    previewElement.removeEventListener('click', onPreviewClickRef);
+  }
+
   if (onClearRequestRef) {
-    window.removeEventListener('feedback:photo:clear-request', onClearRequestRef);
+    AppEvents.offAppEvent('feedback:photo:clear-request', onClearRequestRef);
   }
 
-  // PT: remove handlers do botão X do input (limpar seleção)
-  // EN: remove input clear (X) button handlers
   detachInputClearButtonHandlers();
 
-  // Limpa refs
-  inputClearBtnEl = null;
+  inputClearButtonElement = null;
   onInputClearClickRef = null;
   onInputClearKeydownRef = null;
-
   onClearRequestRef = null;
 
   revokeCurrentObjectUrl();
 
-  inputEl = null;
-  labelEl = null;
-  previewEl = null;
+  inputElement = null;
+  labelElement = null;
+  previewElement = null;
 
   onInputChangeRef = null;
   onPreviewClickRef = null;
@@ -312,10 +334,9 @@ function detachPhotoUI() {
   isAttached = false;
 }
 
-// ------------------------------
-// Export pattern (project standard)
-// Ordem de uso: attach → clear → detach
-// ------------------------------
+/* -----------------------------------------------------------------------------*/
+// Export
+/* -----------------------------------------------------------------------------*/
 
 export const DaphnePhotoUI = {
   attachPhotoUI,

@@ -1,0 +1,130 @@
+<!-- ===================================================== -->
+<!-- SECTION: ABOUT -->
+<!-- Foundation / sections/about.html -->
+<!-- ===================================================== -->
+
+<section id="sobre" class="min-h-[calc(60vh-4rem)] snap-start scroll-mt-20">
+  <div class="mx-auto max-w-screen-2xl px-4 py-12 sm:px-6 lg:px-8">
+    <div class="grid grid-cols-1 gap-2 xl:min-h-[68vh] xl:grid-cols-2 xl:gap-8">
+      <!-- Imagem à esquerda -->
+      <div class="relative z-10 py-4 lg:py-2 xl:py-12">
+        <div class="relative h-auto xl:h-full">
+          <!-- FUNDO + OVERLAY: agora SEM "hidden", e atrás com -z-10 -->
+          <img
+            alt="Sobre a SCS Molduras"
+            src="assets/img/background/sobre/Escritorio-Administrativo.webp"
+            class="absolute inset-0 w-full h-full object-cover brightness-90 contrast-110 -z-10 pointer-events-none"
+          />
+          <div
+            class="absolute inset-0 -z-10 pointer-events-none bg-gradient-to-r from-black/50 via-black/35 to-transparent xl:from-black/60 xl:via-black/40 xl:to-transparent backdrop-blur-[1.5px]"
+          ></div>
+
+          <!-- GRID -->
+          <!-- mobile: no fluxo; lg+: absoluto centralizado -->
+          <div
+            class="px-3 py-4 sm:py-6 xl:py-0 xl:absolute xl:inset-0 xl:flex xl:items-center xl:justify-center"
+          >
+            <div
+              class="grid grid-cols-2 gap-3 sm:gap-4 md:gap-5 w-full sm:w-[92%] md:w-[88%] lg:w-[86%] xl:w-[84%] max-w-[1080px] mx-auto z-10"
+            >
+              <figure
+                class="relative h-[140px] sm:h-[175px] md:h-[220px] lg:h-[260px] xl:h-[300px] rounded-xl overflow-hidden shadow-[0_10px_25px_-10px_rgba(0,0,0,0.35)] ring-1 ring-white/25 hover:ring-white/50 transition-all duration-200 cursor-zoom-in"
+              >
+                <img
+                  src="assets/img/background/sobre/producao-1.webp"
+                  data-full="assets/img/background/sobre/producao-1.webp"
+                  class="absolute inset-0 w-full h-full object-cover js-open-modal"
+                  alt="Produção"
+                />
+              </figure>
+
+              <figure
+                class="relative h-[140px] sm:h-[175px] md:h-[220px] lg:h-[260px] xl:h-[300px] rounded-xl overflow-hidden shadow-[0_10px_25px_-10px_rgba(0,0,0,0.35)] ring-1 ring-white/25 hover:ring-white/50 transition-all duration-200 cursor-zoom-in"
+              >
+                <img
+                  src="assets/img/background/sobre/estoque.webp"
+                  data-full="assets/img/background/sobre/estoque.webp"
+                  class="absolute inset-0 w-full h-full object-cover js-open-modal"
+                  alt="Estoque"
+                />
+              </figure>
+
+              <figure
+                class="relative h-[140px] sm:h-[175px] md:h-[220px] lg:h-[260px] xl:h-[300px] rounded-xl overflow-hidden shadow-[0_10px_25px_-10px_rgba(0,0,0,0.35)] ring-1 ring-white/25 hover:ring-white/50 transition-all duration-200 cursor-zoom-in"
+              >
+                <img
+                  src="assets/img/background/sobre/producao-3.webp"
+                  data-full="assets/img/background/sobre/producao-3.webp"
+                  class="absolute inset-0 w-full h-full object-cover js-open-modal"
+                  alt="Equipe"
+                />
+              </figure>
+
+              <figure
+                class="relative h-[140px] sm:h-[175px] md:h-[220px] lg:h-[260px] xl:h-[300px] rounded-xl overflow-hidden shadow-[0_10px_25px_-10px_rgba(0,0,0,0.35)] ring-1 ring-white/25 hover:ring-white/50 transition-all duration-200 cursor-zoom-in"
+              >
+                <img
+                  src="assets/img/background/sobre/embalagem.webp"
+                  data-full="assets/img/background/sobre/embalagem.webp"
+                  class="absolute inset-0 w-full h-full object-cover js-open-modal"
+                  alt="Embalagem"
+                />
+              </figure>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Texto à direita -->
+      <div class="relative flex items-center bg-gray-100">
+        <span
+          class="hidden xl:absolute xl:inset-y-0 xl:-start-16 xl:block xl:w-16 xl:bg-gray-100"
+        ></span>
+
+        <div class="p-8 sm:p-16 lg:p-24">
+          <div class="flex items-baseline gap-3 flex-wrap">
+            <h2 class="text-3xl sm:text-4xl font-bold leading-tight">SCS Molduras</h2>
+            <span
+              class="inline-flex items-center gap-1.5 rounded-full bg-neutral-900 text-white text-[11px] sm:text-xs px-3 py-1 leading-none whitespace-nowrap print:hidden"
+              aria-label="Fábrica Própria"
+              title="Fábrica Própria"
+            >
+              <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path d="M3 21h18v-9l-5 3V9l-5 3V3H3v18Z" />
+              </svg>
+              Fábrica Própria
+            </span>
+          </div>
+
+          <p class="mt-4 text-gray-600">
+            A <strong>SCS Molduras</strong> é especializada na fabricação de molduras padrão e
+            personalizadas, unindo organização, compromisso e qualidade em cada etapa do processo.
+            Nosso trabalho é pautado pela ética, pela responsabilidade e pelo cuidado em entregar
+            peças com acabamento limpo e prazos confiáveis, atendendo desde pedidos individuais até
+            grandes demandas corporativas.
+          </p>
+
+          <h3 class="mt-6 text-xl font-semibold text-gray-800">Missão</h3>
+          <p class="mt-2 text-gray-600">
+            Fornecer molduras com qualidade e preço justo, prezando pela confiança e transparência
+            no relacionamento com clientes e parceiros.
+          </p>
+
+          <h3 class="mt-6 text-xl font-semibold text-gray-800">Futuro</h3>
+          <p class="mt-2 text-gray-600">
+            Estamos investindo no desenvolvimento de um
+            <strong>sistema próprio de gestão</strong>, criado para organizar de forma eficiente
+            toda a produção e o atendimento, garantindo controle em tempo real e mais praticidade
+            para nossos clientes e parceiros.
+          </p>
+          <p class="mt-2 text-gray-600">
+            Os marketplaces, como Shopee e Mercado Livre, fazem parte da nossa estratégia como
+            canais de apoio, mas o foco é consolidar um
+            <strong>catálogo e sistema próprios</strong>, que fortaleçam a identidade da SCS
+            Molduras e ofereçam ainda mais confiança, seriedade e dedicação em cada pedido.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

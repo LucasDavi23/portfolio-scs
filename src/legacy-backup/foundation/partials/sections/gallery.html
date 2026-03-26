@@ -1,0 +1,48 @@
+<!-- ===================================================== -->
+<!-- SECTION: GALLERY -->
+<!-- Foundation / sections/gallery.html -->
+<!-- ===================================================== -->
+
+<section id="galeria" class="py-6 min-h-[calc(60vh-4rem)] snap-start scroll-mt-20">
+  <!-- reduzi de py-12 para py-6 -->
+  <div class="max-w-screen-lg px-3 sm:px-4 lg:px-6 mx-auto">
+    <!-- reduzi largura e padding -->
+    <header class="text-center">
+      <h2 class="text-lg font-bold text-gray-900 sm:text-2xl">Galeria de Molduras</h2>
+      <p class="max-w-md mx-auto mt-2 text-gray-500 text-sm">Modelos mais vendidos e composições</p>
+    </header>
+
+    <ul class="grid grid-cols-1 gap-4 mt-6 lg:grid-cols-3">
+      <!-- Imagem 1 (ESQUERDA, topo) -->
+      <li class="rounded-lg overflow-hidden ring-1 ring-black/10 shadow transition hover:shadow-md">
+        <img
+          src="assets/img/background/produtos/LA-2/produto-1.webp"
+          alt="produto-1"
+          class="w-full aspect-square object-cover object-center cursor-pointer transition duration-300 hover:scale-[1.03] js-open-modal"
+          loading="lazy"
+        />
+      </li>
+
+      <!-- Imagem 2 (ESQUERDA, abaixo) -->
+      <li class="rounded-lg overflow-hidden ring-1 ring-black/10 shadow transition hover:shadow-md">
+        <img
+          src="assets/img/background/produtos/LA-2/produto-2.webp"
+          alt="produto-2"
+          class="w-full aspect-square object-cover object-center cursor-pointer transition duration-300 hover:scale-[1.03] js-open-modal"
+          loading="lazy"
+        />
+      </li>
+
+      <!-- Imagem grande (DIREITA, 2 colunas x 2 linhas) -->
+      <li
+        class="lg:col-span-2 lg:col-start-2 lg:row-span-2 lg:row-start-1 rounded-lg overflow-hidden ring-1 ring-black/10 shadow transition hover:shadow-md"
+      >
+        <img
+          src="assets/img/background/produtos/LA-2/produto-3.webp"
+          alt="produto-3"
+          class="w-full aspect-square object-cover cursor-pointer transition duration-300 hover:scale-[1.02] js-open-modal"
+        />
+      </li>
+    </ul>
+  </div>
+</section>

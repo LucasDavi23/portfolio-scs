@@ -1,47 +1,57 @@
-// /js/system/director/morgana-system-director.js
-// 🜁 Morgana — Diretora Geral do Sistema
-// Nível: Adulta
+// 🜁 Morgana — System Director
 //
-// PT: Morgana coordena o sistema como um todo. Ela não cuida de setores,
-//     mas garante que cada líder execute seu papel na ordem correta.
-//     Este arquivo é o "ponto inicial" do sistema.
+// Nível / Level: Adulta / Adult
 //
-// EN: Morgana coordinates the entire system. She does not handle specific
-//     sectors, but ensure s each leader runs in the correct order.
-//     This file is the system's entry point.
+// PT: Coordena a inicialização dos setores do sistema.
+// EN: Coordinates system sector initialization.
 
-// 🌇 Aurora — Líder do Layout
+/* -----------------------------------------------------------------------------*/
+// Imports
+/* -----------------------------------------------------------------------------*/
+
+/* -----------------------------------------------------------------------------*/
+// 🌇 Aurora — Layout Leader
+// Fornece / Provides:
+// - initLayout()
+/* -----------------------------------------------------------------------------*/
 import { AuroraLayoutLeader } from '/assets/js/layout/leader/aurora-layout-main.js';
 
-// 🛡️ Kendra — Líder do Setor de Board.
+/* -----------------------------------------------------------------------------*/
+// 🛡️ Kendra — Board Leader
+// Fornece / Provides:
+// - initBoard()
+/* -----------------------------------------------------------------------------*/
 import { KendraBoardLeader } from '/assets/js/feedback/board/leader/kendra-feedback-main';
 
-// 🌙 Aura — Líder do setor Form.
+/* -----------------------------------------------------------------------------*/
+// 🌙 Aura — Form Leader
+// Fornece / Provides:
+// - initForm()
+/* -----------------------------------------------------------------------------*/
 import { AuraFormLeader } from '/assets/js/feedback/form/leader/aura-form-leader-main.js';
 
-// Futuro:
-// import { initFeedback } from '/assets/js/feedback/leader/selah-feedback-board-ui.js';
-// import { initPedidos } from '/assets/js/pedidos/leader/...';
+/* -----------------------------------------------------------------------------*/
+// System Initialization
+//
+// PT: Inicializa os setores principais do sistema.
+// EN: Initializes core system sectors.
+/* -----------------------------------------------------------------------------*/
 
+// PT: Executa a inicialização principal do sistema.
+// EN: Runs the main system initialization.
 export function initSystem() {
-  // PT: Inicializa cada setor necessário na página.
-  // EN: Initializes each required sector on the page.
-
-  // --- Layout ---
   AuroraLayoutLeader.initLayout();
 
-  // --- Feedback ---
-
-  // --- Board ---
   KendraBoardLeader.initBoard();
 
-  // --- Form ---mas
   AuraFormLeader.initForm();
-  // --- Futuro ---
-  // initFeedback();
-  // initPedidos();
-  // initOrcamento();
 }
 
-// Auto-executa se desejado (opcional):
+/* -----------------------------------------------------------------------------*/
+// Auto Init
+//
+// PT: Executa o sistema ao carregar o DOM.
+// EN: Runs the system when the DOM is ready.
+/* -----------------------------------------------------------------------------*/
+
 document.addEventListener('DOMContentLoaded', initSystem);

@@ -1,40 +1,47 @@
-// ==================================================
-// ⭐ Stella — Submit Overlay UI Specialist (System/UI)
-// Nível: Jovem
-// --------------------------------------------------
-// PT: Overlay reutilizável de "processando" para submits.
-//     Bloqueia interação e comunica estado usando o spinner da Luma.
-// EN: Reusable "processing" overlay for submits.
-//     Blocks interaction and communicates state using Luma's spinner.
-// ==================================================
+// ⭐ Stella — Submit Overlay
+//
+// Nível / Level: Jovem / Young
+//
+// PT: Exibe overlay de carregamento em submits.
+// EN: Displays loading overlay during submits.
 
-// 🍃 Luma — Loading Base (System/UI)
-// provides:
-// ensurePaint,
-// safeLabel,
-// spinnerHTML,
-// renderLoading,
-// clearLoading,
-// setButtonLoading,
+/* -----------------------------------------------------------------------------*/
+// Imports
+/* -----------------------------------------------------------------------------*/
 
+/* -----------------------------------------------------------------------------*/
+// 🍃 Luma — Loading UI
+// Fornece / Provides:
+// - spinnerHTML()
+/* -----------------------------------------------------------------------------*/
 import { LumaLoading } from '/assets/js/system/ui/loading/luma-loading';
 
-// ---------------------------------------------------------------------
+/* -----------------------------------------------------------------------------*/
+// Overlay Helpers
+//
+// PT: Cria e gerencia o overlay de submit.
+// EN: Creates and manages the submit overlay.
+/* -----------------------------------------------------------------------------*/
 
+// PT: Garante que o overlay exista no container.
+// EN: Ensures the overlay exists in the container.
 function ensureOverlay(containerEl) {
   if (!containerEl) return null;
 
-  // Evita duplicar
   let overlay = containerEl.querySelector('[data-stella-submit-overlay="true"]');
   if (overlay) return overlay;
 
-  // Garante contexto de posicionamento
   const style = getComputedStyle(containerEl);
-  if (style.position === 'static') containerEl.classList.add('relative');
 
-  // cria overlay
+  // PT: Garante contexto de posicionamento.
+  // EN: Ensures positioning context.
+  if (style.position === 'static') {
+    containerEl.classList.add('relative');
+  }
+
   overlay = document.createElement('div');
   overlay.setAttribute('data-stella-submit-overlay', 'true');
+
   overlay.className =
     'absolute inset-0 z-50 hidden items-center justify-center rounded-2xl bg-white/70 backdrop-blur-sm';
 
@@ -51,6 +58,15 @@ function ensureOverlay(containerEl) {
   return overlay;
 }
 
+/* -----------------------------------------------------------------------------*/
+// Overlay Actions
+//
+// PT: Controla exibição e ocultação do overlay.
+// EN: Controls overlay visibility.
+/* -----------------------------------------------------------------------------*/
+
+// PT: Exibe o overlay.
+// EN: Shows the overlay.
 function show(containerEl, label = 'Enviando...', options = {}) {
   const overlay = ensureOverlay(containerEl);
   if (!overlay) return;
@@ -58,16 +74,23 @@ function show(containerEl, label = 'Enviando...', options = {}) {
   const { subtext = 'Aguarde só um instante.' } = options;
 
   const content = overlay.querySelector('[data-stella-overlay-content]');
-  if (content) content.innerHTML = LumaLoading.spinnerHTML(label);
+  if (content) {
+    content.innerHTML = LumaLoading.spinnerHTML(label);
+  }
 
   const sub = overlay.querySelector('[data-stella-overlay-sub]');
-  if (sub) sub.textContent = subtext;
+  if (sub) {
+    sub.textContent = subtext;
+  }
 
   overlay.classList.remove('hidden');
   overlay.classList.add('flex');
+
   containerEl.setAttribute('aria-busy', 'true');
 }
 
+// PT: Oculta o overlay.
+// EN: Hides the overlay.
 function hide(containerEl) {
   if (!containerEl) return;
 
@@ -76,8 +99,13 @@ function hide(containerEl) {
 
   overlay.classList.add('hidden');
   overlay.classList.remove('flex');
+
   containerEl.removeAttribute('aria-busy');
 }
+
+/* -----------------------------------------------------------------------------*/
+// Export
+/* -----------------------------------------------------------------------------*/
 
 export const StellaSubmitOverlay = {
   show,

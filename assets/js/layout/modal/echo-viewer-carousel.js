@@ -1,33 +1,25 @@
-// ==================================================
-// 🔊 Echo — Viewer Carousel Assistant
+// 🔊 Echo — Viewer Carousel
 //
-// Nível: Aprendiz
+// Nível / Level: Aprendiz / Apprentice
 //
-// PT: Auxilia a Iris quando o modal de imagem precisa operar
-//     como galeria. Echo gerencia lista de imagens, índice atual
-//     e navegação (next/prev, swipe e teclado), notificando a Iris
-//     sempre que a imagem muda.
-//     Echo não abre/fecha modal, não controla scroll e não altera UI.
-//
-// EN: Assists Iris when the image modal needs to operate as a gallery.
-//     Echo manages the image list, current index and navigation
-//     (next/prev, swipe and keyboard), notifying Iris whenever
-//     the image changes.
-//     Echo does not open/close the modal, handle scroll, or alter UI.
-// --------------------------------------------------
+// PT: Gerencia navegação de imagens em modo galeria.
+// EN: Manages image navigation in gallery mode.
 
-// -----------------------------------------------------------------------------
-// Internal helpers (pure)
-// -----------------------------------------------------------------------------
+/* -----------------------------------------------------------------------------*/
+// Helpers (Pure)
+//
+// PT: Funções puras de apoio.
+// EN: Pure helper functions.
+/* -----------------------------------------------------------------------------*/
 
-// PT: Garante que o número fique dentro dos limites.
-// EN: Ensures a number stays within bounds.
+// PT: Mantém número dentro do limite.
+// EN: Keeps number within bounds.
 function clampNumber(value, min, max) {
   return Math.max(min, Math.min(max, value));
 }
 
-// PT: Normaliza a lista de imagens para { src, alt }.
-// EN: Normalizes the image list to { src, alt }.
+// PT: Normaliza lista de imagens.
+// EN: Normalizes image list.
 function normalizeImageList(images) {
   if (!Array.isArray(images)) return [];
 
@@ -51,17 +43,22 @@ function normalizeImageList(images) {
     .filter(Boolean);
 }
 
-// PT: Evita capturar teclado quando o foco está em campos de formulário.
-// EN: Avoids capturing keys while focus is on form controls.
+// PT: Verifica se é campo de formulário.
+// EN: Checks if element is a form control.
 function isFormControlElement(element) {
   const tagName = element?.tagName;
   return tagName === 'INPUT' || tagName === 'TEXTAREA' || tagName === 'SELECT';
 }
 
-// -----------------------------------------------------------------------------
-// Internal helpers (session-specific)
-// -----------------------------------------------------------------------------
+/* -----------------------------------------------------------------------------*/
+// Session Helpers
+//
+// PT: Controle interno da sessão.
+// EN: Internal session control.
+/* -----------------------------------------------------------------------------*/
 
+// PT: Notifica mudança de imagem.
+// EN: Notifies image change.
 function notifySessionChange(sessionState, reason) {
   const { onChange, currentIndex, imageList, isDestroyed } = sessionState;
   if (isDestroyed) return;
@@ -75,14 +72,20 @@ function notifySessionChange(sessionState, reason) {
   });
 }
 
+// PT: Verifica se pode avançar.
+// EN: Checks if can go next.
 function canGoToNext(sessionState) {
   return sessionState.currentIndex < sessionState.imageList.length - 1;
 }
 
+// PT: Verifica se pode voltar.
+// EN: Checks if can go previous.
 function canGoToPrevious(sessionState) {
   return sessionState.currentIndex > 0;
 }
 
+// PT: Vai para índice específico.
+// EN: Navigates to specific index.
 function goToIndex(sessionState, targetIndex, reason) {
   if (sessionState.isDestroyed) return false;
   if (!sessionState.imageList.length) return false;
@@ -96,21 +99,29 @@ function goToIndex(sessionState, targetIndex, reason) {
   return true;
 }
 
+// PT: Avança imagem.
+// EN: Goes to next image.
 function goToNext(sessionState, reason) {
   if (!canGoToNext(sessionState)) return false;
   return goToIndex(sessionState, sessionState.currentIndex + 1, reason);
 }
 
+// PT: Volta imagem.
+// EN: Goes to previous image.
 function goToPrevious(sessionState, reason) {
   if (!canGoToPrevious(sessionState)) return false;
   return goToIndex(sessionState, sessionState.currentIndex - 1, reason);
 }
-// -----------------------------------------------------------------------------
-// Handler factories (keep outside createViewerSession)
-// -----------------------------------------------------------------------------
 
-// PT: Cria manipulador de teclado para navegação.
-// EN: Creates keyboard handler for navigation.
+/* -----------------------------------------------------------------------------*/
+// Handlers
+//
+// PT: Manipuladores de eventos.
+// EN: Event handlers.
+/* -----------------------------------------------------------------------------*/
+
+// PT: Cria handler de teclado.
+// EN: Creates keyboard handler.
 function createKeyboardHandler(sessionState) {
   return function handleKeyDown(event) {
     if (sessionState.isDestroyed) return;
@@ -128,6 +139,8 @@ function createKeyboardHandler(sessionState) {
   };
 }
 
+// PT: Cria handlers de swipe.
+// EN: Creates swipe handlers.
 function createSwipeHandlers(sessionState) {
   let touchStartClientX = 0;
   let touchStartClientY = 0;
@@ -151,8 +164,6 @@ function createSwipeHandlers(sessionState) {
     const deltaX = touch.clientX - touchStartClientX;
     const deltaY = touch.clientY - touchStartClientY;
 
-    // PT: ignora swipe vertical dominante
-    // EN: ignore vertically dominant swipes
     if (Math.abs(deltaY) * sessionState.swipeDominanceRatio > Math.abs(deltaX)) return;
 
     const elapsedTimeMs = Math.max(1, performance.now() - touchStartTimestampMs);
@@ -176,21 +187,23 @@ function createSwipeHandlers(sessionState) {
   return { handleTouchStart, handleTouchEnd };
 }
 
-// -----------------------------------------------------------------------------
-// Public API (🔊 Echo — Viewer Carousel Session)
-// -----------------------------------------------------------------------------
+/* -----------------------------------------------------------------------------*/
+// Public API
+//
+// PT: Cria sessão do viewer.
+// EN: Creates viewer session.
+/* -----------------------------------------------------------------------------*/
 
+// PT: Inicializa sessão de galeria.
+// EN: Initializes gallery session.
 function createViewerSession(options = {}) {
   const {
     images = [],
     startIndex = 0,
     onChange = null,
-
     enableKeyboardNavigation = false,
-
     enableSwipeNavigation = false,
     swipeRootElement = null,
-
     swipeMinimumDistancePixels = 45,
     swipeDominanceRatio = 1.25,
     swipeFastVelocityThreshold = 0.55,
@@ -199,26 +212,20 @@ function createViewerSession(options = {}) {
   const imageList = normalizeImageList(images);
 
   const sessionState = {
-    // PT/EN: core
     imageList,
     currentIndex: clampNumber(Number(startIndex) || 0, 0, Math.max(0, imageList.length - 1)),
     onChange,
     isDestroyed: false,
-
-    // PT/EN: swipe config
     swipeMinimumDistancePixels,
     swipeDominanceRatio,
     swipeFastVelocityThreshold,
   };
 
-  // Create handlers (stable refs for removeEventListener)
   const keyboardHandler = enableKeyboardNavigation ? createKeyboardHandler(sessionState) : null;
-
   const swipeHandlers = enableSwipeNavigation ? createSwipeHandlers(sessionState) : null;
 
-  // Bind listeners
   if (keyboardHandler) {
-    window.addEventListener('keydown', keyboardHandler);
+    addEventListener('keydown', keyboardHandler);
   }
 
   if (swipeHandlers && swipeRootElement) {
@@ -230,20 +237,15 @@ function createViewerSession(options = {}) {
     });
   }
 
-  // Initial emit
   notifySessionChange(sessionState, 'init');
 
-  // Return controller to Iris
   return {
-    // PT/EN: getters
     getIndex() {
       return sessionState.currentIndex;
     },
     getImages() {
       return sessionState.imageList;
     },
-
-    // PT/EN: navigation
     next() {
       return goToNext(sessionState);
     },
@@ -253,13 +255,11 @@ function createViewerSession(options = {}) {
     goTo(targetIndex) {
       return goToIndex(sessionState, targetIndex, 'goTo');
     },
-
-    // PT/EN: teardown
     destroy() {
       sessionState.isDestroyed = true;
 
       if (keyboardHandler) {
-        window.removeEventListener('keydown', keyboardHandler);
+        removeEventListener('keydown', keyboardHandler);
       }
 
       if (swipeHandlers && swipeRootElement) {
@@ -270,9 +270,10 @@ function createViewerSession(options = {}) {
   };
 }
 
-// ------------------------------
-// Export pattern (project standard)
-// ------------------------------
+/* -----------------------------------------------------------------------------*/
+// Export
+/* -----------------------------------------------------------------------------*/
+
 export const EchoViewerCarousel = {
   createViewerSession,
 };

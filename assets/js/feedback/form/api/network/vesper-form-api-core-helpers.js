@@ -1,84 +1,113 @@
-// ==================================================
-// 🧬 Vesper — Core de Rede (helpers) — Nível: Adulta
+/* -----------------------------------------------------------------------------*/
+// 🧬 Vesper — Form API Core Helpers
 //
-// Nível: Adulta
+// Nível / Level: Adulto / Adult
 //
-// File: vesper-form-api-core-helpers.js
+// PT: Especialista na camada de rede do FORM. Resolve o endpoint,
+//     executa requisições GET/POST, faz parse seguro da resposta
+//     e normaliza o retorno do GAS sem conhecer regras de domínio.
 //
-// PT: Especialista na camada de rede do FORM: constrói BASE URL,
-//     executa POST JSON com headers "text/plain" (evita preflight),
-//     faz parse seguro e normaliza erros. Não conhece domínio do form.
-// EN: Specialist in the FORM network layer: builds BASE URL,
-//     performs JSON POST with "text/plain" headers (avoids preflight),
-//     safely parses responses and normalizes errors. Knows no form domain.
-// ==================================================
+// EN: Specialist in the FORM network layer. Resolves the endpoint,
+//     performs GET/POST requests, safely parses responses,
+//     and normalizes GAS output without knowing domain rules.
+/* -----------------------------------------------------------------------------*/
 
-/**
- * PT: Resolve o endpoint do Apps Script.
- * EN: Resolves Apps Script endpoint.
- */
-export function getFeedbackEndpoint() {
+/* -----------------------------------------------------------------------------*/
+// Endpoint Resolver
+//
+// PT: Resolve o endpoint principal do Apps Script.
+//     Usa a configuração global quando disponível e aplica
+//     um fallback seguro para ambientes sem bootstrap prévio.
+//
+// EN: Resolves the main Apps Script endpoint.
+//     Uses the global configuration when available and applies
+//     a safe fallback for environments without prior bootstrap.
+/* -----------------------------------------------------------------------------*/
+function getFeedbackEndpoint() {
   return (
     window.FEEDBACK_ENDPOINT ||
     'https://script.google.com/macros/s/AKfycbzzCFgGmXhIDc7xlaJa_XpacGMu3GBn7d0kg2ntRgUrpuisnV__AjF_8pJGXgG6NaMP0A/exec'
   );
 }
 
-/**
- * PT: Normaliza resposta do GAS em um formato estável.
- * EN: Normalizes GAS response into a stable shape.
- */
-export function normalizeGasResponse(raw) {
+/* -----------------------------------------------------------------------------*/
+// GAS Response Normalizer
+//
+// PT: Normaliza a resposta bruta do GAS em um formato estável
+//     para consumo pelas demais personas do FORM.
+//
+// EN: Normalizes the raw GAS response into a stable shape
+//     for consumption by other FORM personas.
+/* -----------------------------------------------------------------------------*/
+function normalizeGasResponse(rawResponse) {
   return {
-    success: !!(raw?.success ?? raw?.ok ?? raw?.status === 'ok'),
-    message: raw?.message || raw?.error || '',
-    data: raw?.data || raw,
-    item: raw?.item || null,
-    raw,
+    success: !!(rawResponse?.success ?? rawResponse?.ok ?? rawResponse?.status === 'ok'),
+    message: rawResponse?.message || rawResponse?.error || '',
+    data: rawResponse?.data || rawResponse,
+    item: rawResponse?.item || null,
+    raw: rawResponse,
   };
 }
 
-/**
- * PT: POST JSON para o Apps Script via text/plain (evita preflight).
- * EN: JSON POST to Apps Script via text/plain (avoids preflight).
- */
-export async function postJsonAction(action, body) {
-  const base = getFeedbackEndpoint();
-  const url = `${base}?action=${encodeURIComponent(action)}`;
+/* -----------------------------------------------------------------------------*/
+// JSON POST Action
+//
+// PT: Envia uma ação POST ao Apps Script usando "text/plain"
+//     para evitar preflight em cenários comuns.
+//
+// EN: Sends a POST action to Apps Script using "text/plain"
+//     to avoid preflight in common scenarios.
+/* -----------------------------------------------------------------------------*/
+async function postJsonAction(action, body) {
+  const baseUrl = getFeedbackEndpoint();
+  const requestUrl = `${baseUrl}?action=${encodeURIComponent(action)}`;
 
-  const resp = await fetch(url, {
+  const response = await fetch(requestUrl, {
     method: 'POST',
-    headers: { 'Content-Type': 'text/plain;charset=UTF-8' },
+    headers: {
+      'Content-Type': 'text/plain;charset=UTF-8',
+    },
     body: JSON.stringify(body),
     mode: 'cors',
   });
 
-  const text = await resp.text();
+  const responseText = await response.text();
 
-  if (!resp.ok) {
-    throw new Error(`HTTP ${resp.status}: ${text || '(empty body)'}`);
+  if (!response.ok) {
+    throw new Error(`HTTP ${response.status}: ${responseText || '(empty body)'}`);
   }
 
-  let raw;
+  let rawResponse;
+
   try {
-    raw = JSON.parse(text);
+    rawResponse = JSON.parse(responseText);
   } catch {
-    throw new Error(`Invalid GAS JSON: ${text.slice(0, 300)}`);
+    throw new Error(`Invalid GAS JSON: ${responseText.slice(0, 300)}`);
   }
 
-  return normalizeGasResponse(raw);
+  return normalizeGasResponse(rawResponse);
 }
 
-/**
- * PT: GET JSON simples (sem headers) para o GAS.
- * EN: Simple GET JSON (no headers) for GAS.
- */
-export async function getJson(url) {
-  const resp = await fetch(url);
-  if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-  return resp.json();
+/* -----------------------------------------------------------------------------*/
+// JSON GET Request
+//
+// PT: Executa uma requisição GET simples ao GAS sem headers customizados.
+//
+// EN: Performs a simple GET request to GAS without custom headers.
+/* -----------------------------------------------------------------------------*/
+async function getJson(url) {
+  const response = await fetch(url);
+
+  if (!response.ok) {
+    throw new Error(`HTTP ${response.status}`);
+  }
+
+  return response.json();
 }
 
+/* -----------------------------------------------------------------------------*/
+// Export
+/* -----------------------------------------------------------------------------*/
 export const VesperFormApiCoreHelpers = {
   getFeedbackEndpoint,
   normalizeGasResponse,

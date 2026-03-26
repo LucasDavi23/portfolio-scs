@@ -1,68 +1,67 @@
-// ==================================================
 // 🧱 Noah — Outbox Processor
 //
-// Nível: Adulto
+// Nível / Level: Adulto / Adult
 //
+// PT: Responsável por processar a outbox de envios pendentes.
+//     Consulta a fila da Alma, decide quando tentar novamente,
+//     executa reenvios com retry/backoff e remove itens após sucesso.
+//     Não armazena dados, não coordena UI, não valida domínio
+//     e não renderiza interface.
+//     Seu papel é manter o fluxo de envio ativo mesmo após falhas.
 //
-// PT: Especialista em persistência e entrega eventual.
-//     Noah processa a Outbox: consulta a Alma, decide quando tentar,
-//     executa reenvios com retry/backoff e remove da fila quando há sucesso.
-//     Ele NÃO guarda dados (isso é Alma), NÃO coordena submit UI,
-//     NÃO valida domínio do formulário e NÃO renderiza interface.
-//     Seu papel é manter o fluxo vivo apesar de falhas.
-//
-// EN: Specialist in persistence and eventual delivery.
-//     Noah processes the Outbox: queries Alma, decides when to retry,
-//     executes resends with retry/backoff, and removes items on success.
-//     He does NOT store data (that's Alma), does NOT coordinate submit UI,
-//     does NOT validate form domain, and does NOT touch UI.
-//     His role is to keep the flow alive despite failures.
-// ==================================================
+// EN: Responsible for processing the outbox of pending submissions.
+//     Queries Alma's queue, decides when to retry,
+//     performs resends with retry/backoff, and removes items after success.
+//     Does not store data, does not coordinate UI, does not validate domain,
+//     and does not render interface.
+//     Its role is to keep the delivery flow alive despite failures.
+/* -----------------------------------------------------------------------------*/
 
+/* -----------------------------------------------------------------------------*/
+// Imports
+/* -----------------------------------------------------------------------------*/
+
+/* -----------------------------------------------------------------------------*/
 // 🧠 Alma — Submit Queue
-// Provides:
-// - enqueue,
-// - peek,
-// - dequeue,
-// - removeById,
-// - clearQueue,
-// - getQueueSize,
-
+// Fornece / Provides:
+// - peek()
+// - dequeue()
+// - getQueueSize()
+// - updateHeadMeta()
+/* -----------------------------------------------------------------------------*/
 import { AlmaOutboxQueue } from '/assets/js/feedback/form/submit/outbox/alma-outbox-queue.js';
 
-// --------------------------------------------------
-// Internal constants (defaults)
-// --------------------------------------------------
-
-/**
- * PT: Configurações padrão de retry/backoff.
- * EN: Default retry/backoff settings.
- */
+/* -----------------------------------------------------------------------------*/
+// Internal Constants
+//
+// PT: Configurações padrão de retry e backoff.
+// EN: Default retry and backoff settings.
+/* -----------------------------------------------------------------------------*/
 const DEFAULTS = {
-  // PT: intervalo base (ms) entre tentativas
-  // EN: base interval (ms) between attempts
+  // PT: Intervalo base em milissegundos entre tentativas.
+  // EN: Base interval in milliseconds between attempts.
   baseDelayMs: 2_000,
 
-  // PT: teto máximo do atraso (ms)
-  // EN: max delay cap (ms)
+  // PT: Limite máximo do atraso em milissegundos.
+  // EN: Maximum delay cap in milliseconds.
   maxDelayMs: 60_000,
 
-  // PT: fator de crescimento exponencial
-  // EN: exponential growth factor
+  // PT: Fator de crescimento exponencial.
+  // EN: Exponential growth factor.
   backoffFactor: 2,
 
-  // PT: jitter aleatório para evitar "thundering herd"
-  // EN: random jitter to avoid thundering herd
+  // PT: Variação aleatória para evitar tentativas sincronizadas.
+  // EN: Random variation to avoid synchronized retries.
   jitterRatio: 0.25,
 
-  // PT: limite de tentativas por item antes de "desistir"
-  // EN: max attempts per item before giving up
+  // PT: Número máximo de tentativas por item.
+  // EN: Maximum number of attempts per item.
   maxAttemptsPerItem: 10,
 };
 
-// --------------------------------------------------
-// Internal state
-// --------------------------------------------------
+/* -----------------------------------------------------------------------------*/
+// Internal State
+/* -----------------------------------------------------------------------------*/
 
 let isRunning = false;
 let isProcessing = false;
@@ -70,88 +69,67 @@ let timerId = null;
 
 let config = { ...DEFAULTS };
 
-/**
- * PT: Função de envio injetada (ex: Gael).
- * EN: Injected send function (e.g., Gael).
- *
- * Assinatura esperada:
- * sendFn(payload, meta) -> Promise<{ ok: boolean, status?: number, error?: any }>
- */
-let sendFn = null;
+// PT: Função de envio injetada externamente.
+// EN: Send function injected externally.
+//
+// Assinatura esperada / Expected signature:
+// sendFn(payload, meta) -> Promise<{ ok: boolean, status?: number, error?: any }>
+let sendFunction = null;
 
-/**
- * PT: Hooks opcionais (Noah não toca UI).
- * EN: Optional hooks (Noah does not touch UI).
- */
+// PT: Hooks opcionais para integração externa.
+// EN: Optional hooks for external integration.
 let hooks = {
   onCommitted: null,
 };
 
-/**
- * 🧱 Talento interno: Configurar hooks
- *
- * PT: Permite que um orquestrador (ex: Selene/Liora) receba callbacks
- *     quando Noah concluir uma entrega (commit).
- *
- * EN: Allows an orchestrator (e.g., Selene/Liora) to receive callbacks
- *     when Noah completes a commit.
- */
+/* -----------------------------------------------------------------------------*/
+// Internal Helpers — Hooks
+/* -----------------------------------------------------------------------------*/
+
+// PT: Atualiza os hooks opcionais do processador.
+// EN: Updates the processor optional hooks.
 function setHooks(nextHooks = {}) {
   hooks = { ...hooks, ...(nextHooks || {}) };
 }
 
-// --------------------------------------------------
-// Internal helpers (time & backoff)
-// --------------------------------------------------
+/* -----------------------------------------------------------------------------*/
+// Internal Helpers — Time and Backoff
+/* -----------------------------------------------------------------------------*/
 
-/**
- * PT: Obtém timestamp em ms.
- * EN: Gets current timestamp in ms.
- */
-function nowMs() {
-  return Date.now();
-}
-
-/**
- * PT: Gera jitter aleatório em torno do delay.
- * EN: Generates random jitter around delay.
- */
+// PT: Aplica variação aleatória ao delay.
+// EN: Applies random variation to the delay.
 function applyJitter(delayMs, jitterRatio) {
   const jitter = delayMs * jitterRatio;
   const min = delayMs - jitter;
   const max = delayMs + jitter;
+
   return Math.max(0, Math.floor(min + Math.random() * (max - min)));
 }
 
-/**
- * PT: Calcula o próximo delay com backoff exponencial + jitter.
- * EN: Computes next delay with exponential backoff + jitter.
- */
+// PT: Calcula o próximo atraso com backoff exponencial e jitter.
+// EN: Computes the next delay using exponential backoff and jitter.
 function computeBackoffDelay(attempts) {
-  const raw = config.baseDelayMs * Math.pow(config.backoffFactor, Math.max(0, attempts - 1));
-  const capped = Math.min(raw, config.maxDelayMs);
-  return applyJitter(capped, config.jitterRatio);
+  const rawDelay = config.baseDelayMs * Math.pow(config.backoffFactor, Math.max(0, attempts - 1));
+  const cappedDelay = Math.min(rawDelay, config.maxDelayMs);
+
+  return applyJitter(cappedDelay, config.jitterRatio);
 }
 
-/**
- * PT: Agenda a próxima execução do loop.
- * EN: Schedules the next loop execution.
- */
+// PT: Agenda o próximo ciclo de execução.
+// EN: Schedules the next execution cycle.
 function scheduleNextTick(delayMs) {
   clearScheduledTick();
-  timerId = window.setTimeout(() => {
-    // PT/EN: execute one cycle
+
+  timerId = setTimeout(() => {
     tick().catch(() => {
-      // PT: erros já tratados internamente
-      // EN: errors are handled internally
+      // PT: Erros já são tratados internamente no ciclo.
+      // EN: Errors are already handled internally in the cycle.
     });
   }, delayMs);
 }
 
-/**
- * PT: Limpa qualquer timer pendente.
- * EN: Clears any pending timer.
- */
+// PT: Limpa qualquer timer pendente.
+// EN: Clears any pending timer.
 function clearScheduledTick() {
   if (timerId) {
     clearTimeout(timerId);
@@ -159,64 +137,84 @@ function clearScheduledTick() {
   }
 }
 
-// --------------------------------------------------
-// Noah — Core cycle (tick)
-// --------------------------------------------------
+/* -----------------------------------------------------------------------------*/
+// Internal Helpers — Send
+/* -----------------------------------------------------------------------------*/
 
-/**
- * PT: Executa um ciclo de processamento.
- * EN: Runs one processing cycle.
- */
+// PT: Executa o envio com proteção contra exceptions.
+// EN: Executes the send operation with protection against exceptions.
+async function safeSend(payload, meta) {
+  try {
+    const result = await sendFunction(payload, meta);
+
+    if (result && result.ok === true) {
+      return { ok: true };
+    }
+
+    return {
+      ok: false,
+      error: result?.error,
+      status: result?.status,
+    };
+  } catch (error) {
+    return { ok: false, error };
+  }
+}
+
+/* -----------------------------------------------------------------------------*/
+// Core Cycle
+//
+// PT: Executa um ciclo de processamento da outbox.
+// EN: Executes one outbox processing cycle.
+/* -----------------------------------------------------------------------------*/
 async function tick() {
   if (!isRunning) return;
-  if (isProcessing) return; // EN: prevent re-entrancy
+  if (isProcessing) return;
 
   isProcessing = true;
 
   try {
-    // PT: Se não há sender, Noah não pode agir.
-    // EN: If no sender is configured, Noah can't act.
-    if (typeof sendFn !== 'function') {
-      // EN: try again later
+    // PT: Sem sender configurado, Noah apenas reagenda.
+    // EN: Without a configured sender, Noah only reschedules.
+    if (typeof sendFunction !== 'function') {
       scheduleNextTick(config.baseDelayMs);
       return;
     }
 
-    // PT: Se fila vazia, entra em modo "idle".
-    // EN: If queue is empty, go idle.
+    // PT: Sem itens na fila, entra em modo ocioso.
+    // EN: With no items in the queue, enter idle mode.
     if (AlmaOutboxQueue.getQueueSize() === 0) {
       scheduleNextTick(config.baseDelayMs);
       return;
     }
 
-    const item = AlmaOutboxQueue.peek();
-    if (!item) {
-      // EN: try again later
+    const queueItem = AlmaOutboxQueue.peek();
+
+    if (!queueItem) {
       scheduleNextTick(config.baseDelayMs);
       return;
     }
 
-    // PT: Normaliza meta (controle de tentativas).
-    // EN: Normalize meta (attempt tracking).
-    const meta = item.meta || {};
+    // PT: Normaliza o meta para controle de tentativas.
+    // EN: Normalizes meta for attempt tracking.
+    const meta = queueItem.meta || {};
     const attempts = Number(meta.attempts || 0);
 
-    // PT: Se excedeu tentativas, remove (ou poderia "quarentenar").
-    // EN: If max attempts exceeded, remove (or quarantine).
+    // PT: Remove o item se o limite máximo já foi atingido.
+    // EN: Removes the item if the maximum attempt limit has been reached.
     if (attempts >= config.maxAttemptsPerItem) {
       AlmaOutboxQueue.dequeue();
-
       scheduleNextTick(config.baseDelayMs);
       return;
     }
 
-    // PT: Tenta enviar.
-    // EN: Try to send.
-    const result = await safeSend(item.payload, meta);
+    // PT: Tenta reenviar o item atual.
+    // EN: Tries to resend the current item.
+    const result = await safeSend(queueItem.payload, meta);
 
     if (result.ok) {
-      // PT: Sucesso → remove da fila.
-      // EN: Success → remove from queue.
+      // PT: Em caso de sucesso, remove da fila.
+      // EN: On success, removes the item from the queue.
       const removedItem = AlmaOutboxQueue.dequeue();
 
       if (typeof hooks.onCommitted === 'function') {
@@ -227,8 +225,8 @@ async function tick() {
       return;
     }
 
-    // PT: Falhou → atualiza attempts e re-agenda com backoff.
-    // EN: Failed → update attempts and reschedule with backoff.
+    // PT: Em caso de falha, atualiza metadados e reagenda com backoff.
+    // EN: On failure, updates metadata and reschedules with backoff.
     const nextAttempts = attempts + 1;
 
     AlmaOutboxQueue.updateHeadMeta({
@@ -237,103 +235,59 @@ async function tick() {
       lastError: String(result.error || 'unknown'),
     });
 
-    // PT: Persistir o "attempts" precisa de update na Alma.
-    // EN: Persisting "attempts" requires an update method in Alma.
-    // Estratégia (temporária): remove + re-enqueue mantendo ordem? NÃO.
-    // Melhor: criar Alma.updateHeadMeta(metaPatch).
-    // Aqui deixamos pendente para implementar no passo seguinte.
-
     const delayMs = computeBackoffDelay(nextAttempts);
     scheduleNextTick(delayMs);
   } catch (error) {
-    // PT: Falha inesperada → re-tenta depois.
-    // EN: Unexpected failure → retry later.
+    // PT: Falha inesperada reage com nova tentativa futura.
+    // EN: Unexpected failure triggers a future retry.
     scheduleNextTick(config.baseDelayMs);
   } finally {
     isProcessing = false;
   }
 }
 
-/**
- * PT: Envio protegido (não deixa exception explodir).
- * EN: Protected send (prevents exceptions from bubbling).
- */
-async function safeSend(payload, meta) {
-  try {
-    const result = await sendFn(payload, meta);
-    if (result && result.ok === true) return { ok: true };
-    return { ok: false, error: result?.error, status: result?.status };
-  } catch (error) {
-    return { ok: false, error };
-  }
-}
+/* -----------------------------------------------------------------------------*/
+// Public API
+/* -----------------------------------------------------------------------------*/
 
-// --------------------------------------------------
-// Public API (Noah)
-// --------------------------------------------------
-
-/**
- * 🧱 Talento: Configurar Sender
- *
- * PT: Injeta a função responsável por enviar (ex: Gael).
- * EN: Injects the sender function responsible for sending (e.g., Gael).
- */
+// PT: Define a função responsável pelo envio.
+// EN: Sets the function responsible for sending.
 function setSender(fn) {
-  sendFn = fn;
+  sendFunction = fn;
 }
 
-/**
- * 🧱 Talento: Ajustar Config
- *
- * PT: Sobrescreve parcial dos defaults (backoff, limites, etc).
- * EN: Partially overrides defaults (backoff, limits, etc).
- */
-function configure(partial = {}) {
-  config = { ...config, ...(partial || {}) };
+// PT: Atualiza parcialmente a configuração do processador.
+// EN: Partially updates the processor configuration.
+function configure(partialConfig = {}) {
+  config = { ...config, ...(partialConfig || {}) };
 }
 
-/**
- * 🧱 Talento: Iniciar
- *
- * PT: Inicia o processamento contínuo da Outbox.
- * EN: Starts continuous Outbox processing.
- */
+// PT: Inicia o processamento contínuo da outbox.
+// EN: Starts continuous outbox processing.
 function start() {
   if (isRunning) return;
-  isRunning = true;
 
-  // PT/EN: start immediately
+  isRunning = true;
   scheduleNextTick(0);
 }
 
-/**
- * 🧱 Talento: Parar
- *
- * PT: Para o processamento e limpa timers.
- * EN: Stops processing and clears timers.
- */
+// PT: Interrompe o processamento e limpa timers.
+// EN: Stops processing and clears timers.
 function stop() {
   isRunning = false;
   clearScheduledTick();
 }
 
-/**
- * 🧱 Talento: Forçar um ciclo
- *
- * PT: Executa um ciclo imediatamente (útil após enqueue).
- * EN: Runs one cycle immediately (useful after enqueue).
- */
+// PT: Força um novo ciclo imediatamente.
+// EN: Forces a new cycle immediately.
 function nudge() {
   if (!isRunning) return;
+
   scheduleNextTick(0);
 }
 
-/**
- * 🧱 Talento: Estado
- *
- * PT: Retorna estado atual para debug/control.
- * EN: Returns current state for debug/control.
- */
+// PT: Retorna o estado atual do processador.
+// EN: Returns the current processor state.
 function getState() {
   return {
     isRunning,
@@ -341,6 +295,10 @@ function getState() {
     queueSize: AlmaOutboxQueue.getQueueSize(),
   };
 }
+
+/* -----------------------------------------------------------------------------*/
+// Export
+/* -----------------------------------------------------------------------------*/
 
 export const NoahOutboxProcessor = {
   setSender,

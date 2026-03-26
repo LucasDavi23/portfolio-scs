@@ -1,16 +1,17 @@
-<!-- ===================================================== -->
-<!-- PARTIAL: MODAL / FEEDBACK FORM -->
-<!-- Foundation / partials/modals/feedback-form-modal.html -->
-<!-- ===================================================== -->
+<!-- -------------------------------------------------- -->
+<!-- 📌 Modal — Feedback Form -->
+<!-- PT: Modal de envio de avaliação do cliente. -->
+<!-- EN: Customer feedback submission modal. -->
+<!-- -------------------------------------------------- -->
 
-<div id="feedback-modal" class="fixed inset-0 z-[9999] hidden" aria-hidden="true">
+<div id="feedback-modal" class="fixed inset-0 z-[59] hidden" aria-hidden="true">
   <!-- Backdrop -->
   <div
     class="absolute inset-0 bg-black/60 backdrop-blur-[1px] z-10 opacity-0 transition-opacity"
     data-feedback-backdrop
   ></div>
 
-  <!-- Panel wrapper (scroll interno) -->
+  <!-- Panel Wrapper -->
   <div class="relative z-20 grid min-h-[100dvh] place-items-center p-4 sm:p-6 pointer-events-none">
     <!-- Panel -->
     <div
@@ -36,14 +37,15 @@
 
       <!-- Body -->
       <div class="p-0" data-modal-body>
-        <!-- FORM (esquerda no desktop) -->
+        <!-- Form Container -->
         <div class="flex bg-gray-100 rounded-2xl lg:order-1">
           <div class="p-6 sm:p-6 lg:p-7 w-full">
             <h2 class="text-2xl font-semibold sm:text-3xl">
               Conte pra gente como foi sua experiência
             </h2>
+
+            <!-- Rating -->
             <div data-form-sticky>
-              <!-- Avaliação por estrelas (HTML-only, acessível) -->
               <fieldset class="mt-4" aria-label="Avaliação">
                 <legend class="sr-only">Avaliação</legend>
 
@@ -70,7 +72,9 @@
                   <input class="sr-only" type="radio" name="rating_star" id="rate5" value="5" />
                   <label for="rate5" class="star" title="5 estrelas"></label>
                 </div>
+
                 <input type="hidden" id="rating" name="rating" value="" />
+
                 <p class="mt-1 text-xs text-gray-500">
                   Selecione de 1 a 5 estrelas.
                   <span id="rating-badge" class="hidden">0/5</span>
@@ -78,15 +82,16 @@
               </fieldset>
             </div>
 
-            <!-- Formulário (HTML-only) -->
+            <!-- Form -->
             <form class="mt-6 space-y-4" id="feedback-form" novalidate>
-              <!-- Hidden técnicos -->
+              <!-- Hidden Fields -->
               <input type="hidden" name="origem" value="scs" />
               <input type="hidden" name="timestamp_cliente" id="timestamp_cliente" value="" />
-              <!-- Honeypot (anti-bot) -->
+
+              <!-- Honeypot -->
               <div class="hidden" aria-hidden="true">
-                <label
-                  >Não preencher:
+                <label>
+                  Não preencher:
                   <input
                     type="text"
                     id="honeypot"
@@ -97,11 +102,11 @@
                 </label>
               </div>
 
-              <!-- Nome (obrigatório) -->
+              <!-- Name -->
               <div>
-                <label for="nameInput" class="block text-sm font-medium text-gray-700"
-                  >Seu nome</label
-                >
+                <label for="nameInput" class="block text-sm font-medium text-gray-700">
+                  Seu nome
+                </label>
                 <input
                   id="nameInput"
                   name="name"
@@ -111,11 +116,11 @@
                 />
               </div>
 
-              <!-- Comentário (20–600) -->
+              <!-- Comment -->
               <div>
-                <label for="commentInput" class="block text-sm font-medium text-gray-700"
-                  >Comentário</label
-                >
+                <label for="commentInput" class="block text-sm font-medium text-gray-700">
+                  Comentário
+                </label>
                 <textarea
                   id="commentInput"
                   name="comment"
@@ -126,17 +131,18 @@
                   class="mt-1 w-full rounded-lg border-gray-300 text-sm resize-none h-24 min-h"
                   placeholder="Conte como foi sua experiência (20 a 600 caracteres)"
                 ></textarea>
+
                 <p class="mt-1 text-xs text-gray-500">
                   <span id="counter-comment">0</span>/600 caracteres.
-                  <!-- contador em tempo real entra depois no JS -->
                 </p>
               </div>
 
-              <!-- Foto (opcional, 1 imagem) -->
+              <!-- Photo -->
               <div>
                 <label for="photo" class="block text-sm font-medium text-gray-700">
                   Foto da sua moldura (opcional)
                 </label>
+
                 <div id="photo-ui-row" class="relative mt-1">
                   <input
                     type="file"
@@ -145,47 +151,36 @@
                     accept="image/*"
                     class="peer absolute inset-0 opacity-0 cursor-pointer z-10"
                   />
+
                   <div
                     class="flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-600 shadow-sm peer-hover:border-gray-400 peer-focus:border-gray-900 transition"
                   >
                     <span id="photo-label" class="truncate flex-1" aria-live="polite">
-                      Nenhum arquivo selecionado</span
-                    >
+                      Nenhum arquivo selecionado
+                    </span>
 
                     <span
                       class="inline-flex items-center gap-1 rounded-md bg-gray-900 text-white text-xs px-2 py-1 shadow hover:opacity-90 transition"
                     >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        class="h-3.5 w-3.5"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                          stroke-width="2"
-                          d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M12 12V4m0 8l-3-3m3 3l3-3"
-                        />
-                      </svg>
                       Selecionar
                     </span>
                   </div>
                 </div>
-                <!-- Prévia usada no UI.js -->
+
+                <!-- Preview -->
                 <div
                   id="photo-preview"
-                  class="mt-2 w-24 aspect-square overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm flex-none self-start inline-block align-top"
+                  class="mt-2 w-24 aspect-square overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm inline-block align-top"
                   style="width: 96px; height: 96px; flex: 0 0 96px"
                   title="Clique para ampliar"
                 ></div>
-              </div>
-              <p class="mt-2 text-xs text-gray-500">
-                Envie 1 imagem (máx. 5 MB). Otimizaremos o tamanho depois.
-              </p>
 
-              <!-- Opcionais -->
+                <p class="mt-2 text-xs text-gray-500">
+                  Envie 1 imagem (máx. 5 MB). Otimizaremos o tamanho depois.
+                </p>
+              </div>
+
+              <!-- Optional Contact -->
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label for="contact" class="block text-sm font-medium text-gray-700">
@@ -200,13 +195,13 @@
                 </div>
               </div>
 
-              <!-- Aviso -->
+              <!-- Notice -->
               <p class="text-xs text-gray-600">
                 Ao enviar, você autoriza a publicação do depoimento no site. Dados de contato não
                 são exibidos.
               </p>
 
-              <!-- Botão -->
+              <!-- Submit -->
               <button
                 id="btn-submit"
                 type="submit"
@@ -214,6 +209,8 @@
               >
                 Enviar avaliação
               </button>
+
+              <!-- Status -->
               <span
                 id="form-status"
                 role="status"

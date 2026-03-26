@@ -1,13 +1,16 @@
-<!-- ===================================================== -->
-<!-- SECTION: FEEDBACK -->
-<!-- Foundation / sections/feedback.html -->
-<!-- ===================================================== -->
+<!-- -------------------------------------------------- -->
+<!-- 📌 Section — Feedback -->
+<!-- PT: Seção de avaliações com resumo, cards e integração com plataformas. -->
+<!-- EN: Feedback section with summary, cards and platform integration. -->
+<!-- -------------------------------------------------- -->
 
-<section id="feedback" class="py-6 scroll-mt-20 min-h-[calc(60vh-4rem)] snap-start">
-  <!-- sentinela do scrollspy -->
-  <div id="feedback-s" aria-hidden="true" class="h-px pointer-events-none"></div>
+<section id="feedback" class="py-12">
+  <!-- Scroll Anchor -->
+  <div id="feedback-s" aria-hidden="true" class="h-px pointer-events-none scroll-mt-20"></div>
 
-  <!-- Cabeçalho no estilo da galeria -->
+  <!-- -------------------------------------------------- -->
+  <!-- Header -->
+  <!-- -------------------------------------------------- -->
   <div class="max-w-screen-lg px-3 sm:px-4 lg:px-6 mx-auto">
     <header class="text-center">
       <h2 class="text-lg font-bold text-gray-900 sm:text-2xl">Avaliações de Clientes</h2>
@@ -15,13 +18,17 @@
     </header>
   </div>
 
-  <!-- Bloco branco com os cards das avaliações de notas -->
+  <!-- -------------------------------------------------- -->
+  <!-- Container -->
+  <!-- -------------------------------------------------- -->
   <div class="mx-auto max-w-screen-2xl px-4 py-3 sm:px-6 lg:px-8 -mt-2">
     <div class="rounded-2xl overflow-hidden ring-1 ring-black/10 shadow-lg bg-white">
       <div class="px-5 sm:px-8 py-6 sm:py-7">
-        <!-- RESUMO (SCS) + CTA avaliação de notas -->
+        <!-- -------------------------------------------------- -->
+        <!-- Summary + CTA -->
+        <!-- -------------------------------------------------- -->
         <div class="mt-5 grid grid-cols-1 md:grid-cols-3 gap-4 feedback-topo">
-          <!-- Barras -->
+          <!-- Bars -->
           <div class="rounded-xl border border-gray-200 p-4 sm:p-5">
             <div class="space-y-2">
               <div class="flex items-center gap-3">
@@ -62,7 +69,7 @@
             </div>
           </div>
 
-          <!-- Média -->
+          <!-- Average -->
           <div class="rounded-xl border border-gray-200 p-4 sm:p-5 bg-amber-50/50">
             <div class="text-center">
               <div class="text-2xl sm:text-3xl font-semibold" data-sum-avg>–</div>
@@ -109,38 +116,44 @@
           </div>
         </div>
 
-        <!-- GRID 4 CARDS (SCS + Shopee + ML + Google) -->
+        <!-- -------------------------------------------------- -->
+        <!-- Cards Grid — Feedback Platforms -->
+        <!-- Displays feedback cards for each platform (SCS, Shopee, ML, Google) -->
+        <!-- -------------------------------------------------- -->
         <div class="mt-4 md:mt-5 grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
-          <!-- SCS -->
+          <!-- -------------------------------------------------- -->
+          <!-- Card — SCS -->
+          <!-- -------------------------------------------------- -->
           <div class="p-1">
             <section
               class="rounded-xl border border-gray-200 p-3 h-full flex flex-col overflow-hidden"
               data-feedback-card="scs"
               data-variant="media"
             >
+              <!-- Header -->
               <header class="flex flex-wrap items-center justify-between gap-x-2 gap-y-1">
                 <span
                   class="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium border shrink-0"
                   style="background: #eef2ff; color: #3730a3; border-color: #c7d2fe"
                   >SCS</span
                 >
-                <!-- (opcional) remova este data-c-rating se quiser as estrelas só dentro do cinza -->
+                <!-- Optional rating container (can be removed if rating is displayed inside content only) -->
                 <div
                   class="flex items-center gap-1.5 text-xs leading-none whitespace-nowrap"
                   data-c-rating
                 ></div>
               </header>
 
-              <!-- Área cinza -->
+              <!-- Content Area -->
               <article class="mt-2 rounded-lg bg-gray-50 p-2 text-[13px] min-w-0" data-c-list>
                 <div class="media-grid">
-                  <!-- TOPO (autor à esq / data à dir) -->
+                  <!-- Meta (author + date) -->
                   <div class="meta-row flex items-center justify-between gap-2">
                     <span class="header-author truncate" data-c-author></span>
                     <time class="header-date" data-c-date></time>
                   </div>
 
-                  <!-- TEXTO -->
+                  <!-- Review Text -->
                   <div class="text-wrap">
                     <p
                       class="text-gray-800 leading-5 break-words hyphens-auto line-clamp-none"
@@ -148,10 +161,10 @@
                     ></p>
                   </div>
 
-                  <!-- Separado de linha -->
+                  <!-- Separator -->
                   <div class="photo-sep"></div>
 
-                  <!-- FOTO EMBAIXO (alinhada à direita) -->
+                  <!-- Image (optional) -->
                   <figure class="photo-wrap">
                     <button
                       type="button"
@@ -167,6 +180,7 @@
                       />
                       <span class="badge-ghost">Ver foto</span>
                     </button>
+                    <!-- Fallback when no image -->
                     <div
                       class="thumb-fallback hidden rounded-xl border border-dashed grid place-items-center bg-white text-[10px] text-gray-400"
                     >
@@ -175,7 +189,7 @@
                   </figure>
                 </div>
               </article>
-
+              <!-- Action -->
               <button
                 type="button"
                 class="mt-2 inline-flex justify-center rounded-lg border px-2.5 py-1.5 text-[12px] hover:bg-gray-50"
@@ -188,7 +202,9 @@
             </section>
           </div>
 
-          <!-- Shopee -->
+          <!-- -------------------------------------------------- -->
+          <!-- Card — Shopee -->
+          <!-- -------------------------------------------------- -->
           <div class="p-1">
             <section
               class="rounded-xl border border-gray-200 p-3 h-full flex flex-col overflow-hidden"
@@ -201,22 +217,23 @@
                   style="background: #fff7ed; color: #9a3412; border-color: #fed7aa"
                   >Shopee</span
                 >
+                <!-- Rating container -->
                 <div
                   class="flex items-center gap-1.5 text-xs leading-none whitespace-nowrap"
                   data-c-rating
                 ></div>
               </header>
 
-              <!-- Área cinza -->
+              <!-- Content Area -->
               <article class="mt-2 rounded-lg bg-gray-50 p-2 text-[13px] min-w-0" data-c-list>
                 <div class="media-grid">
-                  <!-- TOPO (autor à esq / data à dir) -->
+                  <!-- Meta (author + date) -->
                   <div class="meta-row flex items-center justify-between gap-2">
                     <span class="header-author truncate" data-c-author></span>
                     <time class="header-date" data-c-date></time>
                   </div>
 
-                  <!-- TEXTO -->
+                  <!-- Review Text -->
                   <div class="text-wrap">
                     <p
                       class="text-gray-800 leading-5 break-words hyphens-auto line-clamp-none"
@@ -224,10 +241,10 @@
                     ></p>
                   </div>
 
-                  <!-- Separador -->
+                  <!-- Separator -->
                   <div class="photo-sep"></div>
 
-                  <!-- FOTO EMBAIXO -->
+                  <!-- Image (optional) -->
                   <figure class="photo-wrap">
                     <button
                       type="button"
@@ -251,7 +268,7 @@
                   </figure>
                 </div>
               </article>
-
+              <!-- Action -->
               <button
                 type="button"
                 class="mt-2 inline-flex justify-center rounded-lg border px-2.5 py-1.5 text-[12px] hover:bg-gray-50"
@@ -264,7 +281,9 @@
             </section>
           </div>
 
-          <!-- Mercado Livre -->
+          <!-- -------------------------------------------------- -->
+          <!-- Card — Mercado Livre -->
+          <!-- -------------------------------------------------- -->
           <div class="p-1">
             <section
               class="rounded-xl border border-gray-200 p-3 h-full flex flex-col overflow-hidden"
@@ -277,22 +296,23 @@
                   style="background: #fef9c3; color: #854d0e; border-color: #fde68a"
                   >Mercado Livre</span
                 >
+                <!-- Rating container -->
                 <div
                   class="flex items-center gap-1.5 text-xs leading-none whitespace-nowrap"
                   data-c-rating
                 ></div>
               </header>
 
-              <!-- Área cinza -->
+              <!-- Content Area -->
               <article class="mt-2 rounded-lg bg-gray-50 p-2 text-[13px] min-w-0" data-c-list>
                 <div class="media-grid">
-                  <!-- TOPO -->
+                  <!-- Meta (author + date) -->
                   <div class="meta-row flex items-center justify-between gap-2">
                     <span class="header-author truncate" data-c-author></span>
                     <time class="header-date" data-c-date></time>
                   </div>
 
-                  <!-- TEXTO -->
+                  <!-- Review Text -->
                   <div class="text-wrap">
                     <p
                       class="text-gray-800 leading-5 break-words hyphens-auto line-clamp-none"
@@ -300,10 +320,10 @@
                     ></p>
                   </div>
 
-                  <!-- Separador -->
+                  <!-- Separator -->
                   <div class="photo-sep"></div>
 
-                  <!-- FOTO EMBAIXO -->
+                  <!-- Image (optional) -->
                   <figure class="photo-wrap">
                     <button
                       type="button"
@@ -327,7 +347,7 @@
                   </figure>
                 </div>
               </article>
-
+              <!-- Action -->
               <button
                 type="button"
                 class="mt-2 inline-flex justify-center rounded-lg border px-2.5 py-1.5 text-[12px] hover:bg-gray-50"
@@ -340,7 +360,9 @@
             </section>
           </div>
 
-          <!-- Google -->
+          <!-- -------------------------------------------------- -->
+          <!-- Card — Google -->
+          <!-- -------------------------------------------------- -->
           <div class="p-1">
             <section
               class="rounded-xl border border-gray-200 p-3 h-full flex flex-col overflow-hidden"
@@ -353,22 +375,23 @@
                   style="background: #eff6ff; color: #1d4ed8; border-color: #bfdbfe"
                   >Google</span
                 >
+                <!-- Rating container -->
                 <div
                   class="flex items-center gap-1.5 text-xs leading-none whitespace-nowrap"
                   data-c-rating
                 ></div>
               </header>
 
-              <!-- Área cinza -->
+              <!-- Content Area -->
               <article class="mt-2 rounded-lg bg-gray-50 p-2 text-[13px] min-w-0" data-c-list>
                 <div class="media-grid">
-                  <!-- TOPO -->
+                  <!-- Meta (author + date) -->
                   <div class="meta-row flex items-center justify-between gap-2">
                     <span class="header-author truncate" data-c-author></span>
                     <time class="header-date" data-c-date></time>
                   </div>
 
-                  <!-- TEXTO -->
+                  <!-- Review Text -->
                   <div class="text-wrap">
                     <p
                       class="text-gray-800 leading-5 break-words hyphens-auto line-clamp-none"
@@ -376,10 +399,10 @@
                     ></p>
                   </div>
 
-                  <!-- Separador -->
+                  <!-- Separator -->
                   <div class="photo-sep"></div>
 
-                  <!-- FOTO EMBAIXO -->
+                  <!-- Image (optional) -->
                   <figure class="photo-wrap">
                     <button
                       type="button"
@@ -403,7 +426,7 @@
                   </figure>
                 </div>
               </article>
-
+              <!-- Action -->
               <button
                 type="button"
                 class="mt-2 inline-flex justify-center rounded-lg border px-2.5 py-1.5 text-[12px] hover:bg-gray-50"

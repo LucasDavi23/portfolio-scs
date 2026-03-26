@@ -1,19 +1,31 @@
-// /assets/js/feedback/dev/performance-probe.js
-// 🧪 Performance Probe (dev only)
-// PT: Ferramenta de desenvolvimento para medir o tempo de carregamento da API
-//     de feedback. Mostra, na tela, o tempo em ms de cada chamada.
-// EN: Development tool used to measure loading performance of the feedback API.
-//     Displays response times (ms) directly on screen.
+// 🧪 Performance Probe — Dev Helper
+//
+// PT: Ferramenta simples para medir o tempo de resposta da API de feedback.
+//     Mostra os resultados em um pequeno painel na tela.
+//
+// EN: Simple helper used to measure feedback API response times.
+//     Displays the results in a small on-screen panel.
 
-export function runPerformanceProbe(api) {
-  if (!api || typeof api.list !== 'function') {
-    console.warn('[PerformanceProbe] Invalid or missing API.');
-    return;
-  }
+/* -----------------------------------------------------------------------------*/
+// Validation
+//
+// PT: Verifica se a API recebida possui os métodos necessários.
+// EN: Checks whether the provided API has the required methods.
+/* -----------------------------------------------------------------------------*/
+function isValidProbeApi(api) {
+  return Boolean(api && typeof api.list === 'function' && typeof api.listMeta === 'function');
+}
 
-  // 🟩 small floating UI that prints times
-  const el = document.createElement('div');
-  el.style.cssText = [
+/* -----------------------------------------------------------------------------*/
+// UI
+//
+// PT: Cria um painel simples para exibir os tempos na tela.
+// EN: Creates a simple panel to display timing results on screen.
+/* -----------------------------------------------------------------------------*/
+function createProbePanel() {
+  const panel = document.createElement('div');
+
+  panel.style.cssText = [
     'position:fixed',
     'bottom:12px',
     'left:12px',
@@ -23,33 +35,66 @@ export function runPerformanceProbe(api) {
     'font:12px/1.4 monospace',
     'padding:8px 12px',
     'border-radius:8px',
-    'opacity:.90',
+    'opacity:.9',
     'white-space:pre',
-    'box-shadow:0 0 6px #0f0',
   ].join(';');
-  el.textContent = 'Performance Probe:';
-  document.body.appendChild(el);
 
-  // generic bench function
-  async function time(label, fn) {
-    const t0 = performance.now();
-    await fn();
-    const dt = (performance.now() - t0) | 0;
-    el.textContent += `\n${label}: ${dt}ms`;
+  panel.textContent = 'Performance Probe:';
+  document.body.appendChild(panel);
+
+  return panel;
+}
+
+/* -----------------------------------------------------------------------------*/
+// Benchmark
+//
+// PT: Mede o tempo de uma chamada assíncrona e escreve no painel.
+// EN: Measures an async call and writes the result to the panel.
+/* -----------------------------------------------------------------------------*/
+async function measure(panel, label, callback) {
+  const start = performance.now();
+
+  try {
+    await callback();
+    const elapsed = Math.round(performance.now() - start);
+    panel.textContent += `\n${label}: ${elapsed}ms`;
+  } catch {
+    panel.textContent += `\n${label}: error`;
   }
+}
 
-  // unique timestamp to bust caches
-  const bust = Date.now();
+/* -----------------------------------------------------------------------------*/
+// Public API
+//
+// PT: Executa testes simples de desempenho para endpoints usados no board.
+//
+// Como usar:
+// import { runPerformanceProbe } from '/assets/js/feedback/dev/performance-probe.js';
+// import { NaomiFeedbackCardAPI } from '/assets/js/feedback/board/api/naomi-feedback-card-api.js';
+//
+// runPerformanceProbe(NaomiFeedbackCardAPI);
+//
+// EN: Runs simple performance tests for endpoints used by the board.
+/* -----------------------------------------------------------------------------*/
+export async function runPerformanceProbe(api) {
+  if (!isValidProbeApi(api)) return;
 
-  // 🟩 card (fast=1) tests
-  time('card scs', () => api.list('scs', 1, 1, { fast: 1, _bust: bust }));
-  time('card ml', () => api.list('ml', 1, 1, { fast: 1, _bust: bust }));
-  time('card shopee', () => api.list('shopee', 1, 1, { fast: 1, _bust: bust }));
-  time('card google', () => api.list('google', 1, 1, { fast: 1, _bust: bust }));
+  const panel = createProbePanel();
+  const cacheBust = Date.now();
 
-  // 🟦 total count (fast=0)
-  time('total scs', () => api.listMeta('scs', 1, 1, { fast: 0, _bust: bust }));
+  await measure(panel, 'card scs', () => api.list('scs', 1, 1, { fast: 1, _bust: cacheBust }));
 
-  // 🟨 modal first page (fast=1, 5 items)
-  time('modal scs', () => api.listMeta('scs', 1, 5, { fast: 1, _bust: bust }));
+  await measure(panel, 'card ml', () => api.list('ml', 1, 1, { fast: 1, _bust: cacheBust }));
+
+  await measure(panel, 'card shopee', () =>
+    api.list('shopee', 1, 1, { fast: 1, _bust: cacheBust })
+  );
+
+  await measure(panel, 'card google', () =>
+    api.list('google', 1, 1, { fast: 1, _bust: cacheBust })
+  );
+
+  await measure(panel, 'total scs', () => api.listMeta('scs', 1, 1, { fast: 0, _bust: cacheBust }));
+
+  await measure(panel, 'modal scs', () => api.listMeta('scs', 1, 5, { fast: 1, _bust: cacheBust }));
 }

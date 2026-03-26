@@ -1,12 +1,20 @@
-// ============================================================
-// 🪨 PETRA — Protetora das Imagens (DOM)
-// 🪨 PETRA — Image Protector (DOM)
-// PT: Aplica thumb/full, fallback visual e auto-recover no DOM.
-// EN: Applies thumb/full, visual fallback and auto-recover in the DOM.
-// Usa a lógica pura da Dália (dalia-image-helpers.js).
-// EN: Uses the pure logic from Dália (dalia-image-helpers.js).
-// ============================================================
-
+// 🪨 Petra — Image DOM Controller
+//
+// Nível / Level: Adulto / Adult
+//
+// PT: Responsável pelo comportamento visual das imagens no Board.
+//     Aplica thumb/full, fallback visual e auto-recover diretamente
+//     no DOM. Utiliza a lógica pura fornecida pela Dália
+//     (dalia-image-helpers.js).
+//
+// EN: Responsible for the visual behavior of images in the Board.
+//     Applies thumb/full images, visual fallback and auto-recover
+//     directly in the DOM. Uses the pure logic provided by Dália
+//     (dalia-image-helpers.js).
+// ------------------------------------------------------------------
+//
+// Imports / Dependências
+//
 // 🌿 Dália — lógica de imagem (helpers)
 // EN 🌿 Dalia — image logic (helpers)
 // Fornece:
@@ -190,12 +198,23 @@ export function markHasPhoto(rootCard, hasPhoto) {
   rootCard.classList.toggle('no-photo', !hasPhoto);
 }
 
+// Mira Modal List UI — lógica de thumbs do Board
 /**
  * PT: Verifica se um elemento está dentro do modal de feedback (lista).
  * EN: Checks if an element is inside the feedback modal (list).
  */
 function isInFeedbackModal(el) {
-  return !!el.closest('#modalFeedback');
+  return !!el?.closest?.('#modalFeedback');
+}
+
+/**
+ * PT: Normaliza opções de hidratação.
+ * EN: Normalizes hydration options.
+ */
+function normalizeOpts(opts) {
+  return {
+    allowModal: !!opts?.allowModal, // padrão: false (se não fornecido)
+  };
 }
 
 /* ------------------------------------------------------------*/
@@ -216,13 +235,22 @@ function isValidSrc(value) {
  * EN: Applies visibility and data-full logic to a single thumb-container.
  */
 
-function applyThumb(container) {
-  if (!container || isInFeedbackModal(container)) return;
+function applyThumb(container, opts) {
+  const o = normalizeOpts(opts);
+  // console.log('[PETRA] applyThumb', container.getAttribute('data-owner'), container);
+
+  if (!container) return;
+  if (!o.allowModal && isInFeedbackModal(container)) return;
+
+  // ✅ pega a raiz do card 1 vez (mais limpo / consistent)
+  const card = container.closest('[data-feedback-card]');
 
   const img = container.querySelector('img');
   if (!img) {
     container.classList.add('hidden');
     container.classList.remove('js-open-modal');
+    // ✅ marca estado no card
+    markHasPhoto(card, false);
     return;
   }
 
@@ -236,28 +264,36 @@ function applyThumb(container) {
     container.setAttribute('data-full', fullSrc);
   }
 
-  if (isValidSrc(thumbSrc)) {
+  const hasPhoto = isValidSrc(thumbSrc);
+
+  if (hasPhoto) {
     container.classList.remove('hidden');
-    container.classList.add('js-open-modal'); // usa o modal global de imagem
+    container.classList.add('js-open-modal');
   } else {
     container.classList.add('hidden');
     container.classList.remove('js-open-modal');
   }
+
+  // ✅ marca estado no card
+  markHasPhoto(card, hasPhoto);
 }
 
 /**
  * PT: Escaneia um root em busca de ".thumb-container".
  * EN: Scans a root for ".thumb-container".
  */
-function scanThumbs(root = document) {
-  root.querySelectorAll('.thumb-container').forEach(applyThumb);
+function scanThumbs(root = document, opts) {
+  const o = normalizeOpts(opts);
+  root.querySelectorAll('.thumb-container').forEach((el) => applyThumb(el, o));
 }
 
 /**
  * PT: Observa o DOM e hidrata thumbs criados dinamicamente.
  * EN: Observes the DOM and hydrates dynamically added thumbs.
  */
-function observeThumbs(root = document) {
+function observeThumbs(root = document, opts) {
+  const o = normalizeOpts(opts);
+
   const obs = new MutationObserver((mutations) => {
     for (const mutation of mutations) {
       mutation.addedNodes.forEach((node) => {
@@ -269,7 +305,7 @@ function observeThumbs(root = document) {
         }
 
         // O nó tem filhos com thumb-containers
-        node.querySelectorAll?.('.thumb-container').forEach(applyThumb); // aplica em cada um
+        node.querySelectorAll?.('.thumb-container').forEach((el) => applyThumb(el, o)); // aplica em cada um
 
         // Observa mudanças em <img> dentro do thumb
         node.querySelectorAll?.('.thumb-container img').forEach((img) => {
@@ -284,6 +320,7 @@ function observeThumbs(root = document) {
       });
     }
   });
+  // ✅ importante: observar o root em si (modal ou document)
   obs.observe(root.body || root, { childList: true, subtree: true });
   return obs;
 }

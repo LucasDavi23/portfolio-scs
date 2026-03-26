@@ -1,44 +1,35 @@
-// ✨ Dara — Assistente lógica da Mira (Helpers)
+/* -----------------------------------------------------------------------------*/
+// ✨ Dara — List Helpers
 //
 // Nível / Level: Jovem / Young
 //
-// PT: Centraliza a lógica "pura" do modal LISTA (sem DOM):
-//     - Mapa de links por plataforma
-//     - Nome legível da plataforma
-//     - Detecção de erro de timeout
+// PT: Centraliza a lógica pura do modal de lista, sem DOM.
+//     Fornece nomes de plataforma, links externos e validações simples.
 //
-// EN: Centralizes the "pure" logic for the LIST modal (no DOM):
-//     - Platform link map
-//     - Human readable platform name
-//     - Timeout error detection
-//
-// Regras / Rules:
-//  - Nada de document/querySelector aqui.
-//  - Somente funções puras, fáceis de testar e reutilizar.
-//------------------------------------------------------------
+// EN: Centralizes the pure logic for the list modal, without DOM.
+//     Provides platform labels, external links and simple validations.
+/* -----------------------------------------------------------------------------*/
 
-// ==========================
-// 1) CONFIG (PLATAFORMAS)
-// ==========================
+/* -----------------------------------------------------------------------------*/
+// Platform Links
+//
 // PT: Mapa base de links por plataforma.
-// EN: Base map of links by platform.
+// EN: Base link map by platform.
+/* -----------------------------------------------------------------------------*/
 const PLATFORM_LINKS = {
   shopee: 'https://shopee.com.br/shop/433324481',
   ml: 'https://www.mercadolivre.com.br/pagina/scsomercioemgeral?item_id=MLB3387412425&category_id=MLB1634&seller_id=282445432&client=recoview-selleritems&recos_listing=true#origin=pdp&component=sellerData&typeSeller=eshop',
   google: 'https://share.google/hIDbxPQ5A2jAxFOjb',
 };
 
-// ==========================
-// 2) HELPERS DE PLATAFORMA
-// ==========================
-
-/**
- * PT: Retorna o nome "bonito" da plataforma.
- * EN: Returns the human–readable name for the platform.
- */
-export function getPlatformLabel(plat) {
-  // platform = 'shopee' | 'ml' | 'google'
-  switch (plat) {
+/* -----------------------------------------------------------------------------*/
+// Platform Helpers
+//
+// PT: Helpers para nome e link de plataforma.
+// EN: Helpers for platform label and link.
+/* -----------------------------------------------------------------------------*/
+function getPlatformLabel(platform) {
+  switch (platform) {
     case 'shopee':
       return 'Shopee';
     case 'ml':
@@ -46,64 +37,61 @@ export function getPlatformLabel(plat) {
     case 'google':
       return 'Google';
     default:
-      return 'Avaliações do site (SCS)';
+      return 'SCS';
   }
 }
 
-/**
- * PT: Retorna o link base da plataforma (ou null se não houver).
- * EN: Returns the base link for the platform (or null if none).
- */
-export function getPlatformLink(plat) {
-  // platform = 'shopee' | 'ml' | 'google'
-  return PLATFORM_LINKS[plat] || null;
+function getPlatformLink(platform) {
+  return PLATFORM_LINKS[platform] || null;
 }
 
-// ==============================
-// 3)Validation (API data)
-// ==============================
+/* -----------------------------------------------------------------------------*/
+// URL Validation
+//
+// PT: Verifica se a URL pode entrar no pipeline de imagem.
+// EN: Checks whether the URL can enter the image pipeline.
+/* -----------------------------------------------------------------------------*/
+function isUsableUrl(url = '') {
+  const source = String(url).trim();
+  if (!source) return false;
 
-/**
- * PT: Verifica se a URL de imagem é válida antes de enviar para o pipeline da Petra.
- * EN: Checks if the image URL is valid before sending it to Petra's pipeline.
- */
+  // PT: Bloqueia placeholders comuns de formulário.
+  // EN: Blocks common form placeholder URLs.
+  if (source === 'https://.../' || source.includes('://...')) return false;
 
-// ==========================
-// 4) HELPERS DE ERRO
-// ==========================
+  // PT: Data URLs já são válidas para imagem.
+  // EN: Data URLs are already valid for images.
+  if (source.startsWith('data:image/')) return true;
 
-/**
- * PT: Verifica se o erro parece ser de timeout.
- * EN: Checks if the error seems to be a timeout error.
- */
+  // PT: Aceita rotas locais do app, como /gas-img...
+  // EN: Accepts local app routes, such as /gas-img...
+  if (source.startsWith('/')) return true;
 
-export function isUsableUrl(u = '') {
-  const s = String(u).trim();
-  if (!s) return false;
-
-  // placeholders / truncados
-  if (s === 'https://.../' || s.includes('://...')) return false;
-
-  // dataUrl ok
-  if (s.startsWith('data:image/')) return true;
-
-  // Valida URL absoluta
   try {
-    new URL(s);
+    new URL(source);
     return true;
   } catch {
     return false;
   }
 }
 
-export function isTimeoutError(err) {
-  const msg = String(err?.message || err || '').toLowerCase();
-  return msg.includes('timeout') || msg.includes('tempo esgotado');
+/* -----------------------------------------------------------------------------*/
+// Error Helpers
+//
+// PT: Verifica se o erro parece ser de timeout.
+// EN: Checks whether the error looks like a timeout.
+/* -----------------------------------------------------------------------------*/
+function isTimeoutError(error) {
+  const message = String(error?.message || error || '').toLowerCase();
+  return message.includes('timeout') || message.includes('tempo esgotado');
 }
 
+/* -----------------------------------------------------------------------------*/
+// Export
+/* -----------------------------------------------------------------------------*/
 export const DaraListHelpers = {
   getPlatformLabel,
   getPlatformLink,
-  isTimeoutError,
   isUsableUrl,
+  isTimeoutError,
 };

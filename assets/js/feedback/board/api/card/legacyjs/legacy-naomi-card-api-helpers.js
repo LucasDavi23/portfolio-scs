@@ -1,5 +1,7 @@
-// /assets/js/feedback/board/api/card/naomi-card-api-helpers.js
 // 🌸 Naomi — Card API (helpers)
+//
+// Nível / Level: Jovem / Young
+//
 // PT: Especialista em feedback cards: monta URLs específicas do Board,
 //     chama o core da API (Nádia) e normaliza os itens em um formato
 //     único de card.
@@ -8,8 +10,12 @@
 //     format.
 /* -----------------------------------------------------------------------------*/
 
+/* -----------------------------------------------------------------------------*/
+// Imports
+/* -----------------------------------------------------------------------------*/
+
 // EndpointConfig — Configuração do Endpoint (Camada de Infra)
-// Fornece:
+// Fornece / Provides:
 // - set(url)
 // - get()
 import { EndpointConfig } from '/assets/js/feedback/core/config/feedback-endpoint.js';
@@ -17,47 +23,57 @@ import { EndpointConfig } from '/assets/js/feedback/core/config/feedback-endpoin
 /* -----------------------------------------------------------------------------*/
 
 // 🧬 Dália — Image Helpers
-import { toPublicImageUrl } from '/assets/js/feedback/board/image/dalia-image-helpers.js';
+// Fornece / Provides:
+// - toPublicImageUrl(url)
+
+import { DaliaImageHelpers } from '/assets/js/feedback/board/image/dalia-image-helpers.js';
 
 /* -----------------------------------------------------------------------------*/
 // 🧬 Nádia — Core da API (infra de rede)
-// NadiaAPICore fornece:
+// Fornece / Provides:
 // - fetchJsonCached()
 // - setTimeoutMs()
 // - setRetries()
 // - setCacheTtl()
 /* -----------------------------------------------------------------------------*/
-import { NadiaAPICore } from '/assets/js/feedback/board/api/rede/nadia-api-core-helpers.js';
+import { NadiaAPICore } from '/assets/js/feedback/board/api/network/nadia-api-core-helpers.js';
 
 /* -----------------------------------------------------------------------------*/
-// 🔹 Helper interno: garante um endpoint válido para as operações da Naomi.
-// PT: Centraliza a leitura segura do endpoint para uso nos cards.
-// EN: Centralizes safe endpoint read for card operations.
+// 📘 Logger — System Observability Layer
 /* -----------------------------------------------------------------------------*/
+import { Logger } from '/assets/js/system/utils/logger.js';
+
+/* -----------------------------------------------------------------------------*/
+// Helpers
+//
+// PT: Funções auxiliares usadas internamente neste módulo.
+// EN: Helper functions used internally in this module.
+/* -----------------------------------------------------------------------------*/
+
+// PT: Garante que existe um endpoint configurado.
+// EN: Ensures an endpoint is configured before making requests.
 
 function ensureEndpoint() {
   const endpoint = EndpointConfig.get();
   if (!endpoint) {
-    throw new error('FEEDBACK_ENDPOINT não definido.');
+    throw new Error('FEEDBACK_ENDPOINT não definido.');
   }
   return endpoint;
+}
+
+// PT: Aplica opções da requisição na querystring.
+// EN: Applies request options into the querystring.
+
+function clampInt(v, min, max, fallback) {
+  const n = parseInt(v, 10);
+  if (Number.isNaN(n)) return fallback;
+  return Math.max(min, Math.min(max, n));
 }
 
 // ========= Helpers de domínio (CARD) =========
 // PT: Funções auxiliares específicas para o domínio dos cards.
 // EN: Helper functions specific to the card domain.
 /* -----------------------------------------------------------------------------*/
-function toISO(d) {
-  if (!d) return '';
-  const m = String(d).trim();
-  if (/^\d{4}-\d{2}-\d{2}/.test(m)) return m;
-
-  const br = m.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
-  if (br) return `${br[3]}-${br[2]}-${br[1]}`;
-
-  const date = new Date(m);
-  return isNaN(date) ? m : date.toISOString().slice(0, 10);
-}
 
 function normalizeItem(x) {
   if (!x || typeof x !== 'object') return null;
@@ -69,20 +85,16 @@ function normalizeItem(x) {
       .find(Boolean) || '';
 
   return {
-    estrelas: Number(x.estrelas ?? x.rating ?? 0) || 0,
-    data: toISO(x.data ?? x.date ?? ''),
-    autor: (x.autor ?? x.author ?? '').toString().trim(),
-    texto: (x.texto ?? x.comment ?? '').toString().trim(),
-    url: pickStr(x.url) || undefined,
-    foto_url: toPublicImageUrl(rawFoto) || undefined,
-    plataforma: (x.plataforma ?? x.plat ?? '').toString().trim().toLowerCase() || undefined,
+    platform: String(x.platform || '').toLowerCase(),
+    rating: Number(x.rating || 0),
+    // ✅ mantém os campos novos do GAS (Selah/Elara já sabem ler isso)
+    date_br: String(x.date_br || '').trim(),
+    date_ms: x.date_ms != null && x.date_ms !== '' ? Number(x.date_ms) : null,
+    author: String(x.author || '').trim(),
+    text: String(x.text || '').trim(),
+    url: String(x.url || '').trim(),
+    photo_url: DaliaImageHelpers.toPublicImageUrl(x.photo_url || ''),
   };
-}
-
-function clampInt(v, min, max, fallback) {
-  const n = parseInt(v, 10);
-  if (Number.isNaN(n)) return fallback;
-  return Math.max(min, Math.min(max, n));
 }
 
 // ========= API pública da Naomi (CARD) =========
@@ -101,8 +113,27 @@ export async function list(plat, page = 1, limit = 1, opts = { fast: 1 }) {
   url.searchParams.set('page', String(pg));
   url.searchParams.set('limit', String(lim));
 
-  if (opts && typeof opts === 'object') {
-    Object.entries(opts).forEach(([k, v]) => url.searchParams.set(k, String(v)));
+  // ---------------------------------------------
+  // ✅ nocache support (GAS + client cache bust)
+  // ---------------------------------------------
+  const isObj = opts && typeof opts === 'object';
+  const nocache =
+    isObj && (opts.nocache === true || String(opts.nocache) === '1' || opts.force === true);
+
+  if (nocache) {
+    url.searchParams.set('nocache', '1');
+    url.searchParams.set('cb', String(Date.now())); // cache buster
+  }
+
+  // adiciona opts como querystring, mas SEM duplicar nocache/cb
+  if (isObj) {
+    Object.entries(opts).forEach(([k, v]) => {
+      if (k === 'nocache' || k === 'cb' || k === 'force') return;
+      url.searchParams.set(k, String(v));
+    });
+
+    // garante fast padrão se não vier
+    if (!url.searchParams.has('fast')) url.searchParams.set('fast', '1');
   } else {
     url.searchParams.set('fast', '1');
   }
@@ -128,13 +159,31 @@ export async function listMeta(plat, page = 1, limit = 5, opts = { fast: 1 }) {
   url.searchParams.set('page', String(pg));
   url.searchParams.set('limit', String(lim));
 
+  const isObj = opts && typeof opts === 'object';
+  const nocache =
+    isObj && (opts.nocache === true || String(opts.nocache) === '1' || opts.force === true);
+
+  if (nocache) {
+    url.searchParams.set('nocache', '1');
+    url.searchParams.set('cb', String(Date.now()));
+  }
+
+  if (isObj) {
+    Object.entries(opts).forEach(([k, v]) => {
+      if (k === 'nocache' || k === 'cb' || k === 'force') return;
+      url.searchParams.set(k, String(v));
+    });
+    if (!url.searchParams.has('fast')) url.searchParams.set('fast', '1');
+  } else {
+    url.searchParams.set('fast', '1');
+  }
+
   const data = await NadiaAPICore.fetchJsonCached(url.toString(), opts);
 
   const itemsArr = Array.isArray(data) ? data : Array.isArray(data.items) ? data.items : [];
-
   const items = itemsArr.map(normalizeItem).filter(Boolean);
-  const hasMore = typeof data?.hasMore === 'boolean' ? data.hasMore : items.length === lim;
 
+  const hasMore = typeof data?.hasMore === 'boolean' ? data.hasMore : items.length === lim;
   const total = typeof data?.total === 'number' ? data.total : undefined;
 
   return { items, hasMore, total };

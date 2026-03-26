@@ -1,15 +1,20 @@
-// 🎐 Yume — Animações do Carrossel
+// 🎐 Yume — Carousel Animations
+//
 // Nível / Level: Aprendiz / Apprentice
 //
-// PT:
-// Centraliza as animações visuais do carrossel.
-// Yume não controla índice, autoplay ou navegação.
-// Sua função é apenas aplicar a transição visual de entrada/saída.
+// PT: Aplica animações de entrada e saída dos slides.
+// EN: Applies enter and exit slide animations.
+
+/* -----------------------------------------------------------------------------*/
+// Imports
+/* -----------------------------------------------------------------------------*/
+
+/* -----------------------------------------------------------------------------*/
+// Animation Constants
 //
-// EN:
-// Centralizes carousel visual animations.
-// Yume does not control index, autoplay or navigation.
-// Its role is only to apply enter/exit visual transitions.
+// PT: Classes usadas nas transições e estados dos slides.
+// EN: Classes used for slide transitions and states.
+/* -----------------------------------------------------------------------------*/
 
 const BASE_TRANSITION_CLASSES = [
   'transition-[transform,opacity]',
@@ -31,6 +36,15 @@ const STATE_CLASSES = [
   'pointer-events-none',
 ];
 
+/* -----------------------------------------------------------------------------*/
+// Slide State Helpers
+//
+// PT: Prepara o estado do slide antes da animação.
+// EN: Prepares slide state before animation.
+/* -----------------------------------------------------------------------------*/
+
+// PT: Limpa estados antigos e aplica base de transição.
+// EN: Clears previous states and applies transition base.
 function resetSlideState(element) {
   if (!element) return;
 
@@ -38,38 +52,45 @@ function resetSlideState(element) {
   element.classList.add(...BASE_TRANSITION_CLASSES);
 }
 
+/* -----------------------------------------------------------------------------*/
+// Slide Animations
+//
+// PT: Controla entrada e saída dos slides.
+// EN: Controls slide enter and exit.
+/* -----------------------------------------------------------------------------*/
+
+// PT: Aplica animação de entrada do slide.
+// EN: Applies slide enter animation.
 function applySlideEnterAnimation(element, direction = 'next') {
   if (!element) return;
 
   resetSlideState(element);
 
-  // PT: posiciona o slide fora da tela antes da entrada
-  // EN: places the slide off-screen before entering
   element.classList.add(
     'z-10',
     'opacity-0',
     direction === 'prev' ? '-translate-x-full' : 'translate-x-full'
   );
 
-  // PT: força reflow para garantir a transição
-  // EN: forces reflow to ensure the transition runs
+  // PT: Força reflow para ativar a transição.
+  // EN: Forces reflow to trigger the transition.
   void element.offsetWidth;
 
   element.classList.remove('opacity-0', 'translate-x-full', '-translate-x-full');
   element.classList.add('opacity-100', 'translate-x-0');
 }
 
+// PT: Aplica animação de saída do slide.
+// EN: Applies slide exit animation.
 function applySlideExitAnimation(element, direction = 'next') {
   if (!element) return;
 
   resetSlideState(element);
 
-  // PT: estado atual visível antes de sair
-  // EN: current visible state before exiting
   element.classList.add('z-10', 'opacity-100', 'translate-x-0');
 
-  // PT: força reflow para a saída acontecer suavemente
-  // EN: forces reflow so exit transition happens smoothly
+  // PT: Força reflow para saída suave.
+  // EN: Forces reflow for smooth exit.
   void element.offsetWidth;
 
   element.classList.remove('opacity-100', 'translate-x-0');
@@ -79,6 +100,10 @@ function applySlideExitAnimation(element, direction = 'next') {
     direction === 'prev' ? 'translate-x-full' : '-translate-x-full'
   );
 }
+
+/* -----------------------------------------------------------------------------*/
+// Export
+/* -----------------------------------------------------------------------------*/
 
 export const YumeCarouselAnimations = {
   applyEnter: applySlideEnterAnimation,

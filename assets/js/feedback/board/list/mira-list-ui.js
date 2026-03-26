@@ -1,718 +1,698 @@
-// ✨ Mira — Guardiã do Modal LISTA (UI - ESModule)
+/* -----------------------------------------------------------------------------*/
+// ✨ Mira — List Modal UI
 //
-// Nível: Adulto / Adult
+// Nível / Level: Adulto / Adult
 //
-// PT: Controla tudo que é DOM/visual do modal LISTA (“Ver mais”):
-//     - abrir/fechar o modal
-//     - carregar páginas de avaliações (via FeedbackAPI)
-//     - renderizar itens na <ul>
-//     - atualizar cabeçalho/rodapé e botão "Carregar mais"
-//     Usa Dara (helpers) para nome/link de plataforma e detecção de timeout.
+// PT: Controla a interface do modal de lista de avaliações.
+//     Abre/fecha o modal, carrega páginas, renderiza itens e atualiza
+//     cabeçalho, rodapé e paginação.
 //
-// EN: Controls all DOM/visual logic for the LIST modal (“See more”):
-//     - open/close the modal
-//     - load paginated reviews (via FeedbackAPI)
-//     - render items into the <ul>
-//     - update header/footer and "Load more" button
-//     Uses Dara for platform label/link and timeout detection.
-//
-// Relações / Relations:
-//  - Selah (Mural/Hero): dispara o modal (data-action="ver-mais")
-//  - Dara (Helpers): getPlatformLabel, getPlatformLink, isTimeoutError
-//  - Talita / FeedbackAPI: global.FeedbackAPI.listMeta(...)
-//  - Petra (imagem): no futuro pode assumir a lógica de thumb/full.
-//  - Dalia (imagem): lógica pura de thumb/full (sem DOM).
-// -----------------------------------------------------------------------------
+// EN: Controls the review list modal UI.
+//     Opens/closes the modal, loads pages, renders items and updates
+//     header, footer and pagination.
+/* -----------------------------------------------------------------------------*/
 
-// Importações / Imports
+/* -----------------------------------------------------------------------------*/
+// Imports
+/* -----------------------------------------------------------------------------*/
 
-// -----------------------------------------------------------------------------
-
-// Petra — Image UI Helpers
-// PT: Lida com thumbs, fallback e observação de imagem
-//  EN: Manages thumbs, fallback and DOM observers for images.
+/* -----------------------------------------------------------------------------*/
+// 🧬 Naomi — Card API Helpers
 // Fornece / Provides:
-//   - initThumbSystem()
-//   - applyThumb()
-//   - scanThumbs()
-//   - observeThumbs()
+// - list()
+// - listMeta()
+/* -----------------------------------------------------------------------------*/
+import { NaomiFeedbackCardAPI } from '/assets/js/feedback/board/api/card/naomi-card-api-helpers.js';
 
+/* -----------------------------------------------------------------------------*/
+// 🎨 Petra — Image UI
+// Fornece / Provides:
+// - loadThumbWithRetries()
+// - smartAutoRecover()
+/* -----------------------------------------------------------------------------*/
 import { PetraImageUI } from '/assets/js/feedback/board/image/petra-image-ui.js';
 
-// -----------------------------------------------------------------------------
-
-// Dalia — Image Helpers (Lógica pura, sem DOM)
-// PT: Centraliza a lógica "pura" de imagem (sem DOM):
-// EN: Centralizes the "pure" image logic (no DOM):
+/* -----------------------------------------------------------------------------*/
+// 🌿 Dália — Image Helpers
 // Fornece / Provides:
 // - FALLBACK_IMG
-
+/* -----------------------------------------------------------------------------*/
 import { DaliaImageHelpers } from '/assets/js/feedback/board/image/dalia-image-helpers.js';
 
-// -----------------------------------------------------------------------------
-
-// Dara — Assistente lógica da Mira (Helpers)
-// PT: Centraliza a lógica "pura" do modal LISTA (sem DOM):
-// EN: Centralizes the "pure" logic for the LIST modal (no DOM):
+/* -----------------------------------------------------------------------------*/
+// ✨ Dara — List Helpers
 // Fornece / Provides:
 // - getPlatformLabel()
 // - getPlatformLink()
 // - isTimeoutError()
 // - isUsableUrl()
-
+/* -----------------------------------------------------------------------------*/
 import { DaraListHelpers } from '/assets/js/feedback/board/list/dara-list-helpers.js';
 
-// -----------------------------------------------------------------------------
-
-// Elara — Assistente lógica do Mural (Helpers)
-// PT: Centraliza a lógica "pura" do Mural (sem DOM):
-// EN: Centralizes the "pure" logic for the Board (no DOM):
+/* -----------------------------------------------------------------------------*/
+// 🕰️ Juniper — Date/Time Utilities
 // Fornece / Provides:
-// - pickImagePair()
-// - isValidImageURL()
-
-import { ElaraBoardHelpers } from '/assets/js/feedback/board/main/elara-board-helpers.js';
-
-// -----------------------------------------------------------------------------
-
-// Juniper — Utilitários de Data/Hora
-// PT: Usado para formatar datas de avaliações.
-// EN: Used to format review dates.
-// Fornece / Provides:
-// - formatDateTime()
-// - parseDateTime()
-
+// - format()
+/* -----------------------------------------------------------------------------*/
 import { JuniperDateTime } from '/assets/js/system/utils/juniper-date-time.js';
 
-// -----------------------------------------------------------------------------
-
-// Luma — UI de Loading Reutilizável
-// PT: Usado para mostrar loading em botões, etc.
-// EN: Used to show loading in buttons, etc.
+/* -----------------------------------------------------------------------------*/
+// 💡 Luma — Loading UI
 // Fornece / Provides:
 // - ensurePaint()
 // - spinnerHTML()
-// - renderLoading()
-// - clearLoading()
 // - setButtonLoading()
+/* -----------------------------------------------------------------------------*/
+import { LumaLoading } from '/assets/js/system/ui/loading/luma-loading.js';
 
-import { LumaLoading } from '/assets/js/system/ui/loading/luma-loading';
-
-// -----------------------------------------------------------------------------
-
-// Zoe — rating UI do system (avaliações por estrelas)
-// EN Zoe — system rating UI (star-based ratings)
-// Fornece:
-//  - renderRating()
-//  - normalizeRating()
-//  - mountInput()
-
+/* -----------------------------------------------------------------------------*/
+// ⭐ Zoe — Rating UI
+// Fornece / Provides:
+// - renderRating()
+/* -----------------------------------------------------------------------------*/
 import { ZoeRating } from '/assets/js/system/ui/rating/zoe-rating.js';
 
-// -----------------------------------------------------------------------------
-// ✨ Latch — Body Scroll Lock (System Utils)
-// Provides:
-//  - lockBodyScroll()
-//  - unlockBodyScroll()
-//  - getScrollLockCount()
-
+/* -----------------------------------------------------------------------------*/
+// 🔒 Latch — Root Scroll Lock
+// Fornece / Provides:
+// - lockScroll()
+// - unlockScroll()
+/* -----------------------------------------------------------------------------*/
 import { LatchRootScroll } from '/assets/js/system/utils/latch-root-scroll-lock.js';
 
-// -----------------------------------------------------------------------------
-// 🕯️ Vela — Modal Motion (System Utils)
-// Provides:
-// openModalMotion,
-// closeModalMotion,
+/* -----------------------------------------------------------------------------*/
+// 🕯️ Vela — Modal Motion
+// Fornece / Provides:
+// - openModalMotion()
+// - closeModalMotion()
+/* -----------------------------------------------------------------------------*/
 import { VelaModalMotion } from '/assets/js/layout/modal/vela-modal-motion.js';
 
-// ==========================
-// 1) HELPERS BÁSICOS DE DOM
-// ==========================
+/* -----------------------------------------------------------------------------*/
+// DOM Helpers
+//
+// PT: Atalhos simples para busca no DOM.
+// EN: Simple shortcuts for DOM lookup.
+/* -----------------------------------------------------------------------------*/
+const qs = (selector, root = document) => root.querySelector(selector);
 
-/** PT: Atalho para querySelector. EN: Shorthand for querySelector. */
-const qs = (selector, root = document) => root.querySelector(selector); // root opcional
-
-/** PT: Atalho para querySelectorAll em array. EN: Shorthand to get an array. */
-const qsa = (selector, root = document) => Array.from(root.querySelectorAll(selector)); // root opcional
-
-/** PT: Retorna o limite padrão baseado na largura da tela. EN: Returns default limit based on screen width. */
+/* -----------------------------------------------------------------------------*/
+// Limit Helpers
+//
+// PT: Retorna o limite padrão com base na largura da tela.
+// EN: Returns the default limit based on screen width.
+/* -----------------------------------------------------------------------------*/
 function getDefaultLimit() {
   return window.matchMedia('(max-width: 639px)').matches ? 8 : 12;
 }
 
-// ==========================
-// 2) ESTADO DO MODAL
-// ==========================
-
+/* -----------------------------------------------------------------------------*/
+// Modal State
+//
+// PT: Estado interno do modal de lista.
+// EN: Internal state for the list modal.
+/* -----------------------------------------------------------------------------*/
 const state = {
-  // estado inicial do modal
-  plat: 'scs', // plataforma atual (scs, google, facebook, etc)
-  page: 1, // pagina atual
-  limit: 5, // fallback (open() define 8 mobile / 12 desktop)
-  hasMore: false, // se há mais páginas
-  loading: false, // se há requisição em andamento
-  total: undefined, // total real (fast:0), opcional
+  plat: 'scs',
+  page: 1,
+  limit: 5,
+  hasMore: false,
+  loading: false,
+  total: undefined,
 };
 
-// PT: flag para não buscar o total múltiplas vezes em paralelo.
-// EN: flag to avoid fetching total multiple times in parallel.
-let fetchingTotal = false; // false = não está buscando / not fetching
+let fetchingTotal = false;
 
-// ==========================
-// 3) DOM STATE (Bound at init)
-// ==========================
-
-let els = null; // refs de DOM (inicializado no init)
+/* -----------------------------------------------------------------------------*/
+// DOM State
+//
+// PT: Referências de DOM vinculadas no init.
+// EN: DOM references bound during init.
+/* -----------------------------------------------------------------------------*/
+let elements = null;
 
 function bindElements(root = document) {
-  els = {
-    // objeto para guardar refs de DOM / object to hold DOM refs
-    modal: qs('#modalFeedback', root), // modal container
-    panel: qs('#modalFeedbackPanel', root), // painel do modal
-    titulo: qs('#modalFeedbackTitulo'), // título do modal
-    sub: qs('#modalFeedbackSub'), // subtítulo do modal
-    list: qs('#modalFeedbackList'), // <ul> da list
-    info: qs('#modalFeedbackInfo'), // info de total/erro
-    btnMore: qs('#modalFeedbackLoadMore'), // botão "Carregar mais"
-    btnClose: qs('#modalFeedbackClose'), // botão fechar
-    btnPlat: qs('#modalFeedbackLink'), // "ver na plataforma"
+  elements = {
+    modal: qs('#modalFeedback', root),
+    panel: qs('#modalFeedbackPanel', root),
+    titulo: qs('#modalFeedbackTitulo', root),
+    sub: qs('#modalFeedbackSub', root),
+    list: qs('#modalFeedbackList', root),
+    info: qs('#modalFeedbackInfo', root),
+    btnMore: qs('#modalFeedbackLoadMore', root),
+    btnClose: qs('#modalFeedbackClose', root),
+    btnPlat: qs('#modalFeedbackLink', root),
   };
-  return els;
+
+  return elements;
 }
 
-// ==========================
-// 4) RENDERIZAÇÕES
-// ==========================
+/* -----------------------------------------------------------------------------*/
+// Item Renderer
+//
+// PT: Monta um item de avaliação como <li>.
+// EN: Builds a review item as <li>.
+/* -----------------------------------------------------------------------------*/
+function renderItem(item) {
+  const listItemElement = document.createElement('li');
+  listItemElement.className = 'py-4';
 
-/**
- * PT: Monta 1 item de avaliação como <li>.
- * EN: Builds 1 review item (<li>).
- */
+  const lineElement = document.createElement('div');
+  lineElement.className = 'flex flex-col gap-2';
 
-function renderItem(it) {
-  // it = item de review
-  const li = document.createElement('li');
-  li.className = 'py-4';
+  /* ------------------------------------------------------------------------- */
+  // Image Slot
+  //
+  // PT: Mira cria a estrutura; Petra cuida do carregamento e recuperação.
+  // EN: Mira creates the structure; Petra handles loading and recovery.
+  /* ------------------------------------------------------------------------- */
 
-  const line = document.createElement('div');
-  line.className = 'flex flex-col gap-2';
-
-  /* ==================================================
-   * 🪨 PETRA SLOT — imagem (Mira cria, Petra manda)
-   * ================================================== */
-
-  const btnThumb = document.createElement('button');
-  btnThumb.type = 'button';
-  btnThumb.className =
+  const thumbButtonElement = document.createElement('button');
+  thumbButtonElement.type = 'button';
+  thumbButtonElement.className =
     'thumb-container relative w-[84px] aspect-[2/2] rounded-md overflow-hidden border border-gray-200 bg-gray-50 p-1 hidden';
+  thumbButtonElement.setAttribute('data-owner', 'mira-list');
 
-  btnThumb.setAttribute('data-owner', 'mira-list');
+  const imageElement = document.createElement('img');
+  imageElement.alt = 'Foto enviada pelo cliente';
+  imageElement.className = 'h-full w-full object-contain';
+  imageElement.loading = 'eager';
+  imageElement.decoding = 'async';
+  imageElement.referrerPolicy = 'no-referrer';
 
-  const img = document.createElement('img');
-  img.alt = 'Foto enviada pelo cliente';
-  img.className = 'h-full w-full object-contain';
-  img.loading = 'eager';
-  img.decoding = 'async';
-  img.referrerPolicy = 'no-referrer';
+  thumbButtonElement.classList.add('hidden');
+  thumbButtonElement.classList.remove('js-open-modal');
+  imageElement.onload = null;
+  imageElement.onerror = null;
+  imageElement.removeAttribute('data-full');
+  thumbButtonElement.removeAttribute('data-full');
+  imageElement.removeAttribute('src');
 
-  // ✅ Reset total (igual Selah)
-  btnThumb.classList.add('hidden');
-  btnThumb.classList.remove('js-open-modal');
-  img.onload = img.onerror = null;
-  img.removeAttribute('data-full');
-  btnThumb.removeAttribute('data-full');
-  img.removeAttribute('src');
+  /* ------------------------------------------------------------------------- */
+  // Text Content
+  //
+  // PT: Conteúdo textual principal da avaliação.
+  // EN: Main textual content of the review.
+  /* ------------------------------------------------------------------------- */
 
-  btnThumb.appendChild(img);
-  line.appendChild(btnThumb);
+  const contentElement = document.createElement('div');
+  contentElement.className = 'min-w-0';
 
-  // --------------------------------------------------
-  // ✅ PIPELINE CORRETO (igual Selah):
-  // use pickImagePair para normalizar/proxy
-  // --------------------------------------------------
-  {
-    // Se Mira não importa ElaraBoardHelpers, pode chamar o helper equivalente que vocês já usam.
-    // O importante é NÃO usar it.photo_url direto.
-    const { thumbUrl, fullUrl } = ElaraBoardHelpers.pickImagePair(it);
+  const metaElement = document.createElement('div');
+  metaElement.className = 'inline-flex items-center gap-2 text-sm';
 
-    const sourceForThumb = (thumbUrl || fullUrl || '').trim(); // ✅ entra no "moedor"
-    const rawBigUrl = (fullUrl || thumbUrl || '').trim(); // guardado (futuro HD)
-
-    // DEBUG certeiro (depois remove)
-    // console.log('[MIRA] sourceForThumb:', sourceForThumb, { thumbUrl, fullUrl, it });
-
-    if (DaraListHelpers.isUsableUrl(sourceForThumb)) {
-      PetraImageUI.loadThumbWithRetries(img, btnThumb, sourceForThumb, rawBigUrl, 2)
-        .then(() => {
-          const ok = !btnThumb.classList.contains('hidden');
-          if (!ok) return;
-
-          // ✅ mostra divisor + media quando thumb está ok
-          divider.classList.remove('hidden');
-          mediaRow.classList.remove('hidden');
-
-          // ✅ SRC FINAL vira fonte do modal (igual Selah)
-          const finalUrlForModal = img.src;
-          if (finalUrlForModal) {
-            img.dataset.full = finalUrlForModal;
-            btnThumb.dataset.full = finalUrlForModal;
-            btnThumb.classList.add('js-open-modal');
-            btnThumb.setAttribute('role', 'button');
-            btnThumb.setAttribute('tabindex', '0');
-          }
-
-          // ✅ auto-recover com a fonte do moedor (não a raw)
-          PetraImageUI.smartAutoRecover(img, sourceForThumb, 60000, 10000);
-        })
-        .catch((err) => {
-          console.warn('[MIRA thumb] falhou após retries', { err, sourceForThumb, it });
-
-          // mantém oculto (sem imagem)
-          btnThumb.classList.add('hidden');
-          divider.classList.add('hidden');
-          mediaRow.classList.add('hidden');
-
-          img.src = DaliaImageHelpers.FALLBACK_IMG;
-          btnThumb.classList.remove('js-open-modal');
-          // opcional: tenta recuperar mesmo assim
-          PetraImageUI.smartAutoRecover(img, sourceForThumb, 60000, 10000);
-        });
-    }
-  }
-
-  /* ==================================================
-   * 📝 TEXTO — Mira continua dona
-   * ================================================== */
-
-  const body = document.createElement('div');
-  body.className = 'min-w-0';
-
-  const meta = document.createElement('div');
-  meta.className = 'inline-flex items-center gap-2 text-sm';
-
-  const rating = document.createElement('span');
-  rating.className = 'shrink-0';
-  rating.innerHTML = ZoeRating.renderRating(it.rating || 0, {
-    size: 'sm', // lista/modal → discreto
-    showValue: false, // só estrelas
+  const ratingElement = document.createElement('span');
+  ratingElement.className = 'shrink-0';
+  ratingElement.innerHTML = ZoeRating.renderRating(item.rating || 0, {
+    size: 'sm',
+    showValue: false,
   });
 
-  const when = JuniperDateTime.format(
-    it.date_ms ?? it.date_br ?? it.date_iso ?? it.dateIso ?? it.date
+  const formattedDate = JuniperDateTime.format(
+    item.date_ms ?? item.date_br ?? item.date_iso ?? item.dateIso ?? item.date
   );
-  const time = document.createElement('time');
-  time.className = 'text-xs text-gray-500 whitespace-nowrap';
-  time.textContent = when || '';
-  meta.appendChild(rating);
-  meta.appendChild(time);
 
-  const txt = document.createElement('p');
-  txt.className = 'mt-0 text-gray-900 leading-6';
-  txt.textContent = it.text || '';
+  const timeElement = document.createElement('time');
+  timeElement.className = 'text-xs text-gray-500 whitespace-nowrap';
+  timeElement.textContent = formattedDate || '';
 
-  const author = document.createElement('p');
-  author.className = 'mt-0 text-xs text-gray-500';
-  author.textContent = it.author ? `- ${it.author}` : '';
+  metaElement.appendChild(ratingElement);
+  metaElement.appendChild(timeElement);
 
-  body.appendChild(meta);
-  body.appendChild(txt);
-  body.appendChild(author);
-  line.appendChild(body);
+  const textElement = document.createElement('p');
+  textElement.className = 'mt-0 text-gray-900 leading-6';
+  textElement.textContent = item.text || '';
 
-  // Linha divisória
-  const divider = document.createElement('div');
-  divider.className = 'mt-0 pt-2 hidden';
+  const authorElement = document.createElement('p');
+  authorElement.className = 'mt-0 text-xs text-gray-500';
+  authorElement.textContent = item.author ? `- ${item.author}` : '';
 
-  // Linha da imagem
-  const mediaRow = document.createElement('div');
-  mediaRow.className = 'mt-0 hidden';
+  contentElement.appendChild(metaElement);
+  contentElement.appendChild(textElement);
+  contentElement.appendChild(authorElement);
+  lineElement.appendChild(contentElement);
 
-  // adiciona a imagem à linha
-  mediaRow.appendChild(btnThumb);
-  divider.appendChild(mediaRow);
-  line.appendChild(divider);
+  /* ------------------------------------------------------------------------- */
+  // Media Wrapper
+  //
+  // PT: Linha dedicada à mídia, exibida apenas quando a thumb é válida.
+  // EN: Media row shown only when the thumbnail is valid.
+  /* ------------------------------------------------------------------------- */
 
-  // adiciona linha ao <li>
-  li.appendChild(line);
-  return li;
-}
+  const dividerElement = document.createElement('div');
+  dividerElement.className = 'mt-0 pt-2 hidden';
 
-/**
- * PT: Renderiza estado "vazio" (sem avaliações).
- * EN: Renders "empty" state (no reviews).
- */
-function renderEmpty(plat, msg = 'Ainda não há avaliações.') {
-  const li = document.createElement('li'); // cria <li>
-  li.className = 'py-10 text-center'; // classes
-  li.innerHTML = `
- <p class="text-sm text-gray-500">${msg}</p> `; // conteúdo
+  const mediaRowElement = document.createElement('div');
+  mediaRowElement.className = 'mt-0 hidden';
 
-  const link = DaraListHelpers.getPlatformLink(plat); // link da plataforma
-  if (plat !== 'scs' && link) {
-    const a = document.createElement('a'); // cria <a>
-    a.href = link; // atribui href
-    a.target = 'blank'; // nova aba
-    a.rel = 'noopener';
-    a.className = 'mt-3 inline-flex rounded-lg border px-3 py-1.5 text-xs hover:bg-gray-50'; // classes
-    a.textContent = 'Ver na plataforma'; // texto
+  thumbButtonElement.appendChild(imageElement);
+  mediaRowElement.appendChild(thumbButtonElement);
+  dividerElement.appendChild(mediaRowElement);
+  lineElement.appendChild(dividerElement);
 
-    const wrap = document.createElement('div'); // cria div wrap
-    wrap.appendChild(a); // adiciona <a> ao wrap
-    li.appendChild(wrap); // adiciona wrap ao <li>
+  /* ------------------------------------------------------------------------- */
+  // Image Pipeline
+  //
+  // PT: Usa Dalia para normalizar a imagem e Petra para carregar/retry.
+  // EN: Uses Dalia to normalize the image and Petra for load/retry.
+  /* ------------------------------------------------------------------------- */
+  {
+    const { thumbUrl, fullUrl } = DaliaImageHelpers.pickImagePair(item);
+
+    const thumbSourceUrl = (thumbUrl || fullUrl || '').trim();
+    const rawFullUrl = (fullUrl || thumbUrl || '').trim();
+
+    if (DaraListHelpers.isUsableUrl(thumbSourceUrl)) {
+      PetraImageUI.loadThumbWithRetries(
+        imageElement,
+        thumbButtonElement,
+        thumbSourceUrl,
+        rawFullUrl,
+        2
+      )
+        .then(() => {
+          const isVisible = !thumbButtonElement.classList.contains('hidden');
+          if (!isVisible) return;
+
+          dividerElement.classList.remove('hidden');
+          mediaRowElement.classList.remove('hidden');
+
+          const modalSourceUrl = imageElement.src;
+          if (modalSourceUrl) {
+            imageElement.dataset.full = modalSourceUrl;
+            thumbButtonElement.dataset.full = modalSourceUrl;
+            thumbButtonElement.classList.add('js-open-modal');
+            thumbButtonElement.setAttribute('role', 'button');
+            thumbButtonElement.setAttribute('tabindex', '0');
+          }
+
+          PetraImageUI.smartAutoRecover(imageElement, thumbSourceUrl, 60000, 10000);
+        })
+        .catch(() => {
+          thumbButtonElement.classList.add('hidden');
+          dividerElement.classList.add('hidden');
+          mediaRowElement.classList.add('hidden');
+
+          imageElement.src = DaliaImageHelpers.FALLBACK_IMG;
+          thumbButtonElement.classList.remove('js-open-modal');
+
+          PetraImageUI.smartAutoRecover(imageElement, thumbSourceUrl, 60000, 10000);
+        });
+    }
+
+    // PT: Quando não houver URL válida, a mídia permanece oculta.
+    // EN: When no valid URL exists, media stays hidden.
   }
-  return li; // retorna o <li> pronto
+
+  listItemElement.appendChild(lineElement);
+  return listItemElement;
 }
 
-/**
- * PT: Atualiza cabeçalho e rodapé com base nos contadores.
- * EN: Updates header/footer based on current counters.
- */
+/* -----------------------------------------------------------------------------*/
+// Empty State Renderer
+//
+// PT: Renderiza o estado vazio do modal.
+// EN: Renders the modal empty state.
+/* -----------------------------------------------------------------------------*/
+function renderEmpty(platform, message = 'Ainda não há avaliações.') {
+  const listItemElement = document.createElement('li');
+  listItemElement.className = 'py-10 text-center';
+  listItemElement.innerHTML = `<p class="text-sm text-gray-500">${message}</p>`;
+
+  const platformLink = DaraListHelpers.getPlatformLink(platform);
+
+  if (platform !== 'scs' && platformLink) {
+    const anchorElement = document.createElement('a');
+    anchorElement.href = platformLink;
+    anchorElement.target = '_blank';
+    anchorElement.rel = 'noopener';
+    anchorElement.className =
+      'mt-3 inline-flex rounded-lg border px-3 py-1.5 text-xs hover:bg-gray-50';
+    anchorElement.textContent = 'Ver na plataforma';
+
+    const wrapperElement = document.createElement('div');
+    wrapperElement.appendChild(anchorElement);
+    listItemElement.appendChild(wrapperElement);
+  }
+
+  return listItemElement;
+}
+
+/* -----------------------------------------------------------------------------*/
+// Header Updater
+//
+// PT: Atualiza cabeçalho e rodapé com base nos contadores.
+// EN: Updates header and footer based on counters.
+/* -----------------------------------------------------------------------------*/
 function updateHeader(shown, total, hasMore) {
   const shownSafe = Number.isFinite(shown) && shown >= 0 ? shown : 0;
   const totalSafe = Number.isFinite(total) && total > 0 ? total : null;
 
-  // 🔹 Subtítulo
-  if (totalSafe !== null) {
-    els.sub.textContent = `${shownSafe} / ${totalSafe} avaliações`;
-  } else {
-    els.sub.textContent = `${shownSafe} avaliações`;
+  if (elements.sub) {
+    elements.sub.textContent =
+      totalSafe !== null ? `${shownSafe} / ${totalSafe} avaliações` : `${shownSafe} avaliações`;
   }
 
-  // 🔹 Linha de info (rodapé)
-  if (totalSafe !== null) {
-    els.info.textContent = hasMore
-      ? `Mostrando ${shownSafe} de ${totalSafe}`
-      : `Exibindo todas (${totalSafe})`;
-  } else {
-    els.info.textContent = hasMore ? `Mostrando ${shownSafe} (há mais…)` : `Exibindo ${shownSafe}`;
+  if (elements.info) {
+    elements.info.textContent =
+      totalSafe !== null
+        ? hasMore
+          ? `Mostrando ${shownSafe} de ${totalSafe}`
+          : `Exibindo todas (${totalSafe})`
+        : hasMore
+          ? `Mostrando ${shownSafe} (há mais…)`
+          : `Exibindo ${shownSafe}`;
   }
 }
 
-/**
- * PT: Busca o total real (fast:0) em paralelo, se ainda não soubermos.
- * EN: Fetches the real total (fast:0) in parallel, if not known yet.
- */
-
+/* -----------------------------------------------------------------------------*/
+// Total Fetcher
+//
+// PT: Busca o total real em paralelo quando necessário.
+// EN: Fetches the real total in parallel when needed.
+/* -----------------------------------------------------------------------------*/
 async function searchTotalIfNecessary() {
-  // buscarTotalSePreciso
-  if (fetchingTotal) return; // já está buscando / already fetching
-  if (Number.isFinite(state.total) && state.total > 0) return; // já sabemos o total / already know total
+  if (fetchingTotal) return;
+  if (Number.isFinite(state.total) && state.total > 0) return;
 
-  fetchingTotal = true; // marca que está buscando / mark as fetching
+  fetchingTotal = true;
+
   try {
-    const meta = await window.FeedbackAPI.listMeta(state.plat, 1, 1, {
-      fast: 0, // fast:0 para total real
-      _bust: Date.now(), // bust cache
+    const meta = await NaomiFeedbackCardAPI.listMeta(state.plat, 1, 1, {
+      fast: 0,
+      _bust: Date.now(),
     });
 
     if (Number.isFinite(meta.total) && meta.total >= 0) {
       if (state.total == null || meta.total > state.total) {
-        state.total = meta.total; // atualiza total se maior / update total if bigger
-        const shown = els.list.querySelectorAll('li:not([data-luma-loading="1"])').length; // itens mostrados / shown items
+        state.total = meta.total;
+
+        const shown = elements.list.querySelectorAll('li:not([data-luma-loading="1"])').length;
         if (shown > 0) {
-          updateHeader(shown, state.total, state.hasMore); // atualiza header / update header
+          updateHeader(shown, state.total, state.hasMore);
         }
       }
     }
-  } catch (e) {
-    // falha ao buscar total — ignora / failed to fetch total — ignore
-    console.warn('Não foi possível buscar o total real de avaliações.', e);
+  } catch {
+    // PT: Falha ao buscar total real não deve quebrar o modal.
+    // EN: Failing to fetch the real total should not break the modal.
   } finally {
-    fetchingTotal = false; // marca que terminou de buscar / mark as not fetching
+    fetchingTotal = false;
   }
 }
 
-// ==========================
-// 5) ABRIR / FECHAR MODAL
-// ==========================
-
-export function open(plat) {
-  // inicializa se ainda não foi (passa root para bindElements)
-  if (!initialized) ListModal(document);
-
-  // reset de estado // reset state
-
-  state.plat = plat || 'scs'; // plataforma
-  state.page = 1; // página 1
-  state.hasMore = false; // sem mais páginas
-  state.total = undefined; // total desconhecido
-  state.limit = getDefaultLimit(); // itens por página baseado na tela
-
-  // header + limpar UI
-  els.titulo.textContent = DaraListHelpers.getPlatformLabel(state.plat);
-
-  // Loading inicial
-  els.sub.innerHTML = LumaLoading.spinnerHTML('Loading evaluations...');
-
-  // ✅ Placeholder de loading na lista (marcado para remoção no 1º payload)
-  els.list.innerHTML = `<li data-luma-loading="1" class="py-12 flex justify-center">
-  ${LumaLoading.spinnerHTML('Loading...')} </li>`;
-
-  els.info.textContent = '—';
-
-  // botão "ver na plataforma"
-  const link = DaraListHelpers.getPlatformLink(state.plat); // link da plataforma
-  if (state.plat === 'scs' || !link) {
-    els.btnPlat?.classList.add('hidden', 'opacity-0', 'pointer-events-none');
-    els.btnPlat?.removeAttribute('href');
-  } else {
-    els.btnPlat?.classList.remove('hidden', 'opacity-0', 'pointer-events-none');
-    if (els.btnPlat) els.btnPlat.href = link;
+/* -----------------------------------------------------------------------------*/
+// Modal Open
+//
+// PT: Abre o modal e inicia a primeira carga.
+// EN: Opens the modal and starts the first load.
+/* -----------------------------------------------------------------------------*/
+function open(platform) {
+  if (!initialized) {
+    ListModal(document);
   }
 
-  // abrir Modal
-  els.modal.classList.remove('hidden'); // mostra modal
-  els.modal.classList.add('flex'); // mostra modal
-  // 🔒 TRAVA SCROLL (Latch)
-  LatchRootScroll.lockScroll();
-  console.log('[Mira List] open()', { plat: state.plat });
+  state.plat = platform || 'scs';
+  state.page = 1;
+  state.hasMore = false;
+  state.total = undefined;
+  state.limit = getDefaultLimit();
 
-  // 🎞️ Motion (Vela)
-  if (els.modal && els.panel) {
+  elements.titulo.textContent = DaraListHelpers.getPlatformLabel(state.plat);
+  elements.sub.innerHTML = LumaLoading.spinnerHTML('Carregando avaliações...');
+  elements.list.innerHTML = `<li data-luma-loading="1" class="py-12 flex justify-center">
+    ${LumaLoading.spinnerHTML('Carregando...')}
+  </li>`;
+  elements.info.textContent = '—';
+
+  const platformLink = DaraListHelpers.getPlatformLink(state.plat);
+
+  if (state.plat === 'scs' || !platformLink) {
+    elements.btnPlat?.classList.add('hidden', 'opacity-0', 'pointer-events-none');
+    elements.btnPlat?.removeAttribute('href');
+  } else {
+    elements.btnPlat?.classList.remove('hidden', 'opacity-0', 'pointer-events-none');
+    if (elements.btnPlat) elements.btnPlat.href = platformLink;
+  }
+
+  elements.modal.classList.remove('hidden');
+  elements.modal.classList.add('flex');
+
+  LatchRootScroll.lockScroll();
+
+  if (elements.modal && elements.panel) {
     VelaModalMotion.openModalMotion({
-      rootEl: els.modal,
-      panelEl: els.panel,
+      rootEl: elements.modal,
+      panelEl: elements.panel,
     });
   }
 
-  // desativar "Carregar mais" até terminar 1ª carga
-  if (els.btnMore) {
-    els.btnMore.setAttribute('disabled', 'true'); // desativa
-    els.btnMore.classList.add('opacity-50', 'cursor-not-allowed'); // estilo desativado
+  if (elements.btnMore) {
+    elements.btnMore.setAttribute('disabled', 'true');
+    elements.btnMore.classList.add('opacity-50', 'cursor-not-allowed');
   }
 
-  // carregar 1ª página com tratamento de erro/retry
-  load(true).catch(async (err) => {
-    console.warn('Erro ao carregar inicial:', err);
-    if (DaraListHelpers.isTimeoutError(err)) {
-      els.sub.textContent = '⏳ Servidor lento, tentando novamente...';
-      await new Promise((r) => setTimeout(r, 2000));
+  load(true).catch(async (error) => {
+    if (DaraListHelpers.isTimeoutError(error)) {
+      elements.sub.textContent = '⏳ Servidor lento, tentando novamente...';
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+
       try {
         await load(true);
-        console.info('Retry Ok após timeOut inicial');
         return;
-      } catch (e2) {
-        console.warn('Retry falhou:', e2);
-        els.sub.textContent = '⚠️ Servidor ainda não respondeu. Tente novamente em instantes.';
+      } catch (retryError) {
+        elements.sub.textContent = '⚠️ Servidor ainda não respondeu. Tente novamente em instantes.';
       }
     } else {
-      els.sub.textContent = '⚠️ Falha ao carregar. Tente novamente.';
+      elements.sub.textContent = '⚠️ Falha ao carregar. Tente novamente.';
     }
 
-    // fallback visual
-    els.list.appendChild(renderEmpty(state.plat));
+    elements.list.appendChild(renderEmpty(state.plat));
 
-    // liberar botão para usuário tentar manualmente
-    if (els.btnMore) {
-      els.btnMore.removeAttribute('disabled');
-      els.btnMore.classList.remove('opacity-50', 'cursor-not-allowed');
+    if (elements.btnMore) {
+      elements.btnMore.removeAttribute('disabled');
+      elements.btnMore.classList.remove('opacity-50', 'cursor-not-allowed');
     }
   });
 
-  // busca total real em paralelo
   searchTotalIfNecessary();
 }
 
-let isClosing = false; // flag para evitar múltiplos closes
+let isClosing = false;
 
-export async function close() {
-  if (isClosing) return; // já está fechando
+/* -----------------------------------------------------------------------------*/
+// Modal Close
+//
+// PT: Fecha o modal com animação e libera o scroll.
+// EN: Closes the modal with motion and unlocks scroll.
+/* -----------------------------------------------------------------------------*/
+async function close() {
+  if (isClosing) return;
   isClosing = true;
 
-  // 🎞️ Motion (Vela) — fecha primeiro, esconde depois
-  if (els.modal && els.panel) {
+  if (elements.modal && elements.panel) {
     await VelaModalMotion.closeModalMotion({
-      rootEl: els.modal,
-      panelEl: els.panel,
+      rootEl: elements.modal,
+      panelEl: elements.panel,
     });
   }
 
-  if (els?.modal) {
-    els.modal.classList.add('hidden');
-    els.modal.classList.remove('flex');
+  if (elements?.modal) {
+    elements.modal.classList.add('hidden');
+    elements.modal.classList.remove('flex');
   }
 
-  // 🔓 LIBERA SCROLL (Latch)
   LatchRootScroll.unlockScroll();
 
-  els.list.innerHTML = '';
+  if (elements?.list) {
+    elements.list.innerHTML = '';
+  }
 
-  isClosing = false; // reset flag para permitir reabrir
+  isClosing = false;
 }
 
-// ==========================
-// 6) PAGINAÇÃO (CARREGAR MAIS)
-// ==========================
-
+/* -----------------------------------------------------------------------------*/
+// Page Loader
+//
+// PT: Carrega a página atual da lista.
+// EN: Loads the current list page.
+/* -----------------------------------------------------------------------------*/
 async function load(first = false) {
   if (state.loading) return;
   state.loading = true;
 
-  // ✅ Luma no botão só no "Carregar mais"
-  if (!first && els?.btnMore) {
-    LumaLoading.setButtonLoading(els.btnMore, true, 'Loading more...');
-    await LumaLoading.ensurePaint(); // garante que o loading aparece
+  if (!first && elements?.btnMore) {
+    LumaLoading.setButtonLoading(elements.btnMore, true, 'Carregando...');
+    await LumaLoading.ensurePaint();
   }
 
   try {
     if (first) {
-      els.sub.innerHTML = LumaLoading.spinnerHTML('Loading evaluations...');
-      await LumaLoading.ensurePaint(); // ✅ PT: garante que o loading aparece | EN: ensures loading appears
+      elements.sub.innerHTML = LumaLoading.spinnerHTML('Carregando avaliações...');
+      await LumaLoading.ensurePaint();
     }
 
-    const bust = Date.now();
+    const cacheBust = Date.now();
 
     const {
       items = [],
       hasMore = false,
       total,
-    } = await window.FeedbackAPI.listMeta(state.plat, state.page, state.limit, {
+    } = await NaomiFeedbackCardAPI.listMeta(state.plat, state.page, state.limit, {
       fast: 1,
-      _bust: bust,
+      _bust: cacheBust,
     });
 
-    console.log('[MIRA LIST] payload listMeta:', { items, first: items?.[0] });
-
-    // ✅ remove body placeholder loading (prevents "6 items" and stuck loading)
-    const liLoading = els.list.querySelector('li[data-luma-loading="1"]');
-    if (liLoading) liLoading.remove();
+    const loadingItemElement = elements.list.querySelector('li[data-luma-loading="1"]');
+    if (loadingItemElement) {
+      loadingItemElement.remove();
+    }
 
     if (first && items.length === 0) {
-      els.sub.textContent = 'No reviews yet.'; // subtítulo
-      els.list.appendChild(renderEmpty(state.plat)); // render vazio
-      state.hasMore = false; // sem mais páginas
+      elements.sub.textContent = 'Ainda não há avaliações.';
+      elements.list.appendChild(renderEmpty(state.plat));
+      state.hasMore = false;
     } else {
-      const frag = document.createDocumentFragment(); // fragmento p/ otimizar
-      items.forEach((it) => frag.appendChild(renderItem(it))); // renderiza itens
-      els.list.appendChild(frag); // adiciona fragmento à lista
+      const fragment = document.createDocumentFragment();
+      items.forEach((item) => fragment.appendChild(renderItem(item)));
+      elements.list.appendChild(fragment);
 
-      // ✅ update total only when API provides it (never sum)
       if (Number.isFinite(total) && total >= 0) {
         if (state.total == null || total > state.total) {
-          state.total = total; // atualiza total se maior / update total if bigger
+          state.total = total;
         }
       }
 
-      const shown = els.list.querySelectorAll('li:not([data-luma-loading="1"])').length; // itens mostrados
-      state.hasMore = hasMore; // atualiza hasMore
-      // ✅ prevent undefined in header
+      const shown = elements.list.querySelectorAll('li:not([data-luma-loading="1"])').length;
+      state.hasMore = hasMore;
+
       const totalSafe = Number.isFinite(state.total) ? state.total : shown;
-      updateHeader(shown, totalSafe, state.hasMore); // atualiza header
+      updateHeader(shown, totalSafe, state.hasMore);
 
       if (state.hasMore) {
-        els.btnMore?.removeAttribute('disabled'); // ativa botão
-        els.btnMore?.classList.remove('opacity-50', 'cursor-not-allowed'); // estilo ativo
+        elements.btnMore?.removeAttribute('disabled');
+        elements.btnMore?.classList.remove('opacity-50', 'cursor-not-allowed');
       } else {
-        els.btnMore?.setAttribute('disabled', 'true'); // desativa botão
-        els.btnMore?.classList.add('opacity-50', 'cursor-not-allowed'); // estilo desativado
+        elements.btnMore?.setAttribute('disabled', 'true');
+        elements.btnMore?.classList.add('opacity-50', 'cursor-not-allowed');
       }
 
-      state.page += 1; // próxima página
+      state.page += 1;
 
-      // keep your parallel full total fetch (fast:0) if needed
+      // PT: Fallback extra para garantir o total caso o paralelo não resolva.
+      // EN: Extra fallback to ensure total if parallel fetch does not resolve.
       if (first && (state.total == null || state.total === 0)) {
-        window.FeedbackAPI.listMeta(state.plat, 1, 1, {
+        NaomiFeedbackCardAPI.listMeta(state.plat, 1, 1, {
           fast: 0,
           _bust: Date.now(),
         })
-          .then(({ total: t }) => {
-            if (Number.isFinite(t) && t > 0 && (state.total == null || t > state.total)) {
-              state.total = t;
-              const shownNow = els.list.childElementCount;
+          .then(({ total: realTotal }) => {
+            if (
+              Number.isFinite(realTotal) &&
+              realTotal > 0 &&
+              (state.total == null || realTotal > state.total)
+            ) {
+              state.total = realTotal;
+              const shownNow = elements.list.childElementCount;
               updateHeader(shownNow, state.total, state.hasMore);
             }
           })
           .catch(() => {
-            /* falha ao buscar total — ignora */
+            // PT: Falha ao buscar total em paralelo é ignorada.
+            // EN: Parallel total fetch failure is ignored.
           });
       }
     }
-  } catch (err) {
-    console.error(err); // log do erro
-
-    if (DaraListHelpers.isTimeoutError(err)) {
-      els.sub.textContent = '⏳ Servidor lento. Tente novamente.';
+  } catch (error) {
+    if (DaraListHelpers.isTimeoutError(error)) {
+      elements.sub.textContent = '⏳ Servidor lento. Tente novamente.';
     } else {
-      els.sub.textContent = '⚠️ Falha ao carregar. Clique em "Tentar novamente".';
+      elements.sub.textContent = '⚠️ Falha ao carregar. Clique em "Tentar novamente".';
     }
 
-    // ✅ remove placeholder even on error, so it won't stay stuck
-    const liLoading = els.list.querySelector('li[data-luma-loading="1"]');
-    if (liLoading) liLoading.remove();
+    const loadingItemElement = elements.list.querySelector('li[data-luma-loading="1"]');
+    if (loadingItemElement) {
+      loadingItemElement.remove();
+    }
 
     if (first) {
-      els.list.appendChild(renderEmpty(state.plat));
+      elements.list.appendChild(renderEmpty(state.plat));
     }
 
-    if (els.btnMore) {
-      els.btnMore.disabled = false; // ativa botão
-      els.btnMore.classList.remove('opacity-50', 'cursor-not-allowed'); // estilo ativo
+    if (elements.btnMore) {
+      elements.btnMore.disabled = false;
+      elements.btnMore.classList.remove('opacity-50', 'cursor-not-allowed');
     }
   } finally {
-    // ✅ sempre desfaz o loading do botão no final (se não for 1ª carga)
-    if (!first && els?.btnMore) {
-      LumaLoading.setButtonLoading(els.btnMore, false);
+    if (!first && elements?.btnMore) {
+      LumaLoading.setButtonLoading(elements.btnMore, false);
     }
+
     state.loading = false;
   }
 }
 
-// ==========================
-// 7) INIT (SEM AUTOEXEC)
-// ==========================
-
-let initialized = false; // flag para init único
+/* -----------------------------------------------------------------------------*/
+// Init
+//
+// PT: Inicializa a Mira sem autoexec.
+// EN: Initializes Mira without autoexec.
+/* -----------------------------------------------------------------------------*/
+let initialized = false;
 
 function ListModal(root = document) {
-  if (initialized) return; // já inicializado
+  if (initialized) return;
   initialized = true;
 
-  bindElements(root); // vincula refs de DOM
+  bindElements(root);
 
-  // Delegação para abrir o modal via [data-action="ver-mais"]
-  root.addEventListener('click', (e) => {
-    const trigger = e.target?.closest?.('[data-action="ver-mais"]');
+  if (!elements?.modal || !elements?.list) {
+    initialized = false;
+    return;
+  }
 
-    if (!trigger) return; // não é o alvo
-    e.preventDefault();
+  root.addEventListener('click', (event) => {
+    const triggerElement = event.target?.closest?.('[data-action="ver-mais"]');
+    if (!triggerElement) return;
 
-    const plat =
-      trigger.dataset.platform ||
-      trigger.dataset.plat ||
-      trigger.getAttribute('data-platform') ||
-      trigger.getAttribute('data-plat') ||
+    event.preventDefault();
+
+    const platform =
+      triggerElement.dataset.platform ||
+      triggerElement.dataset.plat ||
+      triggerElement.getAttribute('data-platform') ||
+      triggerElement.getAttribute('data-plat') ||
       'scs';
 
-    open(plat);
+    open(platform);
   });
 
-  els.btnClose?.addEventListener('click', (e) => {
-    e.stopPropagation();
+  elements.btnClose?.addEventListener('click', (event) => {
+    event.stopPropagation();
     close();
   });
 
-  els.modal?.addEventListener('click', (e) => {
-    if (e.target === els.modal) close();
-  });
-
-  window.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && !els.modal.classList.contains('hidden')) {
+  elements.modal?.addEventListener('click', (event) => {
+    if (event.target === elements.modal) {
       close();
     }
   });
 
-  // Paginar
-  els.btnMore?.addEventListener('click', () => load(false));
+  window.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && elements?.modal && !elements.modal.classList.contains('hidden')) {
+      close();
+    }
+  });
+
+  elements.btnMore?.addEventListener('click', () => load(false));
 }
 
-// ==========================
-// 8) EXPORT PADRÃO (PERSONA)
-// ==========================
+/* -----------------------------------------------------------------------------*/
+// Export
+/* -----------------------------------------------------------------------------*/
 export const MiraListUI = {
   ListModal,
   open,
   close,
-
-  // opcional p/ debug
-  _state: state,
+  state: state,
 };

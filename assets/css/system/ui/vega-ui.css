@@ -65,11 +65,10 @@ html {
 }
 
 /* Evita que âncoras fiquem sob o header fixo */
-section[id],
-header[id],
-footer[id] {
-  scroll-margin-top: 88px;
-}
+
+/* [id] {
+  scroll-margin-top: 80px;
+} */
 
 /* Evita rolagem lateral no mobile */
 html,

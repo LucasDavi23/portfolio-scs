@@ -1,99 +1,123 @@
-// ==================================================
+/* -----------------------------------------------------------------------------*/
 // ⭐ Ayla — Form Rating UI Specialist
 //
-// Nível: Aprendiz
-//
-// File: ayla-rating-stars-ui.js
+// Nível / Level: Aprendiz / Junior
 //
 // PT: Controla a interface de avaliação por estrelas
 //     dentro do formulário de feedback.
-//     Ayla é responsável apenas pela interação visual:
+//     É responsável apenas pela interação visual:
 //     clique, toggle das estrelas, sincronização com
 //     input oculto, badge de status e reset visual.
-//     Ela não calcula o valor final, não emite eventos
+//     Não calcula regras de domínio, não emite eventos
 //     e não executa envio — UI apenas.
 //
 // EN: Controls the star-based rating interface
 //     inside the feedback form.
-//     Ayla is responsible only for visual interaction:
+//     Responsible only for visual interaction:
 //     click handling, star toggling, hidden input
 //     synchronization, status badge and visual reset.
-//     She does not calculate the final value, does not
-//     emit events, and does not submit data — UI only.
-// ==================================================
+//     Does not calculate domain rules, emit events,
+//     or submit data — UI only.
+/* -----------------------------------------------------------------------------*/
 
-// ------------------------------
-// Internal state (module scope)
-// ------------------------------
-let groupEl = null;
-let radioEls = [];
-let labelEls = [];
-let hiddenInputEl = null;
-let badgeEl = null;
+/* -----------------------------------------------------------------------------*/
+// Imports
+/* -----------------------------------------------------------------------------*/
+// (nenhum necessário / none needed)
+
+/* -----------------------------------------------------------------------------*/
+// Helpers
+//
+// PT: Estado interno e funções auxiliares da UI de estrelas.
+// EN: Internal state and helper functions for stars UI.
+/* -----------------------------------------------------------------------------*/
+
+let groupElement = null;
+let radioElements = [];
+let labelElements = [];
+let hiddenInputElement = null;
+let badgeElement = null;
 
 let isAttached = false;
 
-// Keep references to handlers so we can remove them on unmount
 let labelClickHandlers = [];
 let radioChangeHandlers = [];
 
-// ------------------------------
-// Internal helpers (UI only)
-// ------------------------------
-
+// PT: Pinta as estrelas ativas conforme a quantidade selecionada.
+// EN: Paints active stars according to the selected quantity.
 function paintStars(quantity) {
-  // PT: Mantém a classe original do projeto ("star--ativa")
-  // EN: Keeps the project's original class name ("star--ativa")
-  labelEls.forEach((label, index) => {
-    label.classList.toggle('star--ativa', index < quantity);
+  labelElements.forEach((labelElement, index) => {
+    labelElement.classList.toggle('star--ativa', index < quantity);
   });
 }
 
+// PT: Atualiza o badge com o valor atual da avaliação.
+// EN: Updates the badge with the current rating value.
 function updateBadge(quantity) {
-  if (!badgeEl) return;
+  if (!badgeElement) {
+    return;
+  }
 
   if (quantity > 0) {
-    badgeEl.textContent = `${quantity}/5`;
-    badgeEl.classList.remove('hidden');
+    badgeElement.textContent = `${quantity}/5`;
+    badgeElement.classList.remove('hidden');
   } else {
-    badgeEl.classList.add('hidden');
+    badgeElement.classList.add('hidden');
   }
 }
 
+// PT: Lê o valor atual da avaliação no input oculto.
+// EN: Reads the current rating value from the hidden input.
 function getCurrentRatingValue() {
-  return parseInt(hiddenInputEl?.value || '0', 10) || 0;
+  return parseInt(hiddenInputElement?.value || '0', 10) || 0;
 }
 
+// PT: Aplica o valor da avaliação e sincroniza radios, estrelas e badge.
+// EN: Applies the rating value and syncs radios, stars and badge.
 function applyRatingValue(quantity) {
-  const normalized = Number(quantity) || 0;
+  const normalizedValue = Number(quantity) || 0;
 
-  const radio = radioEls.find((r) => parseInt(r.value, 10) === normalized);
+  const selectedRadio = radioElements.find((radioElement) => {
+    return parseInt(radioElement.value, 10) === normalizedValue;
+  });
 
-  if (radio) radio.checked = true;
-  if (hiddenInputEl) hiddenInputEl.value = String(normalized);
+  if (selectedRadio) {
+    selectedRadio.checked = true;
+  }
 
-  paintStars(normalized);
-  updateBadge(normalized);
+  if (hiddenInputElement) {
+    hiddenInputElement.value = String(normalizedValue);
+  }
+
+  paintStars(normalizedValue);
+  updateBadge(normalizedValue);
 }
 
+// PT: Limpa completamente a avaliação visual e o input oculto.
+// EN: Fully clears the visual rating and the hidden input.
 function clearRatingValue() {
-  radioEls.forEach((radio) => (radio.checked = false));
-  if (hiddenInputEl) hiddenInputEl.value = '';
+  radioElements.forEach((radioElement) => {
+    radioElement.checked = false;
+  });
+
+  if (hiddenInputElement) {
+    hiddenInputElement.value = '';
+  }
 
   paintStars(0);
   updateBadge(0);
 }
 
-// ------------------------------
-// Public API (Ayla)
-// ------------------------------
+/* -----------------------------------------------------------------------------*/
+// Public API
+/* -----------------------------------------------------------------------------*/
 
-/**
- * PT: Anexa a UI de estrelas (eventos + sync visual).
- * EN: Attaches the stars UI (events + visual sync).
- */
+// PT: Anexa a UI de estrelas ao formulário.
+// EN: Attaches the stars UI to the form.
 function attachStarsUI(options = {}) {
-  if (isAttached) return;
+  if (isAttached) {
+    return;
+  }
 
   const {
     groupId = 'rating-group',
@@ -102,87 +126,85 @@ function attachStarsUI(options = {}) {
     badgeId = 'rating-badge',
   } = options;
 
-  groupEl = document.getElementById(groupId);
-  if (!groupEl) return;
+  groupElement = document.getElementById(groupId);
 
-  radioEls = Array.from(document.querySelectorAll(`input[name="${radioName}"]`));
+  if (!groupElement) {
+    return;
+  }
 
-  // PT: Aceita label.star ou label normal (compat com HTML legado)
-  // EN: Accepts label.star or plain label (legacy HTML compatible)
-  labelEls = Array.from(groupEl.querySelectorAll('label.star, label'));
+  radioElements = Array.from(document.querySelectorAll(`input[name="${radioName}"]`));
 
-  hiddenInputEl = document.getElementById(hiddenInputId);
-  badgeEl = document.getElementById(badgeId);
+  labelElements = Array.from(groupElement.querySelectorAll('label.star, label'));
 
-  // ------------------------------
-  // Bind events
-  // ------------------------------
+  hiddenInputElement = document.getElementById(hiddenInputId);
+  badgeElement = document.getElementById(badgeId);
 
-  labelClickHandlers = labelEls.map((label) => {
+  labelClickHandlers = labelElements.map((labelElement) => {
     const handler = (event) => {
       event.preventDefault();
 
-      const forId = label.getAttribute('for');
-      const radio = forId ? document.getElementById(forId) : null;
+      const forId = labelElement.getAttribute('for');
+      const relatedRadio = forId ? document.getElementById(forId) : null;
 
-      const clickedValue = radio ? parseInt(radio.value, 10) : 0;
+      const clickedValue = relatedRadio ? parseInt(relatedRadio.value, 10) : 0;
+
       const currentValue = getCurrentRatingValue();
 
       if (clickedValue === currentValue) {
-        clearRatingValue(); // toggle off (same star clicked)
+        clearRatingValue();
       } else {
         applyRatingValue(clickedValue);
       }
     };
 
-    label.addEventListener('click', handler);
+    labelElement.addEventListener('click', handler);
     return handler;
   });
 
-  radioChangeHandlers = radioEls.map((radio) => {
+  radioChangeHandlers = radioElements.map((radioElement) => {
     const handler = () => {
-      applyRatingValue(parseInt(radio.value, 10));
+      applyRatingValue(parseInt(radioElement.value, 10));
     };
 
-    radio.addEventListener('change', handler);
+    radioElement.addEventListener('change', handler);
     return handler;
   });
 
-  // ------------------------------
-  // Initial state
-  // ------------------------------
-  const preChecked = radioEls.find((r) => r.checked);
-  applyRatingValue(preChecked ? parseInt(preChecked.value, 10) : 0);
+  const preCheckedRadio = radioElements.find((radioElement) => radioElement.checked);
+
+  applyRatingValue(preCheckedRadio ? parseInt(preCheckedRadio.value, 10) : 0);
 
   isAttached = true;
 }
 
-/**
- * PT: Remove listeners e limpa refs (detach seguro).
- * EN: Removes listeners and clears refs (safe detach).
- */
-
+// PT: Remove listeners e limpa as referências internas.
+// EN: Removes listeners and clears internal references.
 function detachStarsUI() {
-  if (!isAttached) return;
+  if (!isAttached) {
+    return;
+  }
 
-  // Remove label listeners
-  labelEls.forEach((label, index) => {
+  labelElements.forEach((labelElement, index) => {
     const handler = labelClickHandlers[index];
-    if (handler) label.removeEventListener('click', handler);
+
+    if (handler) {
+      labelElement.removeEventListener('click', handler);
+    }
   });
 
-  // Remove radio listeners
-  radioEls.forEach((radio, index) => {
+  radioElements.forEach((radioElement, index) => {
     const handler = radioChangeHandlers[index];
-    if (handler) radio.removeEventListener('change', handler);
+
+    if (handler) {
+      radioElement.removeEventListener('change', handler);
+    }
   });
 
-  // Reset internal references
-  groupEl = null;
-  radioEls = [];
-  labelEls = [];
-  hiddenInputEl = null;
-  badgeEl = null;
+  groupElement = null;
+  radioElements = [];
+  labelElements = [];
+  hiddenInputElement = null;
+  badgeElement = null;
 
   labelClickHandlers = [];
   radioChangeHandlers = [];
@@ -190,37 +212,28 @@ function detachStarsUI() {
   isAttached = false;
 }
 
-/**
- * PT: Define o valor das estrelas e sincroniza UI/hidden input.
- * EN: Sets the stars value and syncs UI/hidden input.
- */
-
+// PT: Define o valor da avaliação e sincroniza a UI.
+// EN: Sets the rating value and syncs the UI.
 function setStarsValue(value) {
   applyRatingValue(value);
 }
 
-/**
- * PT: Retorna o valor atual (lido do hidden input).
- * EN: Returns current value (read from hidden input).
- */
-
+// PT: Retorna o valor atual da avaliação.
+// EN: Returns the current rating value.
 function getStarsValue() {
   return getCurrentRatingValue();
 }
 
-/**
- * PT: Limpa a seleção (UI + hidden input).
- * EN: Clears selection (UI + hidden input).
- */
+// PT: Limpa a avaliação selecionada.
+// EN: Clears the selected rating.
 function clearStarsUI() {
   clearRatingValue();
 }
 
-// ------------------------------
-// Export pattern (project standard)
-// PT: Ordem "mais fácil" de ler/usar (montar → usar → limpar → desmontar)
-// EN: "Easiest" order to read/use (mount → use → clear → unmount)
-// ------------------------------
+/* -----------------------------------------------------------------------------*/
+// Export
+/* -----------------------------------------------------------------------------*/
+
 export const AylaRatingStarsUI = {
   attachStarsUI,
   setStarsValue,

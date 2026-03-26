@@ -1,25 +1,31 @@
 // 🪨 Onyx — Tap Guard
 //
-// Nível: Jovem
+// Nível / Level: Jovem / Young
 //
-// PT: Especialista em gestos de toque.
-//     Onyx detecta TAP real e ignora DRAG/SCROLL no mobile.
-//     Ele também bloqueia o “ghost click” que alguns navegadores
-//     disparam depois de um arrasto.
-//
-// EN: Touch gesture specialist.
-//     Onyx detects real TAP and ignores DRAG/SCROLL on mobile.
-//     It also blocks “ghost clicks” some browsers fire after a drag.
-// --------------------------------------------------
+// PT: Valida toques reais e bloqueia ghost clicks.
+// EN: Validates real taps and blocks ghost clicks.
 
-export function createTapGuard({
-  movementThresholdPixels = 10, // PT: px para virar drag | EN: px to become drag
-  maximumTapDurationMs = 350, // PT: ms máximo para tap | EN: max ms for tap
-  ghostClickBlockDurationMs = 450, // PT: janela anti-ghost | EN: anti-ghost window
+/* -----------------------------------------------------------------------------*/
+// Tap Guard Factory
+//
+// PT: Cria um guardião de toque com regras de TAP e DRAG.
+// EN: Creates a touch guard with TAP and DRAG rules.
+/* -----------------------------------------------------------------------------*/
+
+// PT: Cria a instância do tap guard.
+// EN: Creates the tap guard instance.
+function createTapGuard({
+  movementThresholdPixels = 10,
+  maximumTapDurationMs = 350,
+  ghostClickBlockDurationMs = 450,
 } = {}) {
-  // ------------------------------
-  // Internal state (Onyx)
-  // ------------------------------
+  /* -----------------------------------------------------------------------------*/
+  // State
+  //
+  // PT: Estado interno do gesto.
+  // EN: Internal gesture state.
+  /* -----------------------------------------------------------------------------*/
+
   let activePointerId = null;
 
   let startClientX = 0;
@@ -29,10 +35,21 @@ export function createTapGuard({
   let movedBeyondThreshold = false;
   let ghostClickBlockedUntilMs = 0;
 
+  /* -----------------------------------------------------------------------------*/
+  // Helpers
+  //
+  // PT: Funções auxiliares do controle de toque.
+  // EN: Helper functions for touch control.
+  /* -----------------------------------------------------------------------------*/
+
+  // PT: Retorna o tempo atual em milissegundos.
+  // EN: Returns current time in milliseconds.
   function nowMs() {
     return Date.now();
   }
 
+  // PT: Limpa o rastreio atual.
+  // EN: Resets current tracking.
   function resetTracking() {
     activePointerId = null;
     startClientX = 0;
@@ -41,17 +58,24 @@ export function createTapGuard({
     movedBeyondThreshold = false;
   }
 
+  // PT: Verifica se o bloqueio anti-ghost está ativo.
+  // EN: Checks whether anti-ghost blocking is active.
   function isBlockedNow() {
     return nowMs() < ghostClickBlockedUntilMs;
   }
 
-  /**
-   * PT: Inicia o rastreio no pointerdown.
-   * EN: Starts tracking on pointerdown.
-   */
+  /* -----------------------------------------------------------------------------*/
+  // Gesture Actions
+  //
+  // PT: Controla o ciclo do gesto de toque.
+  // EN: Controls the touch gesture lifecycle.
+  /* -----------------------------------------------------------------------------*/
+
+  // PT: Inicia o rastreio no pointerdown.
+  // EN: Starts tracking on pointerdown.
   function capturePointerDown(pointerEvent, elementToCapture = null) {
-    // PT: ignora o click direito do mouse
-    // EN: ignore right mouse click
+    // PT: Ignora clique direito do mouse.
+    // EN: Ignores right mouse click.
     if (pointerEvent.pointerType === 'mouse' && pointerEvent.button !== 0) {
       return false;
     }
@@ -62,8 +86,8 @@ export function createTapGuard({
     startTimestampMs = nowMs();
     movedBeyondThreshold = false;
 
-    // PT: captura o ponteiro para este elemento (opcional)
-    // EN: capture pointer to this element (optional)
+    // PT: Captura o ponteiro no elemento, se suportado.
+    // EN: Captures the pointer on the element if supported.
     if (elementToCapture && elementToCapture.setPointerCapture) {
       try {
         elementToCapture.setPointerCapture(activePointerId);
@@ -73,10 +97,8 @@ export function createTapGuard({
     return true;
   }
 
-  /**
-   * PT: Marca como “drag” quando passou do limite.
-   * EN: Marks as “drag” when it passes the threshold.
-   */
+  // PT: Marca como drag ao ultrapassar o limite.
+  // EN: Marks as drag after crossing the threshold.
   function trackPointerMove(pointerEvent) {
     if (activePointerId == null) return;
     if (pointerEvent.pointerId !== activePointerId) return;
@@ -87,16 +109,14 @@ export function createTapGuard({
     if (deltaX > movementThresholdPixels || deltaY > movementThresholdPixels) {
       movedBeyondThreshold = true;
 
-      // PT: após drag, bloqueia ghost click por uma janela curta
-      // EN: after drag, block ghost clicks for a short window
+      // PT: Após drag, bloqueia ghost click por um curto período.
+      // EN: After drag, blocks ghost click for a short period.
       ghostClickBlockedUntilMs = nowMs() + ghostClickBlockDurationMs;
     }
   }
 
-  /**
-   * PT: Avalia no pointerup se foi TAP real.
-   * EN: Evaluates on pointerup if it was a real TAP.
-   */
+  // PT: Avalia no pointerup se foi um TAP válido.
+  // EN: Evaluates on pointerup whether it was a valid TAP.
   function evaluatePointerUp(pointerEvent) {
     if (activePointerId == null) {
       return { ok: false, reason: 'no_pointer' };
@@ -108,8 +128,8 @@ export function createTapGuard({
 
     const durationMs = nowMs() - startTimestampMs;
 
-    // PT: reset cedo para evitar duplo disparo
-    // EN: early reset to avoid double firing
+    // PT: Limpa cedo para evitar disparo duplicado.
+    // EN: Resets early to avoid duplicate firing.
     resetTracking();
 
     if (movedBeyondThreshold) {
@@ -127,10 +147,8 @@ export function createTapGuard({
     return { ok: true, reason: 'tap' };
   }
 
-  /**
-   * PT: Bloqueia click fantasma no listener de click (capture=true).
-   * EN: Blocks ghost click in a click listener (capture=true).
-   */
+  // PT: Bloqueia ghost click no listener de click.
+  // EN: Blocks ghost click in the click listener.
   function blockGhostClick(clickEvent) {
     if (!isBlockedNow()) return false;
 
@@ -139,13 +157,18 @@ export function createTapGuard({
     return true;
   }
 
-  /**
-   * PT: expõe o estado do bloqueio.
-   * EN: exposes the block state.
-   */
+  // PT: Expõe o estado atual do bloqueio.
+  // EN: Exposes current block state.
   function isGhostClickBlocked() {
     return isBlockedNow();
   }
+
+  /* -----------------------------------------------------------------------------*/
+  // Return API
+  //
+  // PT: Retorna a API pública do tap guard.
+  // EN: Returns the public tap guard API.
+  /* -----------------------------------------------------------------------------*/
 
   return {
     capturePointerDown,
@@ -155,6 +178,10 @@ export function createTapGuard({
     isGhostClickBlocked,
   };
 }
+
+/* -----------------------------------------------------------------------------*/
+// Export
+/* -----------------------------------------------------------------------------*/
 
 export const OnyxTapGuard = {
   createTapGuard,

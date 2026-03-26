@@ -1,26 +1,31 @@
-<!-- ===================================================== -->
-<!-- PARTIAL: LAYOUT / HEADER -->
-<!-- Foundation / partials/layout/header.html -->
-<!-- ===================================================== -->
+<!-- -------------------------------------------------- -->
+<!-- 📌 Header — Main Navigation -->
+<!-- PT: Partial do cabeçalho com navegação principal e menu mobile. -->
+<!-- EN: Header partial with main navigation and mobile menu. -->
+<!-- -------------------------------------------------- -->
 
 <header class="pattern">
-  <!-- NAV FIXA -->
+  <!-- Fixed Nav -->
   <nav class="fixed inset-x-0 top-0 z-50 shadow-sm shadow-black/20">
     <div class="relative isolate">
-      <!-- 🔹 Camada de fundo com blur (fica atrás do conteúdo) -->
+      <!-- -------------------------------------------------- -->
+      <!-- Background Layer -->
+      <!-- PT: Camada visual com blur e overlay da navegação. -->
+      <!-- EN: Navigation background with blur and overlay. -->
+      <!-- -------------------------------------------------- -->
       <div
         class="absolute inset-0 -z-10 bg-neutral-900/75 backdrop-blur-md backdrop-saturate-150 supports-[backdrop-filter]:bg-neutral-900/65 border-b border-white/10"
-      >
-        <!-- linha sutil -->
-      </div>
+      ></div>
 
       <div class="mx-auto max-w-screen-xl px-4 sm:px-6 lg:px-8 h-16">
         <div class="flex h-16 items-center justify-between">
+          <!-- -------------------------------------------------- -->
+          <!-- Logo -->
+          <!-- -------------------------------------------------- -->
           <div class="flex-1 md:flex md:items-center md:gap-12">
-            <!-- LOGO -->
             <a
-              href="#inicio"
-              aria-label="Início"
+              href="#home"
+              aria-label="Home"
               class="h-12 w-12 sm:h-14 sm:w-14 rounded-full bg-white shadow-md shadow-black/10 ring-1 ring-white/30 p-[3px] flex items-center justify-center"
             >
               <img
@@ -32,7 +37,9 @@
             </a>
           </div>
 
-          <!-- Botão hambúrguer (mostra no mobile) -->
+          <!-- -------------------------------------------------- -->
+          <!-- Mobile Menu Toggle -->
+          <!-- -------------------------------------------------- -->
           <div class="flex lg:hidden px-6">
             <button
               id="mobile-menu-toggle"
@@ -57,15 +64,21 @@
             </button>
           </div>
 
-        <!-- PARTIAL EN: nav/primary-nav / PT: Navegação principal (desktop) -->
-        {{> nav/primary-nav }}
+          <!-- -------------------------------------------------- -->
+          <!-- PARTIAL: nav/primary-nav -->
+          <!-- PT: Navegação principal (desktop) -->
+          <!-- EN: Primary navigation (desktop) -->
+          <!-- -------------------------------------------------- -->
+          {{> nav/primary-nav }}
 
-        <!-- PARTIAL EN: nav/mobile-nav / PT: Navegação mobile (hambúrguer) -->
+          <!-- -------------------------------------------------- -->
+          <!-- PARTIAL: nav/mobile-nav -->
+          <!-- PT: Navegação mobile (hambúrguer) -->
+          <!-- EN: Mobile navigation -->
+          <!-- -------------------------------------------------- -->
           {{> nav/mobile-nav }}
+        </div>
       </div>
     </div>
   </nav>
-
-  <!-- Espaçador para compensar a nav fixa (altura ~64px) -->
-  <!-- <div class="h-16"></div> -->
 </header>

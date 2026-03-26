@@ -1,256 +1,257 @@
 // /assets/js/feedback/leader/kendra-feedback-leader.js
-// 🛡️ Kendra — Líder do Setor de Feedback Board
+// 🛡️ Kendra — Feedback Board Leader
 //
-// Nível: Adulto / Adult
+// Nível / Level: Adulto / Adult
 //
-// PT: Kendra coordena o setor de Feedback board. Ela não lida com detalhes como
-//     thumbs, preload ou UI diretamente — isso é responsabilidade de Lia,
-//     Petra, Selah e Mira. Sua função é garantir que cada especialista
-//     execute seu papel no momento certo, mantendo o módulo estável,
-//     rápido e confiável.
+// PT: Kendra coordena o setor de Feedback Board. Ela não lida com detalhes
+//     de thumbs, preload ou UI diretamente — isso é responsabilidade de
+//     Lia, Petra, Selah, Mira, Abigail e Livia. Sua função é garantir que
+//     cada especialista execute seu papel no momento certo, mantendo o
+//     módulo estável, rápido e confiável.
 //
-// EN: Kendra coordinates the Feedback sector. She does not handle details
-//     like thumbs, preload or UI directly — that's the job of Lia, Petra,
-//     Selah and Mira. Her role is to ensure each specialist runs at the
-//     right time, keeping the module stable, fast and reliable.
-//
-// Observação da hierarquia:
-// - Morgana = Diretora Geral do Sistema
-// - Aurora  = Líder do Layout
-// - Kendra  = Líder do Setor de Feedback
-// - (Abaixo dela: Lia, Petra, Selah, Mira, Abigail, Athenais, Livia)
-/* ------------------------------------------------------------------*/
+// EN: Kendra coordinates the Feedback Board sector. She does not handle
+//     thumb, preload or UI details directly — that is the responsibility of
+//     Lia, Petra, Selah, Mira, Abigail and Livia. Her role is to ensure each
+//     specialist run at the right time, keeping the module stable, fast
+//     and reliable.
+/* -----------------------------------------------------------------------------*/
 
+/* -----------------------------------------------------------------------------*/
+// EndpointConfig — Feedback Endpoint Configuration
+// Fornece / Provides:
+// - set(url)
+// - get()
+// - isOffline()
+/* -----------------------------------------------------------------------------*/
+import { EndpointConfig } from '/assets/js/feedback/core/config/feedback-endpoint.js';
+
+/* -----------------------------------------------------------------------------*/
+// ImageEndpointConfig — Feedback Image Endpoint Configuration
+// Fornece / Provides:
+// - set(url)
+// - get()
+// - isOffline()
+/* -----------------------------------------------------------------------------*/
+import { ImageEndpointConfig } from '/assets/js/feedback/core/config/feedback-image-endpoint.js';
+
+/* -----------------------------------------------------------------------------*/
+// 🧬 Naomi — Card API Helpers
+// Fornece / Provides:
+// - list()
+// - listMeta()
+// - latest()
+// - setTimeoutMs()
+// - setRetries()
+// - setCacheTtl()
+/* -----------------------------------------------------------------------------*/
 import { NaomiFeedbackCardAPI } from '/assets/js/feedback/board/api/card/naomi-card-api-helpers.js';
 
-/* --------------------------------------------------
- * // 🌟 Abigaíl 
-  * PT: Controla a UI do resumo/summary do feedback.
-  * EN: Manages the feedback summary UI.
-  * Fornece / Provides:
-  *  - initSummaryUI()
-  -------------------------------------------------- */
-
+/* -----------------------------------------------------------------------------*/
+// 🌟 Abigail — Summary UI
+// Fornece / Provides:
+// - initSummaryUI()
+/* -----------------------------------------------------------------------------*/
 import { AbigailSummaryUI } from '/assets/js/feedback/board/summary/abigail-summary-ui.js';
 
-/* --------------------------------------------------
- * 🌷 Lívia — UI do Avatar
-  * PT: Responsável pela camada visual do avatar: criação do wrap, estilo e atualização das iniciais.
-  * EN: Handles the visual layer of the avatar: wrap creation, styling and initials updates.
-  * Fornece / Provides:
-  *   - initAvatar()
-  -------------------------------------------------- */
-
+/* -----------------------------------------------------------------------------*/
+// 🌷 Livia — Avatar UI
+// Fornece / Provides:
+// - initAvatar()
+/* -----------------------------------------------------------------------------*/
 import { LiviaAvatarUI } from '/assets/js/feedback/board/avatar/livia-avatar-ui.js';
 
-/* --------------------------------------------------
- * 🌱 Lia — Preload Helpers
- * PT: Responsável por pré-aquecer dados e manter cache.
- * EN: Handles warm-up and global feedback cache.
- * Fornece / Provides:
- *   - preloadFirstPageToCache()
- *   - warmOnce()
- *   - startWarmLoop()
- *   - ensureCache()
- -------------------------------------------------- */
+/* -----------------------------------------------------------------------------*/
+// 🌱 Lia — Board Preload Helpers
+// Fornece / Provides:
+// - preloadFirstPageToCache()
+// - warmOnce()
+// - startWarmLoop()
+// - ensureCache()
+/* -----------------------------------------------------------------------------*/
 import { LiaPreload } from '/assets/js/feedback/board/main/lia-board-preload-helpers.js';
 
-/* --------------------------------------------------
- * 🪨 Petra — Image UI Helpers
- * PT: Lida com thumbs, fallback e observação de imagem no Board.
- * EN: Manages thumbs, fallback and DOM observers for Board images.
- * Fornece / Provides:
- *   - initThumbSystem()
- *   - applyThumb()
- *   - scanThumbs()
- *   - observeThumbs()
- -------------------------------------------------- */
+/* -----------------------------------------------------------------------------*/
+// 🪨 Petra — Image UI
+// Fornece / Provides:
+// - initThumbSystem()
+// - applyThumb()
+// - scanThumbs()
+// - observeThumbs()
+/* -----------------------------------------------------------------------------*/
 import { PetraImageUI } from '/assets/js/feedback/board/image/petra-image-ui.js';
 
-/* --------------------------------------------------
- * 🌿 Selah — Board UI
- * PT: Controla renderização do mural/hero e cards iniciais.
- * EN: Controls the feedback board/hero and initial card rendering.
- * Fornece / Provides:
- *   - initBoard()
- -------------------------------------------------- */
+/* -----------------------------------------------------------------------------*/
+// 🌿 Selah — Board UI
+// Fornece / Provides:
+// - init()
+/* -----------------------------------------------------------------------------*/
 import { SelahBoardUI } from '/assets/js/feedback/board/main/selah-board-ui.js';
-/* --------------------------------------------------*/
 
-/* --------------------------------------------------
- * ✨ Mira — LIST Modal UI
- * PT: Controla o modal de lista completa de feedback.
- * EN: Manages the full feedback list modal.
- * Fornece / Provides:
- *   - initListModal()
- -------------------------------------------------- */
+/* -----------------------------------------------------------------------------*/
+// ✨ Mira — List Modal UI
+// Fornece / Provides:
+// - ListModal()
+/* -----------------------------------------------------------------------------*/
 import { MiraListUI } from '/assets/js/feedback/board/list/mira-list-ui.js';
-/* --------------------------------------------------*/
 
-// 1) Expõe a API no window (compat com código legado)
-if (!window.FeedbackCardAPI) {
-  window.FeedbackAPI = NaomiFeedbackCardAPI;
-}
+/* -----------------------------------------------------------------------------*/
+// 📘 Logger — System Observability Layer
+/* -----------------------------------------------------------------------------*/
+import { Logger } from '/assets/js/system/core/logger.js';
 
-/**
- * PT: Helper simples para rodar algo quando o DOM estiver pronto.
- * EN: Small helper to run a callback when DOM is ready.
- */
-function onDomReady(fn) {
+/* -----------------------------------------------------------------------------*/
+// DOM Ready Helper
+//
+// PT: Executa uma função quando o DOM estiver pronto.
+// EN: Runs a function when the DOM is ready.
+/* -----------------------------------------------------------------------------*/
+function onDomReady(callback) {
   if (document.readyState !== 'loading') {
-    fn();
-  } else {
-    document.addEventListener('DOMContentLoaded', fn, { once: true });
-  }
-}
-
-/**
- * PT: Inicializa o preload da Lia caso a FeedbackAPI esteja disponível.
- * EN: Initializes Lia's preload logic if FeedbackAPI is available.
- */
-function initLiaPreload() {
-  const api = window.FeedbackAPI;
-  if (!api || typeof api.list !== 'function') {
-    console.warn(
-      '[Kendra] FeedbackAPI não encontrada ou inválida — preload da Lia não será executado.'
-    );
+    callback();
     return;
   }
 
-  // PT: Pré-carrega a primeira página para cada plataforma.
-  // EN: Preload first page for each platform.
-  LiaPreload.preloadFirstPageToCache(api).catch((err) => {
-    console.warn('[Kendra] Erro ao fazer preload inicial com Lia:', err);
-  });
-
-  // PT: Opcional — iniciar o loop de reaquecimento, se você quiser.
-  // EN: Optional — start periodic warm loop if you want.
-  LiaPreload.warmOnce(api).catch((err) => {
-    console.warn('[Kendra] Erro ao executar warmOnce da Lia: ', err);
-  });
-  // Se um dia quiser usar o loop periódico:
-  // const stopWarmLoop = LiaPreload.startWarmLoop(api);
-  // window.FeedbackWarmLoopStop = stopWarmLoop; // opcional, para debug
+  document.addEventListener('DOMContentLoaded', callback, { once: true });
 }
 
-/**
- * PT: Abigaíl Controla a UI do resumo/summary do feedback.
- * EN: Abigail manages the feedback summary UI.
- */
+/* -----------------------------------------------------------------------------*/
+// Endpoint Bootstrap
+/* -----------------------------------------------------------------------------*/
+
+// PT: Resolve o endpoint de dados do Board para dev/prod.
+// EN: Resolves the Board data endpoint for dev/prod.
+function resolveBoardEndpoint() {
+  return import.meta.env.DEV
+    ? '/gas'
+    : 'https://script.google.com/macros/s/AKfycbzzCFgGmXhIDc7xlaJa_XpacGMu3GBn7d0kg2ntRgUrpuisnV__AjF_8pJGXgG6NaMP0A/exec';
+}
+
+// PT: Resolve o endpoint de imagem do Board para dev/prod.
+// EN: Resolves the Board image endpoint for dev/prod.
+function resolveBoardImageEndpoint() {
+  return import.meta.env.DEV
+    ? '/gas-img'
+    : 'https://script.google.com/macros/s/AKfycbzzCFgGmXhIDc7xlaJa_XpacGMu3GBn7d0kg2ntRgUrpuisnV__AjF_8pJGXgG6NaMP0A/exec';
+}
+
+// PT: Configura os endpoints do Board antes da inicialização.
+// EN: Configures the Board endpoints before initialization.
+function initBoardEndpoints() {
+  EndpointConfig.set(resolveBoardEndpoint());
+  ImageEndpointConfig.set(resolveBoardImageEndpoint());
+}
+
+/* -----------------------------------------------------------------------------*/
+// Sector Initializers
+/* -----------------------------------------------------------------------------*/
+
+/* -----------------------------------------------------------------------------*/
+// Lia Preload Initialization
+//
+// PT: Inicializa o preload da Lia usando a Naomi como fonte da API.
+// EN: Initializes Lia preload using Naomi as the API source.
+/* -----------------------------------------------------------------------------*/
+function initLiaPreload() {
+  const feedbackApi = NaomiFeedbackCardAPI;
+
+  if (!feedbackApi || typeof feedbackApi.list !== 'function') {
+    Logger.warn('Board', 'Kendra', 'NaomiFeedbackCardAPI unavailable, Lia preload skipped');
+    return;
+  }
+
+  LiaPreload.preloadFirstPageToCache(feedbackApi).catch((error) => {
+    Logger.warn('Board', 'Kendra', 'Lia preloadFirstPageToCache failed', error);
+  });
+
+  LiaPreload.warmOnce(feedbackApi).catch((error) => {
+    Logger.warn('Board', 'Kendra', 'Lia warmOnce failed', error);
+  });
+}
+
+// PT: Inicializa a UI de summary da Abigail.
+// EN: Initializes Abigail summary UI.
 function initAbigailSummary() {
   try {
     AbigailSummaryUI.initSummaryUI(document);
-  } catch (err) {
-    console.warn('[Kendra] Erro ao inicializar o resumo da Abigail:', err);
+  } catch (error) {
+    Logger.warn('Board', 'Kendra', 'Abigail summary initialization failed', error);
   }
 }
 
-/**
- * PT: Livia Responsável pela camada visual do avatar: criação do wrap, estilo e atualização das iniciais.
- * EN: Livia Handles the visual layer of the avatar: wrap creation, styling and initials updates.
- */
+// PT: Inicializa a UI de avatar da Livia.
+// EN: Initializes Livia avatar UI.
 function initLiviaAvatar() {
   try {
     LiviaAvatarUI.initAvatar(document);
-  } catch (err) {
-    console.warn('[Kendra] Erro ao inicializar o avatar da Livia:', err);
+  } catch (error) {
+    Logger.warn('Board', 'Kendra', 'Livia avatar initialization failed', error);
   }
 }
 
-/**
- * PT: Inicializa o sistema de thumbs da Petra no documento inteiro.
- * EN: Initializes Petra's thumb system for the whole document.
- */
+// PT: Inicializa o sistema de thumbs da Petra.
+// EN: Initializes Petra thumb system.
 function initPetraThumbs() {
   try {
     PetraImageUI.initThumbSystem(document);
-  } catch (err) {
-    console.warn('[Kendra] Erro ao inicializar thumbs da Petra:', err);
+  } catch (error) {
+    Logger.warn('Board', 'Kendra', 'Petra thumb system initialization failed', error);
   }
 }
 
-/**
- * PT: Inicializa o mural/board (Selah) se disponível.
- * EN: Initializes the hero/board (Selah) if available.
- */
+// PT: Inicializa o board da Selah.
+// EN: Initializes Selah board.
 function initSelahBoard() {
-  let hasBoard = false;
-
-  if (SelahBoardUI && typeof SelahBoardUI.initBoard === 'function') {
-    try {
-      SelahBoardUI.initBoard(document);
-      hasBoard = true;
-    } catch (err) {
-      console.warn('[Kendra] Erro ao inicializar o board com SelahBoardUI:', err);
-    }
+  if (!SelahBoardUI || typeof SelahBoardUI.init !== 'function') {
+    Logger.warn('Board', 'Kendra', 'No board implementation found (SelahBoardUI.init)');
+    return;
   }
 
-  // LEGADO: compat com implementação antiga baseada em window.FeedbackMural
-  if (window.FeedbackMural && typeof window.FeedbackMural.init === 'function') {
-    try {
-      window.FeedbackMural.init({ cards: { perPlatform: 1 } });
-      hasBoard = true;
-    } catch (err) {
-      console.warn('[Kendra] Erro ao inicializar o board com FeedbackMural.init:', err);
-    }
-  }
-
-  if (!hasBoard) {
-    console.warn(
-      '[Kendra] Nenhuma implementação de board encontrada (SelahBoardUI ou FeedbackMural.init).'
-    );
+  try {
+    SelahBoardUI.init({ cards: { perPlatform: 1 } });
+  } catch (error) {
+    Logger.warn('Board', 'Kendra', 'SelahBoardUI initialization failed', error);
   }
 }
-/**
- * PT: Mira (modal LIST) continua cuidando de si mesma neste momento.
- * EN: Mira (LIST modal) still handles its own startup internally.
- */
 
+// PT: Inicializa o modal de lista da Mira.
+// EN: Initializes Mira list modal.
 function initMiraListModal() {
   try {
     MiraListUI.ListModal(document);
-  } catch (err) {
-    console.warn('[Kendra] Erro ao inicializar o modal de lista da Mira:', err);
+  } catch (error) {
+    Logger.warn('Board', 'Kendra', 'Mira list modal initialization failed', error);
   }
 }
 
-/**
- * PT: Função principal de Kendra: é aqui que tudo é amarrado
- *     quando o DOM estiver pronto.
- * EN: Main Kendra function: this is where everything is wired
- *     once the DOM is ready.
- */
+/* -----------------------------------------------------------------------------*/
+// Bootstrap
+/* -----------------------------------------------------------------------------*/
+
+// PT: Função principal da Kendra que amarra o setor de Feedback.
+// EN: Main Kendra function that wires the Feedback sector together.
 function bootstrapBoard() {
-  // 1) Lia — preload/cache de feedback
+  initBoardEndpoints();
+
   initLiaPreload();
-
-  // 2) Abigaíl — resumo/summary do feedback
   initAbigailSummary();
-
-  // 3) Lívia — UI do Avatar
   initLiviaAvatar();
-
-  // 4) Petra — sistema de thumbs do board (fora do modal lista)
   initPetraThumbs();
-
-  // 5) Selah — inicializa o mural/hero do feedback
   initSelahBoard();
-
-  // 6) Mira (modal LISTA) continua cuidando de si mesma neste momento.
   initMiraListModal();
 }
 
+/* -----------------------------------------------------------------------------*/
+// Export
+/* -----------------------------------------------------------------------------*/
+
 export const KendraBoardLeader = {
-  /**
-   * PT: Inicializa o setor de Feedback. Deve ser chamada pela Morgana.
-   * EN: Initializes the Feedback sector. Should be called by Morgana.
-   */
-  initBoard(root = document) {
-    // // Dispara o bootstrap quando o DOM estiver pronto.
-    // // Fire bootstrap once the DOM is ready.
-    onDomReady(() => bootstrapBoard());
+  // PT: Inicializa o setor de Feedback. Deve ser chamada pela Morgana.
+  // EN: Initializes the Feedback sector. Should be called by Morgana.
+  initBoard() {
+    onDomReady(bootstrapBoard);
   },
 
-  // Opcional — expõe a função bruta para debug
+  // PT: Exposto para debug e uso controlado.
+  // EN: Exposed for debug and controlled use.
   bootstrapBoard,
 };

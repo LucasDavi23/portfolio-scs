@@ -1,45 +1,58 @@
-// /js/layout/modal/iris-image-viewer.js
-// 👁️ Iris — Image Viewer (Modal de Imagem Global)
-// Nível: Jovem
-// PT: Gerencia o modal global de imagem: abre a imagem em destaque,
-//     bloqueia o scroll de fundo e fecha por botão, backdrop ou ESC.
-// EN: Manages the global image modal: shows the image in focus, locks
-//     background scroll and closes via button, backdrop or ESC.
-// -------------------------------------------------------------------------------------
+// 👁️ Iris — Image Viewer
 //
+// Nível / Level: Jovem / Young
+//
+// PT: Gerencia o modal global de imagem.
+// EN: Manages the global image modal.
+
+/* -----------------------------------------------------------------------------*/
 // Imports
-// -------------------------------------------------------------------------------------
-// ✨ Latch — Body Scroll Lock (System Utils)
-// Provides:
-//  - lockBodyScroll()
-//  - unlockBodyScroll()
-//  - getScrollLockCount()
+/* -----------------------------------------------------------------------------*/
+
+/* -----------------------------------------------------------------------------*/
+// ✨ Latch — Body Scroll Lock
+// Fornece / Provides:
+// - lockScroll()
+// - unlockScroll()
+/* -----------------------------------------------------------------------------*/
 import { LatchRootScroll } from '/assets/js/system/utils/latch-root-scroll-lock.js';
-//
-// -------------------------------------------------------------------------------------
-// 🪨 Onyx PT: Tap Guard EN: Tap Guard
-// Provides:
-// createTapGuard()
+
+/* -----------------------------------------------------------------------------*/
+// 🪨 Onyx — Tap Guard
+// Fornece / Provides:
+// - createTapGuard()
+/* -----------------------------------------------------------------------------*/
 import { OnyxTapGuard } from '/assets/js/system/ui/gestures/onyx-tap-guard';
 
-// -------------------------------------------------------------------------------------
-//
-// 🔊 Echo — Viewer Carousel Assistant
-// Provides:
-//  - EchoViewerCarousel
+/* -----------------------------------------------------------------------------*/
+// 🔊 Echo — Viewer Carousel
+// Fornece / Provides:
+// - createViewerSession()
+/* -----------------------------------------------------------------------------*/
 import { EchoViewerCarousel } from '/assets/js/layout/modal/echo-viewer-carousel.js';
 
-// -------------------------------------------------------------------------------------
-// 🕯️ Vela — Modal Motion (System Utils)
-// Provides:
-// openModalMotion,
-// closeModalMotion,
-
+/* -----------------------------------------------------------------------------*/
+// 🕯️ Vela — Modal Motion
+// Fornece / Provides:
+// - openModalMotion()
+// - closeModalMotion()
+/* -----------------------------------------------------------------------------*/
 import { VelaModalMotion } from '/assets/js/layout/modal/vela-modal-motion.js';
 
-// -------------------------------------------------------------------------------------
+/* -----------------------------------------------------------------------------*/
+// Image Viewer Setup
+//
+// PT: Inicializa o modal global e seus controles.
+// EN: Initializes the global modal and its controls.
+/* -----------------------------------------------------------------------------*/
 
-export function ImageViewer() {
+// PT: Armazena a instância ativa do viewer de imagem.
+// EN: Stores the active image viewer instance.
+let viewerApi = null;
+
+// PT: Controla o modal global de imagem.
+// EN: Controls the global image modal.
+function ImageViewer() {
   const modalPanel = document.getElementById('modalImgPanel');
   const modal = document.getElementById('modalImg');
   const modalImg = document.getElementById('modalImgSrc');
@@ -47,15 +60,9 @@ export function ImageViewer() {
 
   if (!modal || !modalPanel || !modalImg || !btnClose) return;
 
-  // ------------------------------------------------------------------
-  // PT: garante estado fechado inicial do modal (compat com animação)
-  // EN: ensures initial closed state (animation-safe)
-  // ------------------------------------------------------------------
   modal.classList.add('opacity-0');
   modal.classList.remove('opacity-100');
 
-  // 🪨 Onyx PT: Guardião de TAP (evita abrir modal ao rolar no mobile)
-  // EN: Tap guard (prevents opening modal while scrolling on mobile)
   const tapGuard = OnyxTapGuard.createTapGuard({
     movementThresholdPixels: 10,
     maximumTapDurationMs: 350,
@@ -63,9 +70,52 @@ export function ImageViewer() {
   });
 
   let activeOpenerElement = null;
-
   let echoSession = null;
 
+  /* -----------------------------------------------------------------------------*/
+  // Viewer Controls
+  //
+  // PT: Elementos do modo galeria.
+  // EN: Gallery mode elements.
+  /* -----------------------------------------------------------------------------*/
+
+  const viewerControls = document.getElementById('modalViewerControls');
+  const viewerPrev = document.getElementById('modalViewerPrev');
+  const viewerNext = document.getElementById('modalViewerNext');
+  const viewerCounter = document.getElementById('modalViewerCounter');
+
+  const hasViewerControls = !!(viewerControls && viewerPrev && viewerNext && viewerCounter);
+
+  /* -----------------------------------------------------------------------------*/
+  // Close Shield
+  //
+  // PT: Evita eventos vazando logo após fechar o modal.
+  // EN: Prevents events from leaking right after closing the modal.
+  /* -----------------------------------------------------------------------------*/
+
+  let closeShieldUntil = 0;
+
+  // PT: Ativa o escudo temporário de fechamento.
+  // EN: Arms the temporary close shield.
+  function armCloseShield(ms = 450) {
+    closeShieldUntil = performance.now() + ms;
+  }
+
+  // PT: Verifica se o escudo ainda está ativo.
+  // EN: Checks whether the close shield is still active.
+  function isCloseShieldActive() {
+    return performance.now() < closeShieldUntil;
+  }
+
+  /* -----------------------------------------------------------------------------*/
+  // Session Helpers
+  //
+  // PT: Controle da sessão do viewer.
+  // EN: Viewer session control.
+  /* -----------------------------------------------------------------------------*/
+
+  // PT: Encerra a sessão atual do Echo.
+  // EN: Destroys the current Echo session.
   function destroyEchoSession() {
     try {
       echoSession?.destroy?.();
@@ -73,46 +123,21 @@ export function ImageViewer() {
     echoSession = null;
   }
 
-  // ------------------------------------------------------------------
-  // 🎛️ Viewer Controls Elements (Echo mode)
-  // ------------------------------------------------------------------
-  const viewerControls = document.getElementById('modalViewerControls');
-  const viewerPrev = document.getElementById('modalViewerPrev');
-  const viewerNext = document.getElementById('modalViewerNext');
-  const viewerCounter = document.getElementById('modalViewerCounter');
+  /* -----------------------------------------------------------------------------*/
+  // Image Context Helpers
+  //
+  // PT: Resolve dados da imagem e contexto do carrossel.
+  // EN: Resolves image data and carousel context.
+  /* -----------------------------------------------------------------------------*/
 
-  // PT: controles são opcionais, mas recomendados.
-  // EN: controls are optional, but recommended.
-  const hasViewerControls = !!(viewerControls && viewerPrev && viewerNext && viewerCounter);
-
-  // ------------------------------------------------------------------
-  // 🔒 Close Shield — evita click-through após fechar o modal
-  // ------------------------------------------------------------------
-  let closeShieldUntil = 0;
-
-  function armCloseShield(ms = 450) {
-    closeShieldUntil = performance.now() + ms;
-  }
-
-  function isCloseShieldActive() {
-    return performance.now() < closeShieldUntil;
-  }
-
-  // --------------------------------------------------
-  // Helpers
-  // --------------------------------------------------
-
-  // ------------------------------------------------------------------
-  // 🔎 Carousel Context Resolver
-  // ------------------------------------------------------------------
+  // PT: Resolve imagem e texto alternativo a partir do opener.
+  // EN: Resolves image and alt text from the opener.
   function resolveImageDataFromOpener(opener) {
     let src = '';
     let altText = '';
 
-    // 1) data-full no opener
     src = opener.dataset.full || '';
 
-    // 2) fallback: img interna
     if (!src) {
       const innerImg = opener.querySelector('img');
       if (innerImg) {
@@ -121,13 +146,11 @@ export function ImageViewer() {
       }
     }
 
-    // 3) se o opener em si é IMG
     if (!src && opener.tagName === 'IMG') {
       src = opener.src || '';
       altText = opener.alt || '';
     }
 
-    // 4) fallback alt
     if (!altText) {
       altText = opener.getAttribute('aria-label') || '';
     }
@@ -135,6 +158,8 @@ export function ImageViewer() {
     return { src, altText };
   }
 
+  // PT: Resolve o contexto de galeria a partir do opener.
+  // EN: Resolves gallery context from the opener.
   function resolveCarouselContextFromOpener(opener) {
     const groupName = opener.dataset.viewerGroup || '';
     const indexStr = opener.dataset.viewerIndex || '';
@@ -159,21 +184,31 @@ export function ImageViewer() {
     return { images, startIndex };
   }
 
-  // ------------------------------------------------------------------
-  // 🎛️ Viewer UI Helpers (Echo mode)
-  // ------------------------------------------------------------------
+  /* -----------------------------------------------------------------------------*/
+  // Viewer UI Helpers
+  //
+  // PT: Atualiza os controles visuais do modo galeria.
+  // EN: Updates gallery mode visual controls.
+  /* -----------------------------------------------------------------------------*/
+
+  // PT: Esconde os controles do viewer.
+  // EN: Hides viewer controls.
   function hideViewerControls() {
     if (!hasViewerControls) return;
     viewerControls.classList.add('hidden');
     viewerControls.setAttribute('aria-hidden', 'true');
   }
 
+  // PT: Exibe os controles do viewer.
+  // EN: Shows viewer controls.
   function showViewerControls() {
     if (!hasViewerControls) return;
     viewerControls.classList.remove('hidden');
     viewerControls.setAttribute('aria-hidden', 'false');
   }
 
+  // PT: Atualiza o contador do viewer.
+  // EN: Updates viewer counter.
   function updateViewerCounter(currentIndex, total) {
     if (!hasViewerControls) return;
 
@@ -183,6 +218,8 @@ export function ImageViewer() {
     viewerCounter.textContent = `${safeIndex + 1} / ${safeTotal}`;
   }
 
+  // PT: Atualiza o estado das setas do viewer.
+  // EN: Updates viewer arrow state.
   function updateViewerArrowState(currentIndex, total) {
     if (!hasViewerControls) return;
 
@@ -193,59 +230,60 @@ export function ImageViewer() {
     const disablePrev = idx <= 0;
     const disableNext = idx >= lastIndex;
 
-    const setDisabled = (btn, disabled) => {
-      btn.setAttribute('aria-disabled', disabled ? 'true' : 'false');
-      btn.classList.toggle('opacity-40', disabled);
-      btn.classList.toggle('cursor-not-allowed', disabled);
+    const setDisabled = (button, disabled) => {
+      button.setAttribute('aria-disabled', disabled ? 'true' : 'false');
+      button.classList.toggle('opacity-40', disabled);
+      button.classList.toggle('cursor-not-allowed', disabled);
     };
 
     setDisabled(viewerPrev, disablePrev);
     setDisabled(viewerNext, disableNext);
   }
 
+  /* -----------------------------------------------------------------------------*/
+  // Modal Actions
+  //
+  // PT: Controla abertura e fechamento do modal.
+  // EN: Controls modal opening and closing.
+  /* -----------------------------------------------------------------------------*/
+
+  // PT: Abre o modal com a imagem informada.
+  // EN: Opens the modal with the provided image.
   function openModal(src, altText = '') {
     if (!src) return;
 
     modalImg.src = src;
     modalImg.alt = altText;
 
-    // PT: garante layout base antes de animar
-    // EN: ensure base layout before animating
     modal.classList.remove('hidden');
-    modal.classList.add('grid'); // mesmo se já tiver no HTML, não faz mal
+    modal.classList.add('grid');
     modal.setAttribute('aria-hidden', 'false');
 
-    // PT: sempre começa do estado "fechado"
-    // EN: always start from the "closed" state
     modal.classList.add('opacity-0');
 
-    // PT: força o browser a reconhecer o estado inicial
-    // EN: force browser to commit initial state
+    // PT: Força o browser a reconhecer o estado inicial.
+    // EN: Forces the browser to recognize the initial state.
     void modal.offsetHeight;
 
     LatchRootScroll.lockScroll();
 
-    // 🎞️ Motion premium (Iris)
     VelaModalMotion.openModalMotion({
-      rootEl: modal, // overlay fade
-      panelEl: modalPanel, // panel fade/scale
-      enablePanelTranslate: false, // imagem fica melhor sem slide
+      rootEl: modal,
+      panelEl: modalPanel,
+      enablePanelTranslate: false,
       timings: { openMs: 360, closeMs: 450 },
     });
   }
 
-  let isClosing = false; // flag para evitar múltiplos closes
+  let isClosing = false;
 
+  // PT: Fecha o modal atual.
+  // EN: Closes the current modal.
   async function closeModal() {
     if (isClosing) return;
     isClosing = true;
 
-    // PT: arma escudo para bloquear eventos vazando após fechar
-    // EN: arms shield to block events leaking after close
     armCloseShield(450);
-
-    // PT: limpa opener ativo
-    // EN: clears active opener
     activeOpenerElement = null;
 
     destroyEchoSession();
@@ -261,8 +299,6 @@ export function ImageViewer() {
     modal.classList.add('hidden');
     modal.setAttribute('aria-hidden', 'true');
 
-    // PT: limpa imagem depois de esconder (evita flicker)
-    // EN: clear image after hiding (prevents flicker)
     modalImg.src = '';
     modalImg.alt = '';
 
@@ -271,48 +307,44 @@ export function ImageViewer() {
     isClosing = false;
   }
 
-  // --------------------------------------------------
-  // Open modal (tap-safe via Onyx)
-  // --------------------------------------------------
+  /* -----------------------------------------------------------------------------*/
+  // Open Handlers
+  //
+  // PT: Captura o fluxo de abertura via tap seguro.
+  // EN: Captures the safe-tap opening flow.
+  /* -----------------------------------------------------------------------------*/
+
   document.addEventListener(
     'pointerdown',
-    (e) => {
-      // PT: se modal aberto, não processa openers
-      // EN: if modal is open, ignore openers
+    (event) => {
       if (!modal.classList.contains('hidden')) return;
 
-      const opener = e.target.closest('.js-open-modal');
+      const opener = event.target.closest('.js-open-modal');
       if (!opener) return;
 
-      // PT: evita navegação (ex: <a href="#">) e evita "click-through"
-      // EN: prevents navigation (e.g., <a href="#">) and click-through
-      e.preventDefault();
-      e.stopPropagation();
+      event.preventDefault();
+      event.stopPropagation();
 
       activeOpenerElement = opener;
-
-      // Inicia o tracking do tap guard
-      tapGuard.capturePointerDown(e, opener);
+      tapGuard.capturePointerDown(event, opener);
     },
-    true // capture: pega antes de handlers/navegação
+    true
   );
 
   document.addEventListener(
     'pointermove',
-    (e) => {
-      tapGuard.trackPointerMove(e);
+    (event) => {
+      tapGuard.trackPointerMove(event);
     },
     true
   );
 
   document.addEventListener(
     'pointerup',
-    (e) => {
-      // PT: bloqueia pointerup logo após fechar o modal
-      // EN: blocks pointerup right after closing the modal
+    (event) => {
       if (isCloseShieldActive()) {
-        e.preventDefault();
-        e.stopPropagation();
+        event.preventDefault();
+        event.stopPropagation();
         return;
       }
 
@@ -321,7 +353,7 @@ export function ImageViewer() {
       const opener = activeOpenerElement;
       activeOpenerElement = null;
 
-      const evaluation = tapGuard.evaluatePointerUp(e);
+      const evaluation = tapGuard.evaluatePointerUp(event);
       if (!evaluation.ok) return;
 
       const { src, altText } = resolveImageDataFromOpener(opener);
@@ -335,7 +367,6 @@ export function ImageViewer() {
       if (carouselContext) {
         destroyEchoSession();
 
-        // Abre o modal já com a imagem inicial do carrossel
         openModal(carouselContext.images[carouselContext.startIndex], altText);
 
         echoSession = EchoViewerCarousel.createViewerSession({
@@ -346,6 +377,7 @@ export function ImageViewer() {
           swipeRootElement: modal,
           onChange: ({ index, images, image }) => {
             if (!image?.src) return;
+
             modalImg.src = image.src;
             modalImg.alt = image.alt || altText || '';
 
@@ -355,52 +387,60 @@ export function ImageViewer() {
           },
         });
 
-        // ✅ init do UI no primeiro frame (antes do 1º onChange)
         showViewerControls();
         updateViewerCounter(carouselContext.startIndex, carouselContext.images.length);
         updateViewerArrowState(carouselContext.startIndex, carouselContext.images.length);
 
-        return; // 👈 importante: não cair no openModal simples
+        return;
       }
-      // PT: se não tem contexto de carrossel, abre modal simples (comportamento atual)
+
       hideViewerControls();
-      // Fallback: imagem única (comportamento atual)
       openModal(src, altText);
     },
     true
   );
 
-  // PT: bloqueia click fantasma após drag/scroll
-  // EN: blocks ghost click after drag/scroll
   document.addEventListener(
     'click',
-    (e) => {
-      // PT: bloqueia click vazando após close
-      // EN: blocks click leaking after close
+    (event) => {
       if (isCloseShieldActive()) {
-        e.preventDefault();
-        e.stopPropagation();
+        event.preventDefault();
+        event.stopPropagation();
         return;
       }
 
-      const opener = e.target.closest('.js-open-modal');
+      const opener = event.target.closest('.js-open-modal');
       if (!opener) return;
-      tapGuard.blockGhostClick(e);
+
+      tapGuard.blockGhostClick(event);
     },
     true
   );
 
-  // --------------------------------------------------
-  // Viewer controls handlers (Echo mode)
-  // --------------------------------------------------
+  // PT: Abre o modal de imagem de forma programática (ex: preview do formulário).
+  // EN: Opens the image modal programmatically (e.g., form preview).
+  function openImageViewer({ src, alt = '' }) {
+    if (!src) return;
+
+    openModal(src, alt);
+  }
+
+  /* -----------------------------------------------------------------------------*/
+  // Viewer Control Handlers
+  //
+  // PT: Eventos dos controles do modo galeria.
+  // EN: Gallery mode control events.
+  /* -----------------------------------------------------------------------------*/
+
   if (hasViewerControls) {
     viewerPrev.addEventListener(
       'click',
-      (e) => {
+      (event) => {
         if (viewerPrev.getAttribute('aria-disabled') === 'true') {
-          e.preventDefault();
+          event.preventDefault();
           return;
         }
+
         echoSession?.prev?.();
       },
       true
@@ -408,58 +448,71 @@ export function ImageViewer() {
 
     viewerNext.addEventListener(
       'click',
-      (e) => {
+      (event) => {
         if (viewerNext.getAttribute('aria-disabled') === 'true') {
-          e.preventDefault();
+          event.preventDefault();
           return;
         }
+
         echoSession?.next?.();
       },
       true
     );
   }
 
-  // --------------------------------------------------
-  // Close handlers
-  // --------------------------------------------------
+  /* -----------------------------------------------------------------------------*/
+  // Close Handlers
+  //
+  // PT: Eventos de fechamento do modal.
+  // EN: Modal close events.
+  /* -----------------------------------------------------------------------------*/
 
   btnClose.addEventListener(
     'pointerdown',
-    (e) => {
-      e.preventDefault();
-      e.stopPropagation();
+    (event) => {
+      event.preventDefault();
+      event.stopPropagation();
       closeModal();
     },
     true
   );
 
-  // PT: fecha no pointerdown (antes do click) para evitar "click-through"
-  // EN: close on pointerdown (before click) to avoid click-through
-  modal.addEventListener(
+  document.addEventListener(
     'pointerdown',
-    (e) => {
-      // só fecha se clicou no overlay (fora do conteúdo)
-      if (e.target !== modal) return;
+    (event) => {
+      if (event.target !== modal) return;
 
-      e.preventDefault();
-      e.stopPropagation();
+      event.preventDefault();
+      event.stopPropagation();
 
       closeModal();
     },
-    true // capture: pega antes do restante
+    true
   );
 
-  window.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
+  addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && !modal.classList.contains('hidden')) {
       closeModal();
     }
   });
+
+  return {
+    openImageViewer,
+  };
 }
+
+/* -----------------------------------------------------------------------------*/
+// Export
+/* -----------------------------------------------------------------------------*/
 
 export const IrisImageViewer = {
   ImageViewer,
 
   initImageViewer() {
-    this.ImageViewer();
+    viewerApi = this.ImageViewer();
+  },
+
+  openImageViewer({ src, alt = '' }) {
+    viewerApi?.openImageViewer?.({ src, alt });
   },
 };

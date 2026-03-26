@@ -1,309 +1,328 @@
-// ✨ Athenais — Guardiã da Lógica do Summary (Helpers)
+/* -----------------------------------------------------------------------------*/
+// ✨ Athenais — Summary Helpers
 //
 // Nível / Level: Jovem / Young
 //
-// PT: Athenais simboliza precisão e sabedoria técnica. Aqui, ela cuida apenas
-//     da lógica “pura” do summary:
-//       • cache local (snapshot e TTL),
-//       • fetch ao Apps Script com timeout,
-//       • retry automático com backoff,
-//       • validação da resposta recebida,
-//       • conversão dos dados brutos (items[]) para um objeto final de resumo.
+// PT: Athenais cuida da lógica pura do summary com precisão:
+// - cache local,
+// - requisições ao GAS com timeout,
+// - retry com backoff,
+// - validação,
+// - transformação dos dados em resumo final.
 //
-// EN: Athenais represents precision and technical wisdom. Here she handles only
-//     the “pure” logic of the summary:
-//       • local cache (snapshot and TTL),
-//       • fetch to Apps Script with timeout,
-//       • automatic retry with backoff,
-//       • validation of the received response,
-//       • conversion of raw data (items[]) into the final summary object.
+// EN: Athenais handles the pure summary logic with precision:
+// - local cache,
+// - GAS requests with timeout,
+// - retry with backoff,
+// - validation,
+// - transforming raw data into the final summary.
 /* -----------------------------------------------------------------------------*/
 
 /* -----------------------------------------------------------------------------*/
-// EndpointConfig — Configuração do Endpoint (Camada de Infra)
-// Fornece:
+// Imports
+/* -----------------------------------------------------------------------------*/
+
+/* -----------------------------------------------------------------------------*/
+// EndpointConfig — Endpoint Configuration
+// Fornece / Provides:
 // - set(url)
 // - get()
+/* -----------------------------------------------------------------------------*/
 import { EndpointConfig } from '/assets/js/feedback/core/config/feedback-endpoint.js';
+
+/* -----------------------------------------------------------------------------*/
+// Helpers
+//
+// PT: Funções auxiliares usadas internamente neste módulo.
+// EN: Helper functions used internally in this module.
 /* -----------------------------------------------------------------------------*/
 
-// ============================================================
-// 1. CONFIGURAÇÕES INTERNAS (CACHE, TIMEOUT, RETRY)
-// ============================================================
+// PT: Cria URL absoluta para endpoint local ou remoto.
+// EN: Creates absolute URL for local or remote endpoint.
+function createEndpointUrl(endpoint) {
+  return endpoint.startsWith('http')
+    ? new URL(endpoint)
+    : new URL(endpoint, window.location.origin);
+}
 
-// PT: Chave usada no localStorage para guardar o resumo mais recente.
-// EN: Key used in localStorage to store the latest summary snapshot.
+// PT: Garante que existe um endpoint válido (não offline).
+// EN: Ensures a valid (non-offline) endpoint is configured.
+function ensureEndpoint() {
+  const endpoint = EndpointConfig.get();
+
+  if (EndpointConfig.isOffline()) {
+    throw new Error('Feedback endpoint is not configured (offline mode).');
+  }
+
+  return endpoint;
+}
+
+/* -----------------------------------------------------------------------------*/
+// Internal Settings
+/* -----------------------------------------------------------------------------*/
+
+// PT: Chave do localStorage para o resumo da plataforma (ex: SCS).
+// ⚠️ Personalize esse valor caso utilize múltiplas fontes (SCS, Shopee, ML, etc).
+// Ex: 'shopee_feedback_summary', 'ml_feedback_summary'
+//
+// EN: localStorage key for the platform summary (e.g., SCS).
+// ⚠️ Customize this value if using multiple data sources (SCS, Shopee, ML, etc).
+// Example: 'shopee_feedback_summary', 'ml_feedback_summary'
 const CACHE_KEY = 'scs_feedback_summary_scs';
 
-// PT: Tempo máximo que o cache é considerado válido (60 segundos).
-// EN: Maximum time the cache is considered valid (60 seconds).
+// PT: Tempo de validade do cache local (TTL = Time To Live).
+// Após esse período, o cache é considerado expirado.
+//
+// EN: Local cache validity time (TTL = Time To Live).
+// After this period, the cache is considered expired.
 const CACHE_TTL_MS = 60_000;
 
-// PT: Timeout para cada requisição ao GAS (em milissegundos).
-// EN: Timeout for each GAS request (in milliseconds).
+// PT: Timeout de cada requisição.
+// EN: Timeout for each request.
 const FETCH_TIMEOUT_MS = 8_000;
 
-// PT: Quantas tentativas extras além da primeira (0 = só uma tentativa).
-// EN: How many extra retries besides the first attempt (0 = only once).
+// PT: Quantidade de retries além da primeira tentativa.
+// EN: Number of retries besides the first attempt.
 const MAX_RETRIES = 1;
 
-// ============================================================
-// 2. CACHE HELPERS (localStorage)
-// ============================================================
+// PT: Espera base entre tentativas.
+// EN: Base wait time between attempts.
+const RETRY_DELAY_MS = 500;
 
-// PT: Tenta ler o resumo do cache e verifica se ainda está dentro da validade.
-// EN: Tries to read the summary from cache and checks if it's still valid.
-export function loadSummaryFromCache() {
-  try {
-    const raw = localStorage.getItem(CACHE_KEY); // PT: Lê do localStorage.
-    if (!raw) return null; // PT: Sem cache.
+/* -----------------------------------------------------------------------------*/
+// Cache Helpers
+/* -----------------------------------------------------------------------------*/
 
-    const parsed = JSON.parse(raw); // PT: Converte de JSON.
-    const { timestamp, avg, total, buckets } = parsed || {}; // PT: Extrai dados.
-
-    if (typeof timestamp !== 'number') return null; // PT: Timestamp inválido.
-
-    const age = Date.now() - timestamp; // PT: Calcula idade do cache.
-    if (age > CACHE_TTL_MS) {
-      // PT: Cache expirado.
-      // EN: Cache expired.
-      return null;
-    }
-
-    if (typeof avg !== 'number' || typeof total !== 'number' || typeof buckets !== 'object') {
-      return null; // PT: Dados inválidos.
-    }
-
-    return parsed; // PT: Retorna o resumo válido.
-  } catch (err) {
-    console.warn('summary.js: erro ao ler cache / error reading cache.', err);
-    return null;
-  }
+// PT: Valida se o objeto tem formato básico de summary.
+// EN: Validates whether the object has the basic summary shape.
+function isValidSummaryShape(summary) {
+  return (
+    summary &&
+    typeof summary === 'object' &&
+    typeof summary.avg === 'number' &&
+    typeof summary.total === 'number' &&
+    typeof summary.buckets === 'object' &&
+    summary.buckets !== null
+  );
 }
 
-// PT: Carrega um snapshot do resumo salvo (sem validar).
-// EN: Loads a saved summary snapshot (without validation).
-export function loadSummarySnapshot() {
+// PT: Lê o cache válido dentro do TTL.
+// EN: Reads valid cache data within TTL.
+function loadSummaryFromCache() {
   try {
-    const raw = localStorage.getItem(CACHE_KEY); // PT: Lê do localStorage.
-    if (!raw) return null; // PT: Sem cache.
+    const raw = localStorage.getItem(CACHE_KEY);
+    if (!raw) return null;
 
-    const parsed = JSON.parse(raw); // PT: Converte de JSON.
-    const { avg, total, buckets } = parsed || {}; // PT: Extrai dados.
+    const parsed = JSON.parse(raw);
+    if (!isValidSummaryShape(parsed)) return null;
+    if (typeof parsed.timestamp !== 'number') return null;
 
-    if (typeof avg !== 'number' || typeof total !== 'number' || typeof buckets !== 'object') {
-      return null;
-    }
-    //PT: Snapshot não respeita TTL. Serve só como fallback.
+    const cacheAge = Date.now() - parsed.timestamp;
+    if (cacheAge > CACHE_TTL_MS) return null;
+
     return parsed;
-  } catch (err) {
-    console.warn('summary.js: erro ao ler snapshot / snapshot read error.', err);
+  } catch {
     return null;
   }
 }
 
-// PT: Salva no cache o resumo atual junto com o timestamp.
-// EN: Saves the current summary to cache along with a timestamp.
-export function saveSummarytoCache(summary) {
+// PT: Lê o snapshot salvo, sem validar TTL.
+// EN: Reads the saved snapshot without TTL validation.
+function loadSummarySnapshot() {
+  try {
+    const raw = localStorage.getItem(CACHE_KEY);
+    if (!raw) return null;
+
+    const parsed = JSON.parse(raw);
+    return isValidSummaryShape(parsed) ? parsed : null;
+  } catch {
+    return null;
+  }
+}
+
+// PT: Salva o summary atual no cache com timestamp.
+// EN: Saves the current summary to cache with a timestamp.
+function saveSummaryToCache(summary) {
   try {
     const payload = {
-      // PT: Prepara o payload.
-      avg: summary.avg, //  PT: Média das avaliações.
-      total: summary.total, // PT: Total de avaliações.
-      buckets: summary.buckets, // PT: Mapa de estrelas.
-      timestamp: Date.now(), // PT: Marca o tempo atual.
+      avg: summary.avg,
+      total: summary.total,
+      buckets: summary.buckets,
+      timestamp: Date.now(),
     };
-    localStorage.setItem(CACHE_KEY, JSON.stringify(payload)); // PT: Salva como JSON.
-  } catch (err) {
-    console.warn('summary.js: erro ao salvar cache / cache write error:', err);
+
+    localStorage.setItem(CACHE_KEY, JSON.stringify(payload));
+  } catch {
+    // PT: Falha de cache não deve quebrar o fluxo.
+    // EN: Cache failure should not break the flow.
   }
 }
 
-// ============================================================
-// 3. REDE: FETCH COM TIMEOUT + RETRY
-// ============================================================
+/* -----------------------------------------------------------------------------*/
+// Network Helpers
+/* -----------------------------------------------------------------------------*/
 
-// PT: Implementa um fetch com timeout manual usando Promise.race.
-// EN: Implements fetch with manual timeout using Promise.race.
-
-export function fetchWithTimeout(url, timeoutMs) {
-  // PT: Retorna uma Promise.
-  return Promise.race([
-    // PT: Competição entre:
-    fetch(url), // PT: A promessa do fetch.
-    new Promise((_, reject) => {
-      // PT: E uma promessa que rejeita após timeout.
-      const id = setTimeout(() => {
-        // PT: Timeout atingido.
-        clearTimeout(id); // PT: Limpa o timeout.
-        reject(new Error('Timeout na requisição / Request timed out')); // PT: Rejeita a promessa.
-      }, timeoutMs);
-    }),
-  ]);
+// PT: Aguarda alguns milissegundos.
+// EN: Waits for a few milliseconds.
+function delay(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-// PT: Faz a requisição ao GAS com tentativas extras (retry).
-// EN: Performs the request to GAS with extra retries.
-export async function fetchSummaryWithRetry() {
-  // ENDPOINT oficial do sistema — obtido via módulo base
-  const ENDPOINT = EndpointConfig.get();
+// PT: Faz fetch com timeout manual.
+// EN: Performs fetch with a manual timeout.
+function fetchWithTimeout(url, timeoutMs = FETCH_TIMEOUT_MS) {
+  return new Promise((resolve, reject) => {
+    const timeoutId = setTimeout(() => {
+      reject(new Error('Timeout na requisição / Request timed out'));
+    }, timeoutMs);
 
-  if (!ENDPOINT) {
-    throw new Error('summary-helpers.js: FEEDBACK_ENDPOINT não definido / not defined.');
-  }
-
-  // PT: Retorna uma Promise.
-  const url = `${ENDPOINT}?mode=list&plat=scs&limit=200&page=1`; // PT: URL do endpoint.
-
-  let attempt = 0; // PT: Contador de tentativas.
-  let lastError = null; // PT: Último erro ocorrido.
-
-  while (attempt <= MAX_RETRIES) {
-    // PT: Enquanto não excedeu tentativas.
-    try {
-      const res = await fetchWithTimeout(url, FETCH_TIMEOUT_MS); // PT: Tenta buscar com timeout.
-      if (!res.ok) {
-        // PT: Resposta inválida?
-        throw new Error('Resposta não OK do servidor / Server response not OK: ' + res.status);
-      }
-
-      const data = await res.json(); // PT: Converte resposta em JSON.
-      return data; // PT: se deu certo, retornamos os dados imediatamente.
-    } catch (err) {
-      lastError = err; // PT: Guarda o erro.
-      attempt += 1; // PT: Incrementa tentativas.
-      console.warn(`summary.js: tentativa ${attempt} falhou / attempt failed:`, err);
-
-      // PT: Se ainda temos retries disponíveis, o loop continua.
-      // EN: If we still have retries available, the loop continues.
-    }
-  }
-
-  // PT: Se chegamos aqui, todas as tentativas falharam.
-  // EN: If we reach here, all attempts failed.
-  throw lastError || new Error('Falha ao buscar summary / Failed to fetch summary.');
+    fetch(url)
+      .then((response) => {
+        clearTimeout(timeoutId);
+        resolve(response);
+      })
+      .catch((error) => {
+        clearTimeout(timeoutId);
+        reject(error);
+      });
+  });
 }
 
-// PT: Faz a requisição ao GAS no modo META (agregado) com retry.
-// EN: Performs the request to GAS in META (aggregated) mode with retry.
-export async function fetchSummaryMetaWithRetry({ forceFresh = false } = {}) {
-  // ENDPOINT oficial do sistema — obtido via módulo base
-  const ENDPOINT = EndpointConfig.get();
-
-  if (!ENDPOINT) {
-    // PT: Aqui é melhor lançar erro para o caller tratar (Abigail).
-    // EN: Here it's better to throw an error for the caller to handle (Abigail).
-    throw new Error('summary-helpers.js: FEEDBACK_ENDPOINT não definido / not defined.');
-  }
-
-  // PT: forceFresh = bypass de cache do GAS
-  // EN: forceFresh = bypass GAS cache
-  const cb = Date.now();
-  const url = forceFresh
-    ? `${ENDPOINT}?mode=meta&plat=scs&nocache=1&cb=${cb}`
-    : `${ENDPOINT}?mode=meta&plat=scs`;
-
+// PT: Faz fetch JSON com retry simples e backoff.
+// EN: Performs JSON fetch with simple retry and backoff.
+async function fetchJsonWithRetry(url) {
   let attempt = 0;
   let lastError = null;
 
   while (attempt <= MAX_RETRIES) {
     try {
-      const res = await fetchWithTimeout(url, FETCH_TIMEOUT_MS);
+      const response = await fetchWithTimeout(url, FETCH_TIMEOUT_MS);
 
-      if (!res.ok) {
-        throw new Error('Resposta não OK do servidor / Server response not OK: ' + res.status);
+      if (!response.ok) {
+        throw new Error(`Resposta não OK do servidor / Server response not OK: ${response.status}`);
       }
 
-      const data = await res.json();
-      return data;
-    } catch (err) {
-      lastError = err;
+      return await response.json();
+    } catch (error) {
+      lastError = error;
+
+      if (attempt < MAX_RETRIES) {
+        const retryDelay = RETRY_DELAY_MS * (attempt + 1);
+        await delay(retryDelay);
+      }
+
       attempt += 1;
-      console.warn(`summary-meta: tentativa ${attempt} falhou / attempt failed:`, err);
     }
   }
 
-  throw lastError || new Error('Falha ao buscar summary meta / Failed to fetch summary meta.');
+  throw lastError || new Error('Falha ao buscar summary / Failed to fetch summary.');
 }
 
-// ============================================================
-// 4. PARSE DOS DADOS: LISTA -> SUMMARY
-// ============================================================
+/* -----------------------------------------------------------------------------*/
+// Summary Fetch
+/* -----------------------------------------------------------------------------*/
 
-// PT: Converte a resposta do GAS em um objeto “summary” com:
-//     { avg, total, buckets: {1,2,3,4,5} }
-// EN: Converts GAS response into a “summary” object:
-//     { avg, total, buckets: {1,2,3,4,5} }
-export function buildSummaryFromResponse(data) {
-  // ✅ 1) PRIMEIRO: atalho para META (agregado)
-  // PT/EN: Se veio do endpoint META, já está pronto.
-  if (data && typeof data === 'object' && !Array.isArray(data)) {
-    const hasMetaShape =
-      typeof data.avg === 'number' &&
-      typeof data.total === 'number' &&
-      typeof data.buckets === 'object' &&
-      data.buckets;
+// PT: Busca o summary via lista completa.
+// EN: Fetches the summary through the full list endpoint.
+async function fetchSummaryWithRetry() {
+  const endpointUrl = ensureEndpoint();
 
-    if (hasMetaShape) {
-      return {
-        avg: data.avg,
-        total: data.total,
-        buckets: data.buckets,
-      };
-    }
+  const url = createEndpointUrl(endpointUrl);
+  url.searchParams.set('mode', 'list');
+  url.searchParams.set('plat', 'scs');
+  url.searchParams.set('limit', '200');
+  url.searchParams.set('page', '1');
+
+  return fetchJsonWithRetry(url.toString());
+}
+
+// PT: Busca o summary agregado via endpoint META.
+// EN: Fetches the aggregated summary through the META endpoint.
+async function fetchSummaryMetaWithRetry({ forceFresh = false } = {}) {
+  const endpointUrl = ensureEndpoint(); // 👈 obrigatório
+
+  const url = createEndpointUrl(endpointUrl);
+  url.searchParams.set('mode', 'meta');
+  url.searchParams.set('plat', 'scs');
+
+  if (forceFresh) {
+    url.searchParams.set('nocache', '1');
+    url.searchParams.set('cb', String(Date.now()));
   }
 
-  // PT: Recebe dados brutos da API.
-  // PT: Aceitamos tanto { items: [...] } quanto [...] direto.
-  // EN: We accept both { items: [...] } and [...] directly.
+  return fetchJsonWithRetry(url.toString());
+}
+
+/* -----------------------------------------------------------------------------*/
+// Summary Parser
+/* -----------------------------------------------------------------------------*/
+
+// PT: Estrutura vazia padrão do summary.
+// EN: Default empty summary structure.
+function createEmptySummary() {
+  return {
+    avg: 0,
+    total: 0,
+    buckets: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 },
+  };
+}
+
+// PT: Converte resposta da API em objeto final de summary.
+// EN: Converts the API response into the final summary object.
+function buildSummaryFromResponse(data) {
+  // PT: Atalho para resposta já agregada no formato META.
+  // EN: Shortcut for already aggregated META-shaped responses.
+  if (isValidSummaryShape(data)) {
+    return {
+      avg: data.avg,
+      total: data.total,
+      buckets: data.buckets,
+    };
+  }
+
+  // PT: Aceita tanto { items: [] } quanto [] direto.
+  // EN: Accepts both { items: [] } and direct [] input.
   const items = Array.isArray(data?.items) ? data.items : Array.isArray(data) ? data : [];
 
   const ratings = items
     .map((item) => {
-      // PT: Mapeia para extrair avaliações.
-      const raw = item.rating ?? item.stars ?? item.estrelas ?? item.nota ?? item.rate; // PT: Vários nomes possíveis.
+      const rawRating = item.rating ?? item.stars ?? item.estrelas ?? item.nota ?? item.rate;
+      const numericRating = Number(rawRating);
 
-      const n = Number(raw); // PT: Converte para número. "aqui o n deve ser Number ou numero em pt"
-      return Number.isFinite(n) ? n : null; // PT: Retorna número ou null.
+      return Number.isFinite(numericRating) ? numericRating : null;
     })
-    .filter((n) => n !== null); // PT: Filtra nulos.
+    .filter((numericRating) => numericRating !== null);
 
-  const total = ratings.length; // PT: Total de avaliações.
+  const total = ratings.length;
+  if (!total) return createEmptySummary();
 
-  if (!total) {
-    // PT: Sem avaliações válidas ainda.
-    // EN: No valid ratings yet.
+  const ratingSum = ratings.reduce((accumulator, numericRating) => accumulator + numericRating, 0);
+  const avg = ratingSum / total;
 
-    return {
-      avg: 0, // PT: Média das avaliações.
-      total: 0, // PT: Total de avaliações.
-      buckets: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 }, // PT: Mapa vazio.
-    };
-  }
+  const buckets = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
 
-  const sum = ratings.reduce((acc, n) => acc + n, 0); // PT: Soma todas as avaliações.
-  const avg = sum / total; // PT: Calcula a média.
+  ratings.forEach((rating) => {
+    let star = Math.round(rating);
 
-  const buckets = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 }; // PT: Inicializa contadores.
-  ratings.forEach((r) => {
-    // PT: Conta cada avaliação. o que seria o (r) ? acho que rating
-    let star = Math.round(r); // PT: Arredonda para a estrela mais próxima.
     if (star < 1) star = 1;
     if (star > 5) star = 5;
+
     buckets[star] += 1;
   });
 
-  return { avg, total, buckets }; // PT: Retorna o resumo.
+  return { avg, total, buckets };
 }
+
+/* -----------------------------------------------------------------------------*/
+// Export
+/* -----------------------------------------------------------------------------*/
 
 export const AthenaisSummaryHelpers = {
   loadSummaryFromCache,
-  saveSummarytoCache,
+  loadSummarySnapshot,
+  saveSummaryToCache,
+  fetchWithTimeout,
   fetchSummaryWithRetry,
   fetchSummaryMetaWithRetry,
   buildSummaryFromResponse,
 };
-
-// ============================================================
-// FIM DO ARQUIVO
-// ============================================================

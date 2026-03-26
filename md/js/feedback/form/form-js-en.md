@@ -31,7 +31,6 @@ Aura does not execute validations, process images or perform network requests di
 | Image Upload API  | Lyra        | Handles image upload requests                       |
 | List API          | Mirael      | Retrieves feedback data from the backend            |
 | Flow Conductor    | Liora       | Connects form events and delegates responsibilities |
-| Event Messenger   | Nysa        | Emits internal feedback events                      |
 | Submit Specialist | Selene      | Executes the final submission flow                  |
 | Queue             | Alma        | Stores failed submissions locally                   |
 | Outbox Processor  | Noah        | Retries queued submissions with backoff             |

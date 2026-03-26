@@ -4,263 +4,219 @@
 //
 // PT: Responsável pelo comportamento visual das imagens no Board.
 //     Aplica thumb/full, fallback visual e auto-recover diretamente
-//     no DOM. Utiliza a lógica pura fornecida pela Dália
-//     (dalia-image-helpers.js).
+//     no DOM, utilizando a lógica pura fornecida pela Dália.
 //
 // EN: Responsible for the visual behavior of images in the Board.
 //     Applies thumb/full images, visual fallback and auto-recover
-//     directly in the DOM. Uses the pure logic provided by Dália
-//     (dalia-image-helpers.js).
-// ------------------------------------------------------------------
-//
-// Imports / Dependências
-//
-// 🌿 Dália — lógica de imagem (helpers)
-// EN 🌿 Dalia — image logic (helpers)
-// Fornece:
-// - fetchDataURL(proxyUrl)
-// - FALLBACK_IMG
-// - isLikely1x1(dataUrl)
+//     directly in the DOM, using the pure logic provided by Dália.
+/* -----------------------------------------------------------------------------*/
 
+/* -----------------------------------------------------------------------------*/
+// Imports
+/* -----------------------------------------------------------------------------*/
+
+/* -----------------------------------------------------------------------------*/
+// 🪷 Dália — Image Helpers
+// Fornece / Provides:
+// - fetchDataURL()
+// - FALLBACK_IMG
+// - isLikely1x1()
+/* -----------------------------------------------------------------------------*/
 import { DaliaImageHelpers } from '/assets/js/feedback/board/image/dalia-image-helpers.js';
 
-/* ------------------------------------------------------------
- * applyImageWithFallback(imgEl, btnThumbEl, proxyUrl, fullUrl)
- * ------------------------------------------------------------
- * 🇧🇷 Aplica uma imagem (vinda do proxy) no elemento <img>.
- * Se o proxy falhar, mostra uma imagem alternativa (fallback).
- *
- * - Tenta carregar a imagem principal via fetchDataURL().
- * - Usa isLikely1x1() para detectar respostas inválidas (ex: PNG 1x1).
- * - Se tudo falhar, mostra FALLBACK_IMG (/assets/img/no-photo.png).
- *
- * 🇺🇸 Applies an image (from proxy) to an <img> element.
- * If the proxy fails, shows a fallback placeholder image.
- *
- * - Tries to load the main image using fetchDataURL().
- * - Uses isLikely1x1() to detect invalid responses (e.g., transparent 1x1).
- * - Falls back to FALLBACK_IMG (/assets/img/no-photo.png) if all fails.
- */
+/* -----------------------------------------------------------------------------*/
+// 📘 Logger — System Observability Layer
+/* -----------------------------------------------------------------------------*/
+import { Logger } from '/assets/js/system/core/logger.js';
 
-export async function applyImageWithFallback(imgEl, btnThumbEl, proxyUrl, fullUrl) {
+/* -----------------------------------------------------------------------------*/
+// Image Retry Helpers
+/* -----------------------------------------------------------------------------*/
+
+// PT: Tenta carregar a imagem algumas vezes antes de aplicar fallback final.
+// EN: Tries to load the image a few times before applying the final fallback.
+async function applyImageWithFallback(imageElement, thumbButtonElement, proxyUrl, fullUrl) {
   try {
-    // 🔹 1) Buscar a imagem no proxy via fetchDataURL()
-    // Retorna um texto Base64 tipo "data:image/png;base64,AAAA..."
     const dataUrl = await DaliaImageHelpers.fetchDataURL(proxyUrl);
 
-    // 🔹 2) Testar se o resultado é válido
-    // Se for uma imagem 1x1 transparente (erro), dispara exceção.
-    if (DaliaImageHelpers.isLikely1x1(dataUrl)) throw new Error('imagem 1x1 inválida');
+    if (DaliaImageHelpers.isLikely1x1(dataUrl)) {
+      throw new Error('Invalid 1x1 image response');
+    }
 
-    // 🔹 3) Aplicar a imagem no <img>
-    // src → a imagem Base64 que veio do proxy
-    imgEl.src = dataUrl;
+    imageElement.src = dataUrl;
 
-    // 🔹 4) Tornar o botão visível e habilitar o modal
-    btnThumbEl.classList.remove('hidden');
-    btnThumbEl.classList.add('js-open-modal');
-    imgEl.setAttribute('data-full', fullUrl);
-    btnThumbEl.setAttribute('data-full', fullUrl);
-  } catch (err) {
-    // ⚠️ Se algo deu errado, aplica o fallback local
-    console.warn('[applyImageWithFallback] erro ao carregar imagem:', err.message);
+    if (thumbButtonElement) {
+      thumbButtonElement.classList.remove('hidden');
+      thumbButtonElement.classList.add('js-open-modal');
+      thumbButtonElement.setAttribute('data-full', fullUrl);
+    }
 
-    // Mostra a imagem padrão "sem foto"
-    imgEl.src = DaliaImageHelpers.FALLBACK_IMG;
-    btnThumbEl.classList.remove('js-open-modal');
+    imageElement.setAttribute('data-full', fullUrl);
+  } catch {
+    imageElement.src = DaliaImageHelpers.FALLBACK_IMG;
+
+    if (thumbButtonElement) {
+      thumbButtonElement.classList.remove('js-open-modal');
+    }
   }
 }
 
-/* ------------------------------------------------------------
- * loadThumbWithRetries(imgEl, btnThumbEl, proxyUrl, fullUrl, maxAttempts = 2)
- * ------------------------------------------------------------
- * 🇧🇷 Tenta carregar a miniatura (thumb) várias vezes
- * usando o proxy do Google Apps Script (GAS).
- *
- * - Faz até "maxAttempts" tentativas.
- * - Entre cada tentativa, espera 500 ms (meio segundo).
- * - Se tudo falhar, mostra a imagem de fallback.
- *
- * 🇺🇸 Tries to load the thumbnail multiple times
- * using the Google Apps Script (GAS) proxy.
- *
- * - Makes up to "maxAttempts" attempts.
- * - Waits 500 ms between each try.
- * - Falls back to a local placeholder image if all fail.
- */
+/* -----------------------------------------------------------------------------*/
+// Image Retry Helpers
+/* -----------------------------------------------------------------------------*/
 
-export async function loadThumbWithRetries(imgEl, btnThumbEl, proxyUrl, fullUrl, maxAttempts = 2) {
-  // 🔹 1) "let" cria uma variável que PODE mudar de valor depois.
-  // Aqui ela começa em 0, representando a primeira tentativa.
-  // (se fosse const, o valor não poderia ser alterado)
+// PT: Tenta carregar a imagem algumas vezes antes de aplicar fallback final.
+// EN: Tries to load the image a few times before applying the final fallback.
+async function loadThumbWithRetries(
+  imageElement,
+  thumbButtonElement,
+  proxyUrl,
+  fullUrl,
+  maxAttempts = 2
+) {
+  if (thumbButtonElement) {
+    thumbButtonElement.classList.remove('js-open-modal');
+  }
   let attempt = 0;
 
-  // 🔹 2) Função auxiliar "delay"
-  // Retorna uma Promise que só é resolvida depois de X milissegundos.
-  // É usada para dar uma pausa (ex: 500 ms) entre as tentativas.
   const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-  // 🔹 3) "while" = laço de repetição
-  // Executa o bloco abaixo ENQUANTO a condição for verdadeira.
-  // Aqui, repete enquanto o número de tentativas for menor que o máximo permitido.
   while (attempt < maxAttempts) {
     try {
-      // 🔹 4) attempt++ → soma +1 à variável "attempt"
-      // É igual a escrever "attempt = attempt + 1"
-      attempt++;
+      attempt += 1;
 
-      console.log(`[loadThumbWithRetries] tentativa ${attempt} de ${maxAttempts}`);
+      await applyImageWithFallback(imageElement, thumbButtonElement, proxyUrl, fullUrl);
 
-      // 🔹 5) Tenta carregar a imagem
-      await applyImageWithFallback(imgEl, btnThumbEl, proxyUrl, fullUrl);
+      const currentSrc = imageElement.getAttribute('src') || '';
+      const isFallback = currentSrc === DaliaImageHelpers.FALLBACK_IMG;
 
-      // ✅ Se deu certo, encerra o loop usando "return"
-      console.log('[loadThumbWithRetries] imagem carregada com sucesso');
-      return;
-    } catch (err) {
-      // ⚠️ 6) Se falhar, o código vem parar aqui (no catch)
-      console.warn(`[loadThumbWithRetries] falha na tentativa ${attempt}:`, err);
-
-      // 🔹 7) Se ainda há tentativas restantes, espera meio segundo antes de tentar de novo
-      if (attempt < maxAttempts) {
-        await delay(500); // pausa de 500 milissegundos
+      if (!isFallback) {
+        return;
       }
+    } catch {}
+
+    if (attempt < maxAttempts) {
+      await delay(500);
     }
   }
 
-  // 🚫 8) Se todas as tentativas falharem, mostra o fallback
-  console.error('[loadThumbWithRetries] todas as tentativas falharam, usando fallback');
-  imgEl.src = DaliaImageHelpers.FALLBACK_IMG;
-  btnThumbEl.classList.remove('js-open-modal');
+  imageElement.src = DaliaImageHelpers.FALLBACK_IMG;
+  thumbButtonElement.classList.remove('js-open-modal');
+
+  Logger.warn('UI', 'Petra', 'thumb fallback applied after retry limit', {
+    proxyUrl,
+    maxAttempts,
+  });
 }
 
-/* ------------------------------------------------------------
- * smartAutoRecover(imgEl, proxyUrl, totalMs = 60000, everyMs = 10000)
- * ------------------------------------------------------------
- * 🇧🇷 Faz tentativas automáticas de recarregar a imagem em segundo plano,
- * caso o proxy falhe (ex: imagem 1x1 ou temporariamente fora do ar).
- *
- * 🇺🇸 Automatically retries to reload the image in background
- * if the proxy temporarily fails (like a 1x1 fallback image).
- */
+/* -----------------------------------------------------------------------------*/
+// Smart Auto Recover
+/* -----------------------------------------------------------------------------*/
 
-export function smartAutoRecover(imgEl, proxyUrl, totalMs = 60000, everyMs = 10000) {
-  // const usado aqui pois o tempo inicial nunca muda —
-  // ele serve apenas como referência para sabermos quando parar as tentativas.
+// PT: Tenta recuperar a imagem em segundo plano por um período limitado.
+// EN: Tries to recover the image in the background for a limited period.
+function smartAutoRecover(imageElement, proxyUrl, totalMs = 60000, everyMs = 10000) {
   const startTime = Date.now();
 
-  // const aqui define uma função interna fixa (não será reatribuída),
-  // responsável por tentar recarregar a imagem e se falhar, agendar outra tentativa.
   const tryReload = async () => {
     try {
-      // verifica quanto tempo passou desde o início;
-      // se já excedeu o tempo limite totalMs (ex: 60 segundos), para completamente.
       if (Date.now() - startTime > totalMs) return;
 
-      // let usado aqui porque o cacheBreaker muda a cada tentativa —
-      // ele gera uma nova URL com timestamp diferente para evitar o cache.
-      let cacheBreaker = (proxyUrl.includes('?') ? '&' : '?') + 'cb=' + (Date.now() % 1e7);
-
-      // faz a requisição novamente para o proxy, usando o cacheBreaker
+      const cacheBreaker = `${proxyUrl.includes('?') ? '&' : '?'}cb=${Date.now() % 1e7}`;
       const response = await fetch(proxyUrl + cacheBreaker);
+      const dataUrlText = await response.text();
 
-      // lê o corpo da resposta (texto Base64)
-      const dataURLText = await response.text();
-
-      // verifica se a resposta é válida (não é o PNG 1x1);
-      if (!DaliaImageHelpers.isLikely1x1(dataURLText)) {
-        // se for válida, substitui a imagem atual e dispara o evento de carregamento
-        imgEl.src = dataURLText;
-        imgEl.dispatchEvent(new Event('load'));
-        console.log('[smartAutoRecover] imagem recuperada com sucesso!');
-        return; // encerra o procosso — imagem já foi carregada
+      if (!DaliaImageHelpers.isLikely1x1(dataUrlText)) {
+        imageElement.src = dataUrlText;
+        imageElement.dispatchEvent(new Event('load'));
+        return;
       }
-    } catch (err) {
-      // se o fetch falhar (problema de rede, proxy, etc.), apenas loga o erro e continua tentando
-      console.warn('[smartAutoRecover] tentativa falhou, nova tentativa em breve...', err);
+    } catch (error) {
+      Logger.warn('UI', 'Petra', 'smart auto recover attempt failed', error);
     }
 
-    // agenda a próxima tentativa após "everyMs" milissegundos (ex: 10 segundos)
     setTimeout(tryReload, everyMs);
   };
 
-  // inicia a primeira tentativa com um pequeno atraso
   setTimeout(tryReload, everyMs);
 }
 
-/* ------------------------------------------------------------
- * markHasPhoto(rootCard, hasPhoto)
- * ------------------------------------------------------------ */
-export function markHasPhoto(rootCard, hasPhoto) {
-  // marca a foto onde tem a raiz "raiz, tem"
+/* -----------------------------------------------------------------------------*/
+// Card State
+/* -----------------------------------------------------------------------------*/
+
+// PT: Marca visualmente se o card possui foto.
+// EN: Visually marks whether the card has a photo.
+function markHasPhoto(rootCard, hasPhoto) {
   if (!rootCard) return;
+
   rootCard.classList.toggle('has-photo', !!hasPhoto);
   rootCard.classList.toggle('no-photo', !hasPhoto);
 }
 
-// Mira Modal List UI — lógica de thumbs do Board
-/**
- * PT: Verifica se um elemento está dentro do modal de feedback (lista).
- * EN: Checks if an element is inside the feedback modal (list).
- */
-function isInFeedbackModal(el) {
-  return !!el?.closest?.('#modalFeedback');
+/* -----------------------------------------------------------------------------*/
+// Modal Context Helpers
+/* -----------------------------------------------------------------------------*/
+
+// PT: Verifica se o elemento está dentro do modal de feedback.
+// EN: Checks whether the element is inside the feedback modal.
+function isInFeedbackModal(element) {
+  return !!element?.closest?.('#modalFeedback');
 }
 
-/**
- * PT: Normaliza opções de hidratação.
- * EN: Normalizes hydration options.
- */
-function normalizeOpts(opts) {
+// PT: Normaliza opções de hidratação.
+// EN: Normalizes hydration options.
+function normalizeOptions(options) {
   return {
-    allowModal: !!opts?.allowModal, // padrão: false (se não fornecido)
+    allowModal: !!options?.allowModal,
   };
 }
 
-/* ------------------------------------------------------------*/
+/* -----------------------------------------------------------------------------*/
+// Thumb Validation
+/* -----------------------------------------------------------------------------*/
 
-/**
- * PT: Valida um src básico de imagem.
- * EN: Validates a basic image src.
- */
+// PT: Valida um src básico de imagem.
+// EN: Validates a basic image src.
 function isValidSrc(value) {
-  if (!value) return false; // nulo/indefinido
-  const cleaned = String(value).trim();
-  if (!cleaned || cleaned === '#' || cleaned === 'about:blank') return false; // vazio ou inválido
+  if (!value) return false;
+
+  const cleanedValue = String(value).trim();
+  if (!cleanedValue || cleanedValue === '#' || cleanedValue === 'about:blank') {
+    return false;
+  }
+
   return true;
 }
 
-/**
- * PT: Aplica a lógica de visibilidade e data-full em um thumb-container.
- * EN: Applies visibility and data-full logic to a single thumb-container.
- */
+/* -----------------------------------------------------------------------------*/
+// Thumb DOM Apply
+/* -----------------------------------------------------------------------------*/
 
-function applyThumb(container, opts) {
-  const o = normalizeOpts(opts);
-  // console.log('[PETRA] applyThumb', container.getAttribute('data-owner'), container);
+// PT: Aplica a lógica de visibilidade e data-full em um thumb-container.
+// EN: Applies visibility and data-full logic to a thumb container.
+function applyThumb(container, options) {
+  const normalizedOptions = normalizeOptions(options);
 
   if (!container) return;
-  if (!o.allowModal && isInFeedbackModal(container)) return;
+  if (!normalizedOptions.allowModal && isInFeedbackModal(container)) return;
 
-  // ✅ pega a raiz do card 1 vez (mais limpo / consistent)
-  const card = container.closest('[data-feedback-card]');
+  const cardElement = container.closest('[data-feedback-card]');
+  const imageElement = container.querySelector('img');
 
-  const img = container.querySelector('img');
-  if (!img) {
+  if (!imageElement) {
     container.classList.add('hidden');
     container.classList.remove('js-open-modal');
-    // ✅ marca estado no card
-    markHasPhoto(card, false);
+    markHasPhoto(cardElement, false);
     return;
   }
 
-  const thumbSrc = img.getAttribute('src');
-  let fullSrc = img.getAttribute('data-full') || container.getAttribute('data-full');
+  const thumbSrc = imageElement.getAttribute('src');
+  let fullSrc = imageElement.getAttribute('data-full') || container.getAttribute('data-full');
 
-  // Se o thumb é válido mas o full ainda não, usa o thumb como full
   if (isValidSrc(thumbSrc) && !isValidSrc(fullSrc)) {
     fullSrc = thumbSrc;
-    img.setAttribute('data-full', fullSrc);
+    imageElement.setAttribute('data-full', fullSrc);
     container.setAttribute('data-full', fullSrc);
   }
 
@@ -274,80 +230,85 @@ function applyThumb(container, opts) {
     container.classList.remove('js-open-modal');
   }
 
-  // ✅ marca estado no card
-  markHasPhoto(card, hasPhoto);
+  markHasPhoto(cardElement, hasPhoto);
 }
 
-/**
- * PT: Escaneia um root em busca de ".thumb-container".
- * EN: Scans a root for ".thumb-container".
- */
-function scanThumbs(root = document, opts) {
-  const o = normalizeOpts(opts);
-  root.querySelectorAll('.thumb-container').forEach((el) => applyThumb(el, o));
+/* -----------------------------------------------------------------------------*/
+// Thumb Scan
+/* -----------------------------------------------------------------------------*/
+
+// PT: Escaneia um root em busca de ".thumb-container".
+// EN: Scans a root for ".thumb-container".
+function scanThumbs(root = document, options) {
+  const normalizedOptions = normalizeOptions(options);
+
+  root.querySelectorAll('.thumb-container').forEach((element) => {
+    applyThumb(element, normalizedOptions);
+  });
 }
 
-/**
- * PT: Observa o DOM e hidrata thumbs criados dinamicamente.
- * EN: Observes the DOM and hydrates dynamically added thumbs.
- */
-function observeThumbs(root = document, opts) {
-  const o = normalizeOpts(opts);
+/* -----------------------------------------------------------------------------*/
+// Thumb Observer
+/* -----------------------------------------------------------------------------*/
 
-  const obs = new MutationObserver((mutations) => {
+// PT: Observa o DOM e hidrata thumbs criados dinamicamente.
+// EN: Observes the DOM and hydrates dynamically added thumbs.
+function observeThumbs(root = document, options) {
+  const normalizedOptions = normalizeOptions(options);
+
+  const observer = new MutationObserver((mutations) => {
     for (const mutation of mutations) {
       mutation.addedNodes.forEach((node) => {
         if (!(node instanceof HTMLElement)) return;
 
-        // O nó é um thumb-container sozinho
         if (node.matches?.('.thumb-container')) {
-          applyThumb(node);
+          applyThumb(node, normalizedOptions);
         }
 
-        // O nó tem filhos com thumb-containers
-        node.querySelectorAll?.('.thumb-container').forEach((el) => applyThumb(el, o)); // aplica em cada um
+        node.querySelectorAll?.('.thumb-container').forEach((element) => {
+          applyThumb(element, normalizedOptions);
+        });
 
-        // Observa mudanças em <img> dentro do thumb
-        node.querySelectorAll?.('.thumb-container img').forEach((img) => {
-          const container = img.closest('.thumb-container');
+        node.querySelectorAll?.('.thumb-container img').forEach((imageElement) => {
+          const container = imageElement.closest('.thumb-container');
           if (!container) return;
 
-          new MutationObserver(() => applyThumb(container)).observe(img, {
-            attributes: true,
-            attributeFilter: ['src', 'data-full'],
-          });
+          new MutationObserver(() => applyThumb(container, normalizedOptions)).observe(
+            imageElement,
+            {
+              attributes: true,
+              attributeFilter: ['src', 'data-full'],
+            }
+          );
         });
       });
     }
   });
-  // ✅ importante: observar o root em si (modal ou document)
-  obs.observe(root.body || root, { childList: true, subtree: true });
-  return obs;
+
+  observer.observe(root.body || root, { childList: true, subtree: true });
+  return observer;
 }
 
-/**
- * PT: Export final da Petra com tudo junto.
- * EN: Final export for Petra including DOM thumb logic.
- */
+/* -----------------------------------------------------------------------------*/
+// Export
+/* -----------------------------------------------------------------------------*/
 
 export const PetraImageUI = {
-  // Lado de imagem com Dália (já existente)
+  // Image application
   applyImageWithFallback,
   loadThumbWithRetries,
   smartAutoRecover,
   markHasPhoto,
 
-  // Novo — controle dos thumbs do Board
+  // Thumb DOM control
   applyThumb,
   scanThumbs,
   observeThumbs,
 
-  /**
-   * PT: Inicializa o sistema de thumbs da Petra.
-   * EN: Initializes Petra's thumb system.
-   */
+  // PT: Inicializa o sistema de thumbs da Petra.
+  // EN: Initializes Petra's thumb system.
   initThumbSystem(root = document) {
-    this.scanThumbs(root);
-    this.observeThumbs(root);
+    scanThumbs(root);
+    observeThumbs(root);
   },
 };

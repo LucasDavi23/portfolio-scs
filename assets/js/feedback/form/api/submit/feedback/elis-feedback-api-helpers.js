@@ -1,38 +1,43 @@
+/* -----------------------------------------------------------------------------*/
 // 🌿 Elis — Feedback Create Action (Gateway)
 //
-// Nível: Jovem
+// Nível / Level: Jovem / Junior
 //
-// PT: Camada de atendimento da criação de feedback do FORM.
-//     Recebe o payload pronto, encaminha ao Apps Script via Vesper
-//     (action "submitFeedbackAction") e devolve a resposta técnica normalizada.
-//     Não executa validações nem decisões de negócio.
+// PT: Camada de entrada para criação de feedback no FORM.
+//     Recebe o payload pronto e encaminha para o Apps Script via Vesper,
+//     utilizando a action "submitFeedbackAction".
+//     Retorna a resposta técnica já normalizada.
+//     Não executa validações nem regras de negócio.
 //
-// EN: Feedback creation gateway layer for the FORM.
-//     Receives a ready payload, forwards it to Apps Script via Vesper
-//     ("submitFeedbackAction" action) and returns a technically normalized response.
-//     Performs no business decisions.
-// --------------------------------------------------
+// EN: Entry layer for feedback creation in the FORM.
+//     Receives a ready payload and forwards it to Apps Script via Vesper,
+//     using the "submitFeedbackAction" action.
+//     Returns the already normalized technical response.
+//     Performs no validation or business rules.
+/* -----------------------------------------------------------------------------*/
+
+/* -----------------------------------------------------------------------------*/
 // Imports
-// --------------------------------------------------
-// Vesper — Core de Rede (helpers)
-// Provides:
-// - getFeedbackEndpoint
-// - postJsonAction
-
+//
+// 🧬 Vesper — Form API Core Helpers
+// Fornece / Provides:
+// - postJsonAction(...)
+/* -----------------------------------------------------------------------------*/
 import { VesperFormApiCoreHelpers } from '/assets/js/feedback/form/api/network/vesper-form-api-core-helpers.js';
-// --------------------------------------------------
 
-/**
- * PT: Envia o payload de feedback para o Apps Script.
- * EN: Sends feedback payload to Apps Script.
- *
- * @param {Object} payload - PT: dados prontos do form | EN: ready form data
- * @returns {Promise<{success:boolean,message:string,data:any,item:any,raw:any}>}
- */
-export async function submitFeedbackAction(payload = {}) {
+/* -----------------------------------------------------------------------------*/
+// Submit Feedback Action
+//
+// PT: Envia o payload de feedback para o Apps Script utilizando a Vesper.
+// EN: Sends the feedback payload to Apps Script using Vesper.
+/* -----------------------------------------------------------------------------*/
+async function submitFeedbackAction(payload = {}) {
   return VesperFormApiCoreHelpers.postJsonAction('submitFeedbackAction', payload);
 }
 
+/* -----------------------------------------------------------------------------*/
+// Export
+/* -----------------------------------------------------------------------------*/
 export const ElisFeedbackApiHelpers = {
   submitFeedbackAction,
 };

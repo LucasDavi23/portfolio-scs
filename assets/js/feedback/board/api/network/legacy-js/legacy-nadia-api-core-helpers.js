@@ -1,5 +1,7 @@
-// /assets/js/feedback/core/api/nadia-api-core-helpers.js
 // 🧬 Nádia — Core da API (helpers)
+//
+// Nível / Level: Adulto / Adult
+//
 // PT: Especialista na camada de rede: rate limit, timeout, retry, cache em
 //     memória e parse seguro de JSON. Não conhece “card”, “summary” ou
 //     domínio algum – só garante chamadas estáveis.
@@ -153,10 +155,32 @@ async function fetchJsonWithRetry(
 // ========= API pública da Nádia =========
 export async function fetchJsonCached(
   url,
-  { ttlMs = DEFAULT_TTL_MS, timeoutMs = DEFAULT_TIMEOUT_MS, retries = DEFAULT_RETRIES } = {}
+  {
+    ttlMs = DEFAULT_TTL_MS,
+    timeoutMs = DEFAULT_TIMEOUT_MS,
+    retries = DEFAULT_RETRIES,
+
+    // ✅ novos flags (vêm da Naomi via opts)
+    nocache = false,
+    force = false,
+    cb,
+  } = {}
 ) {
   const key = String(url);
   const now = Date.now();
+
+  // ✅ decide bypass
+  const bypass =
+    nocache === true ||
+    String(nocache) === '1' ||
+    force === true ||
+    String(force) === '1' ||
+    (typeof cb !== 'undefined' && String(cb).length > 0);
+
+  // ✅ se bypass, não usa cache e não coalesce (cada request é fresh)
+  if (bypass) {
+    return await fetchJsonWithRetry(key, { timeoutMs, retries });
+  }
 
   // 1) cache em memória
   const hit = _memCache.get(key);
@@ -170,7 +194,7 @@ export async function fetchJsonCached(
   // 3) dispara a chamada real com retry
   const runner = (async () => {
     try {
-      const data = await fetchJsonWithRetry(url, { timeoutMs, retries });
+      const data = await fetchJsonWithRetry(key, { timeoutMs, retries });
       _memCache.set(key, { exp: now + ttlMs, data });
       return data;
     } finally {

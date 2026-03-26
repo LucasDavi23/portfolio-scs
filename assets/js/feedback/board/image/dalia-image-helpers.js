@@ -1,384 +1,422 @@
 /* -----------------------------------------------------------------------------*/
-// 🪷 DÁLIA — Guardiã da Lógica de Imagem
+// 🪷 Dália — Image Helpers
 //
 // Nível / Level: Jovem / Young
 //
-// PT: Lógica pura de imagem: Drive/GAS, proxy, URLs, validação.
-// EN: Pure image logic: Drive/GAS, proxy, URLs, validation.
+// PT: Lógica pura de imagem: Drive/GAS, proxy, URLs e validação.
+// EN: Pure image logic: Drive/GAS, proxy, URLs and validation.
 /* -----------------------------------------------------------------------------*/
 
-// EndpointConfig — Configuração do Endpoint (Camada de Infra)
-// Fornece:
+/* -----------------------------------------------------------------------------*/
+// Imports
+/* -----------------------------------------------------------------------------*/
+
+/* -----------------------------------------------------------------------------*/
+// ImageEndpointConfig — Image Endpoint Configuration
+// Fornece / Provides:
 // - set(url)
 // - get()
-import { EndpointConfig } from '/assets/js/feedback/core/config/feedback-endpoint.js';
+/* -----------------------------------------------------------------------------*/
+import { ImageEndpointConfig } from '/assets/js/feedback/core/config/feedback-image-endpoint.js';
 
-/* ------------------------------------------------------------
- * parseDrive(raw, item?)
- * ------------------------------------------------------------
- * Extrai { id, rk } (resourceKey) a partir de:
- *  - ID puro ("1AbC...")
- *  - Links do tipo /file/d/<ID>
- *  - Links com ?id=<ID>
- *  - Links legados (/thumbnail, /uc) que já contêm id=image_id
- *
- * Retorna sempre um objeto { id: string, rk: string }.
- * Se não achar, retorna { id: '', rk: '' }.
- */
+/* -----------------------------------------------------------------------------*/
+// Helpers
+//
+// PT: Funções auxiliares internas para validação e montagem de URLs.
+// EN: Internal helper functions for validation and URL building.
+/* -----------------------------------------------------------------------------*/
 
-export function parseDrive(raw, item = {}) {
-  const s = String(raw || '').trim();
-  if (!s) return { id: '', rk: '' };
+// PT: Garante que existe um endpoint válido de imagem (não offline).
+// EN: Ensures a valid image endpoint (non-offline).
+function ensureImageEndpoint() {
+  const endpoint = ImageEndpointConfig.get();
 
-  // Caso 1: já é um ID "puro"
-  if (/^[\w-]{10,}$/.test(s)) {
-    const rkGuess = item.resourcekey || item.resourceKey || item.foto_resourcekey || '';
-    return { id: s, rk: rkGuess || '' };
+  if (ImageEndpointConfig.isOffline()) {
+    throw new Error('Image endpoint is not configured (offline mode).');
   }
 
-  // Caso 2: /file/d/<ID>
-  let m = s.match(/\/file\/d\/([-\w]{10,})/i);
-  if (m) {
-    const rk = (s.match(/[?&]resourcekey=([^&#]+)/i) || [, ''])[1];
-    return { id: m[1], rk };
+  return endpoint;
+}
+
+/* -----------------------------------------------------------------------------*/
+// Drive Parsing
+/* -----------------------------------------------------------------------------*/
+
+// PT: Extrai { id, rk } de um valor do Drive.
+// Aceita:
+// - ID puro
+// - links /file/d/<ID>
+// - links com ?id=<ID>
+// - links legados com id= ou image_id=
+//
+// EN: Extracts { id, rk } from a Drive value.
+// Accepts:
+// - pure ID
+// - /file/d/<ID> links
+// - links with ?id=<ID>
+// - legacy links with id= or image_id=
+function parseDrive(raw, item = {}) {
+  const source = String(raw || '').trim();
+  if (!source) return { id: '', rk: '' };
+
+  if (/^[\w-]{10,}$/.test(source)) {
+    const resourceKey = item.resourcekey || item.resourceKey || item.foto_resourcekey || '';
+    return { id: source, rk: resourceKey || '' };
   }
 
-  // Caso 3: ...?id=<ID>
-  m = s.match(/[?&]id=([-\w]{10,})/i);
-  if (m) {
-    const rk = (s.match(/[?&]resourcekey=([^&#]+)/i) || [, ''])[1];
-    return { id: m[1], rk };
+  let match = source.match(/\/file\/d\/([-\w]{10,})/i);
+  if (match) {
+    const resourceKey = (source.match(/[?&]resourcekey=([^&#]+)/i) || [, ''])[1];
+    return { id: match[1], rk: resourceKey };
   }
 
-  // Caso 4: endpoints legados com id/image_id na query
-  m = s.match(/[?&](?:id|image_id)=([-\w]{10,})/i);
-  if (m) {
-    const rk = (s.match(/[?&]resourcekey=([^&#]+)/i) || [, ''])[1];
-    return { id: m[1], rk };
+  match = source.match(/[?&]id=([-\w]{10,})/i);
+  if (match) {
+    const resourceKey = (source.match(/[?&]resourcekey=([^&#]+)/i) || [, ''])[1];
+    return { id: match[1], rk: resourceKey };
+  }
+
+  match = source.match(/[?&](?:id|image_id)=([-\w]{10,})/i);
+  if (match) {
+    const resourceKey = (source.match(/[?&]resourcekey=([^&#]+)/i) || [, ''])[1];
+    return { id: match[1], rk: resourceKey };
   }
 
   return { id: '', rk: '' };
 }
 
-// -------------------------------------------------------------
-// ID helpers
-// -------------------------------------------------------------
+/* -----------------------------------------------------------------------------*/
+// Drive ID Helpers
+/* -----------------------------------------------------------------------------*/
 
-// --- garantia & tentativa EN ---
-// Validador simples de ID do Drive (mín. 10 chars alfanum/hífen/underscore)
-// EN: simple Drive ID validator (min. 10 alphanum/hyphen/underscore chars)
-export const isDriveId = (s) => /^[\w-]{10,}$/.test(String(s || '').trim());
+// PT: Valida se o valor parece ser um ID de Drive.
+// EN: Validates whether the value looks like a Drive ID.
+const isDriveId = (value) => /^[\w-]{10,}$/.test(String(value || '').trim());
 
-/* ------------------------------------------------------------
- * extractDriveId(anyUrlOrId)
- * ------------------------------------------------------------
- * Extrai um ID plausível de:
- *  - ID puro
- *  - Links /file/d/<ID>
- *  - Links com ?id=<ID>
- *  - Fallback por padrão de “padrão de ID” ([-\w]{20,})
- */
-/* EN: Extracts a plausible Drive ID from:
- *  - Pure ID
- *  - /file/d/<ID> links
- *  - Links with ?id=<ID>
- *  - Fallback by default “ID pattern” ([-\w]{20,})
- */
-export function extractDriveId(anyUrlOrId) {
+// PT: Extrai um ID plausível de:
+// - ID puro
+// - links /file/d/<ID>
+// - links com ?id=<ID>
+// - fallback por padrão de ID
+//
+// EN: Extracts a plausible ID from:
+// - pure ID
+// - /file/d/<ID> links
+// - links with ?id=<ID>
+// - fallback ID pattern
+function extractDriveId(anyUrlOrId) {
   if (!anyUrlOrId) return '';
-  const s = String(anyUrlOrId).trim();
 
-  // já é ID?
-  if (/^[\w-]{20,}$/.test(s)) return s;
+  const source = String(anyUrlOrId).trim();
 
-  // padrões comuns do Drive // common Drive patterns
-  const m =
-    s.match(/\/file\/d\/([-\w]{10,})/i) || s.match(/[?&]id=([-\w]{10,})/i) || s.match(/[-\w]{20,}/); // fallback
-  return m ? m[1] : '';
+  if (/^[\w-]{20,}$/.test(source)) {
+    return source;
+  }
+
+  const match =
+    source.match(/\/file\/d\/([-\w]{10,})/i) ||
+    source.match(/[?&]id=([-\w]{10,})/i) ||
+    source.match(/([-\w]{20,})/);
+
+  return match ? match[1] : '';
 }
 
-/* ------------------------------------------------------------
- * imgProxyUrl(anyUrlOrId, cacheBust?)
- * ------------------------------------------------------------
- * Monta a URL do seu proxy de imagem no GAS a partir de um id/link do Drive.
- * Ex.: https://SEU_EXEC/exec?action=img&id=<ID>&v=<cacheBust>
- */
-/* EN: Builds the URL of your image proxy on GAS from a Drive id/link.
- * Ex.: https://YOUR_EXEC/exec?action=img&id=<ID>&v=<cacheBust>
- */
+/* -----------------------------------------------------------------------------*/
+// Proxy URL Builders
+/* -----------------------------------------------------------------------------*/
 
-export function imgProxyUrl(anyUrlOrId, cacheBust = '') {
-  const id = extractDriveId(anyUrlOrId);
-  if (!id) return '';
-  const v = cacheBust ? `&v=${encodeURIComponent(cacheBust)}` : '';
-  return `${EndpointConfig.get()}?action=img&id=${encodeURIComponent(id)}${v}`;
+// PT: Monta a URL do proxy de imagem no GAS a partir de um ID/link do Drive.
+// EN: Builds the GAS image proxy URL from a Drive ID/link.
+//
+// Exemplo / Example:
+// https://SEU_EXEC/exec?action=img&id=<ID>&v=<cacheBust>
+function imgProxyUrl(anyUrlOrId, cacheBust = '') {
+  const driveId = extractDriveId(anyUrlOrId);
+  if (!driveId) return '';
+
+  const cacheParam = cacheBust ? `&v=${encodeURIComponent(cacheBust)}` : '';
+
+  const endpoint = ensureImageEndpoint();
+
+  return `${endpoint}?action=img&id=${encodeURIComponent(driveId)}${cacheParam}`;
 }
 
-/* ------------------------------------------------------------
- * DRIVE_FULL / DRIVE_THUMB
- * ------------------------------------------------------------ */
+/* -----------------------------------------------------------------------------*/
+// Drive URL Builders
+/* -----------------------------------------------------------------------------*/
 
-// --- builders: preferir lh3 (binário); se não houver rk, cair para endpoints legados ---
-// EN: builders: prefer lh3 (binary); if no rk, fall back to legacy endpoints
+// PT: No modelo atual, full sempre usa o proxy GAS.
+// EN: In the current model, full always uses the GAS proxy.
+function DRIVE_FULL(idOrUrl, rkIgnored = '') {
+  const driveId = extractDriveId(idOrUrl);
+  if (!driveId) return '';
 
-export function DRIVE_FULL(idOrUrl, rkIgnored = '') {
-  const id = extractDriveId(idOrUrl);
-  if (!id) return '';
-  return imgProxyUrl(id); // sempre via GAS // always via GAS
+  return imgProxyUrl(driveId);
 }
 
-export function DRIVE_THUMB(idOrUrl, rkIgnored = '', w = 256) {
-  const id = extractDriveId(idOrUrl);
-  if (!id) return '';
-  // Mesma URL do proxy (o back retorna a imagem original);
-  // Se quiser gerar thumbs menores “de verdade”, teria que tratar no GAS.
-  // EN: Same proxy URL (the backend returns the original image);
-  // If you want to generate smaller “real” thumbs, you would have to handle it in GAS.
-  return imgProxyUrl(id);
+// PT: No modelo atual, thumb usa a mesma URL do proxy.
+// Se quiser thumbs reais menores, isso deve ser tratado no GAS.
+//
+// EN: In the current model, thumb uses the same proxy URL.
+// If you want smaller real thumbnails, this should be handled in GAS.
+function DRIVE_THUMB(idOrUrl, rkIgnored = '', width = 256) {
+  const driveId = extractDriveId(idOrUrl);
+  if (!driveId) return '';
+
+  return imgProxyUrl(driveId);
 }
 
-/* ------------------------------------------------------------
- * ensureDriveUrl(raw, item, kind='thumb')
- * ------------------------------------------------------------
- * Garante a construção da URL do proxy a partir de qualquer texto/ID plausível.
- * - Extrai o ID
- * - Aplica um cache-buster leve (data/timestamp) para evitar cache teimoso
- * - Devolve a URL do proxy (mesma para full/thumb no seu modelo atual)
- */
-/* EN: Ensures the construction of the proxy URL from any plausible text/ID.
- * - Extracts the ID
- * - Applies a light cache-buster (date/timestamp) to avoid stubborn cache
- * - Returns the proxy URL (same for full/thumb in your current model)
- */
-export function ensureDriveUrl(raw, item, kind = 'thumb') {
+/* -----------------------------------------------------------------------------*/
+// Drive URL Safety
+/* -----------------------------------------------------------------------------*/
+
+// PT: Garante a construção da URL do proxy a partir de um texto/ID plausível.
+// Aplica um cache-buster leve com data/timestamp quando disponível.
+//
+// EN: Ensures proxy URL construction from a plausible text/ID.
+// Applies a light cache-buster using date/timestamp when available.
+function ensureDriveUrl(raw, item) {
   if (!raw) return '';
-  const id = extractDriveId(raw);
-  if (!id) return '';
-  const bust = item?.data || item?.timestamp || ''; // cache-buster leve (opcional)
-  return kind === 'full' ? imgProxyUrl(id, bust) : imgProxyUrl(id, bust);
+
+  const driveId = extractDriveId(raw);
+  if (!driveId) return '';
+
+  const cacheBust = item?.data || item?.timestamp || '';
+  return imgProxyUrl(driveId, cacheBust);
 }
 
-/* ------------------------------------------------------------
- * tryBestDriveThumb(idOrUrl, rkIgnored, item)
- * ------------------------------------------------------------
- * Antes: tentava variações do Drive (lh3/uc). Agora:
- * - Sempre monta o proxy do GAS (evita ORB)
- * - Faz um preload “best effort” (não impacta o fluxo do card)
- */
+/* -----------------------------------------------------------------------------*/
+// Preload Helpers
+/* -----------------------------------------------------------------------------*/
 
-/* EN: Before: tried Drive variations (lh3/uc). Now:
- * - Always builds the GAS proxy (avoids CORS)
- * - Does a “best effort” preload (does not impact the card flow)
- */
+// PT: Hoje sempre prioriza o proxy GAS e faz preload em best effort.
+// EN: Today it always prioritizes the GAS proxy and preloads in best effort mode.
+function tryBestDriveThumb(idOrUrl, item = {}) {
+  const imageUrl = ensureDriveUrl(idOrUrl, item);
 
-export function tryBestDriveThumb(idOrUrl, rkIgnored = '', item = {}) {
-  const thumb = ensureDriveUrl(idOrUrl, item, 'thumb');
-  const full = ensureDriveUrl(idOrUrl, item, 'full');
-  preloadImage(thumb).then((ok) => {
-    if (!ok) preloadImage(full);
-  });
-  return thumb || full || '';
+  preloadImage(imageUrl);
+
+  return imageUrl || '';
 }
 
-/* ------------------------------------------------------------
- * preloadImage(src)
- * ------------------------------------------------------------
- * Faz um pré-carregamento “fire-and-forget” de uma URL de imagem.
- * Nunca rejeita: resolve(true) se onload, resolve(false) se onerror.
- * Adiciona um cb (cache-buster) para evitar reuso de cache incorreto.
- */
-/* EN: Does a “fire-and-forget” preloading of an image URL.
- * Never rejects: resolves(true) if onload, resolves(false) if onerror.
- * Adds a cb (cache-buster) to avoid incorrect cache reuse.
- */
-
-export function preloadImage(src) {
+// PT: Faz preload fire-and-forget.
+// Resolve true em load e false em error, sem rejeitar.
+//
+// EN: Performs fire-and-forget preloading.
+// Resolves true on load and false on error, never rejects.
+function preloadImage(src) {
   return new Promise((resolve) => {
     if (!src) return resolve(false);
-    const img = new Image();
-    img.onload = () => resolve(true);
-    img.onerror = () => resolve(false);
-    const url = src + (src.includes('?') ? '&' : '?') + 'cb=' + (Date.now() % 1e7);
-    img.src = url;
+
+    const image = new Image();
+    image.onload = () => resolve(true);
+    image.onerror = () => resolve(false);
+
+    const cacheBreaker = `${src}${src.includes('?') ? '&' : '?'}cb=${Date.now() % 1e7}`;
+    image.src = cacheBreaker;
   });
 }
 
-/* ------------------------------------------------------------
- * sanitizeUrl(u)
- * ------------------------------------------------------------
- * Sanitização básica de URLs externas:
- * - Bloqueia "javascript:"
- * - Aceita apenas http/https (💡 dica: se você começar a usar dataURL,
- *   pode ampliar para aceitar /^data:/ também.)
- */
-/* EN: Basic sanitization of external URLs:
- * - Blocks "javascript:"
- * - Accepts only http/https (💡 tip: if you start using dataURL,
- *   you can expand to accept /^data:/ as well.)
- */
+/* -----------------------------------------------------------------------------*/
+// URL Sanitization
+/* -----------------------------------------------------------------------------*/
 
-export function sanitizeUrl(u) {
-  const s = typeof u === 'string' ? u.trim() : '';
-  if (!s) return '';
-  if (/^javascript:/i.test(s)) return '';
-  if (!/^https?:\/\//i.test(s)) return '';
+// PT: Sanitização básica de URLs externas e rotas locais.
+// - bloqueia javascript:
+// - aceita http/https
+// - aceita rotas locais iniciando com /
+//
+// EN: Basic sanitization for external URLs and local routes.
+// - blocks javascript:
+// - accepts http/https
+// - accepts local routes starting with /
+function sanitizeUrl(urlValue) {
+  const source = typeof urlValue === 'string' ? urlValue.trim() : '';
+  if (!source) return '';
+
+  if (/^javascript:/i.test(source)) return '';
+
+  if (source.startsWith('/')) {
+    return source;
+  }
+
+  if (!/^https?:\/\//i.test(source)) return '';
+
   try {
-    const url = new URL(s);
-    return url.toString();
+    const parsedUrl = new URL(source);
+    return parsedUrl.toString();
   } catch {
     return '';
   }
 }
 
 /* ------------------------------------------------------------
- * toPublicImageUrl(u)
+ * resolveDriveImageUrl(urlValue)
  * ------------------------------------------------------------
- * Compatibilidade legada para “publicar” uma URL de imagem a partir
- * de um link/ID de Drive. Hoje redireciona para o proxy FULL (GAS).
- */
-/* EN: Legacy compatibility to “publish” an image URL from
- * a Drive link/ID. Today redirects to the FULL proxy (GAS).
+ * PT: Resolve uma URL de imagem válida a partir de um ID ou link
+ * do Google Drive, redirecionando para o proxy de imagem (GAS).
+ *
+ * EN: Resolves a valid image URL from a Google Drive ID or link,
+ * redirecting it to the image proxy (GAS).
  */
 
-export function toPublicImageUrl(u) {
-  const { id, rk } = parseDrive(u || '');
-  if (!id) return String(u || '');
+function resolveDriveImageUrl(urlValue) {
+  const { id, rk } = parseDrive(urlValue || '');
+  if (!id) return String(urlValue || '');
   return DRIVE_FULL(id, rk);
 }
+/* -----------------------------------------------------------------------------*/
+// Fallback Image
+//
+// PT: Caminho local da imagem padrão quando o carregamento falha.
+// EN: Local path of the default image when loading fails.
+/* -----------------------------------------------------------------------------*/
 
-/* ============================================================
-   [NOVO BLOCO] HELPERS DE IMAGEM (PROXY + DATAURL + RETRIES)
-   ------------------------------------------------------------
-   Objetivo:
-   - Lidar com o carregamento das imagens do Drive via seu proxy do GAS.
-   - O proxy responde uma dataURL (texto base64 da imagem).
-   - Estes helpers cuidam de:
-     → fazer o fetch da dataURL,
-     → testar se é válida,
-     → tentar recarregar algumas vezes,
-     → aplicar fallback visual quando falha tudo.
-   ============================================================ */
-/* EN:
-   [NEW BLOCK] IMAGE HELPERS (PROXY + DATAURL + RETRIES)
-   ------------------------------------------------------------
-   Goal:
-   - Handle loading Drive images via your GAS proxy.
-   - The proxy responds with a dataURL (base64 text of the image).
-   - These helpers take care of:
-     → fetching the dataURL,
-     → testing if it's valid,
-     → trying to reload a few times,
-     → applying visual fallback when everything fails.
-   ============================================================ */
+const FALLBACK_IMG = '/assets/img/no-photo.png';
 
-/* ------------------------------------------------------------
- * FALLBACK_IMG
- * ------------------------------------------------------------
- * Caminho local da imagem padrão que aparece quando
- * o carregamento da foto falha completamente.
- * Pode ser um arquivo PNG leve ou SVG.
- */
+/* -----------------------------------------------------------------------------*/
+// DataURL Helpers
+/* -----------------------------------------------------------------------------*/
 
-/* EN: Local path of the default image that appears when
- * the photo loading completely fails.
- * It can be a lightweight PNG file or SVG.
- */
-
-// Caminho local do fallback quando tudo falha
-export const FALLBACK_IMG = '/assets/img/no-photo.png';
-
-/* ------------------------------------------------------------
- * fetchDataURL(url)
- * ------------------------------------------------------------
- * 🇧🇷 Faz a requisição para a URL do proxy (GAS)
- * e devolve o TEXTO retornado (dataURL em Base64).
- * Adiciona um “cache-buster” (?cb=…) para evitar reuso de cache.
- *
- * 🇺🇸 Fetches the proxy (GAS) URL and returns the response text
- * as a Base64 dataURL. Adds a "cache-buster" (?cb=…) to bypass cache.
- */
-
-export async function fetchDataURL(url) {
-  // 🔹 1) Gerar um "cache breaker" (também chamado cache-buster)
-  // Serve para forçar o navegador a buscar uma nova versão da imagem,
-  // evitando que ele use uma cópia antiga do cache.
-  // (if the URL already has ?, we use &, otherwise we use ?)
-  const cacheBreaker = (url.includes('?') ? '&' : '?') + 'cb=' + (Date.now() % 1e7);
-
-  // 🔹 2) Enviar a requisição HTTP para o proxy (GAS)
-  // "await" significa: espera o servidor responder.
-  // fetch() returns a "Response" object that contains the full HTTP response.
+// PT: Faz a requisição ao proxy GAS e devolve o texto retornado,
+// que normalmente será uma dataURL Base64.
+//
+// EN: Fetches the GAS proxy and returns the response text,
+// which is usually a Base64 dataURL.
+async function fetchDataURL(url) {
+  const cacheBreaker = `${url.includes('?') ? '&' : '?'}cb=${Date.now() % 1e7}`;
   const response = await fetch(url + cacheBreaker);
-
-  // 🔹 3) Ler o corpo da resposta (response body)
-  // Aqui pegamos o conteúdo da imagem como texto (string Base64).
-  // r.text() → reads the entire response body as text
   const dataURLText = await response.text();
 
-  // 🔹 4) Retornar o texto (imagem em formato DataURL)
-  // This will look like: "data:image/png;base64,AAAA...."
   return dataURLText;
 }
 
-/* ------------------------------------------------------------
- * isLikely1x1(dataUrl)
- * ------------------------------------------------------------
- * 🇧🇷 Detecta quando a resposta do proxy provavelmente
- * é o PNG 1×1 transparente usado como “erro”.
- *
- * Se a string NÃO começar com "data:image/..." ou
- * for muito pequena (<200 caracteres),
- * consideramos inválida e tratamos como imagem vazia.
- *
- * 🇺🇸 Detects when the proxy response is probably
- * the transparent 1×1 PNG used as an “error image”.
- *
- * If the string does NOT start with "data:image/..."
- * or is too small (<200 characters),
- * we treat it as invalid (empty image).
- */
+// PT: Detecta quando a resposta parece ser uma imagem inválida,
+// como um PNG 1x1 transparente de erro.
+//
+// EN: Detects when the response looks like an invalid image,
+// such as a transparent 1x1 error PNG.
+function isLikely1x1(dataUrl) {
+  if (!/^data:image\//i.test(dataUrl)) return true;
 
-export function isLikely1x1(dataUrl) {
-  // 🔹 Verifica se começa com "data:image/"
-  // ^data:image/  → "^" significa "começa com"
-  // o "i" no final (flag) significa "ignore case"
-  // ou seja: aceita "data:image/" ou "DATA:IMAGE/"
-  // test() → método que verifica se a expressão regular bate com a string
-  if (!/^data:image\//i.test(dataUrl)) return true; // não é imagem válida
-
-  // 🔹 Se for muito curta, provavelmente é o PNG 1x1 de erro
-  // (um base64 curtinho, tipo 100 caracteres)
-  return dataUrl.length < 200; // pequena demais → 1x1
+  return dataUrl.length < 200;
 }
+
+/* -----------------------------------------------------------------------------*/
+// Image Source Selection
+//
+// PT: Escolhe a melhor imagem do item e retorna { thumbUrl, fullUrl }.
+// EN: Picks the best image from the item and returns { thumbUrl, fullUrl }.
+/* -----------------------------------------------------------------------------*/
+function pickImagePair(item) {
+  if (!item || typeof item !== 'object') {
+    return { thumbUrl: '', fullUrl: '' };
+  }
+
+  // PT: Normaliza possíveis formatos para string.
+  // EN: Normalizes possible value formats into a string.
+  const toStringValue = (value) => {
+    if (!value) return '';
+
+    if (typeof value === 'string') return value.trim();
+
+    if (typeof value === 'object') {
+      if (typeof value.url === 'string') return value.url.trim();
+      if (typeof value.href === 'string') return value.href.trim();
+      if (typeof value.id === 'string') return value.id.trim();
+    }
+
+    return '';
+  };
+
+  // PT: Filtra valores vazios, placeholders e lixo comum.
+  // EN: Filters empty values, placeholders and common garbage.
+  const isGarbageValue = (value) => {
+    const text = String(value || '').trim();
+    if (!text) return true;
+    if (text === '[object Object]') return true;
+
+    const lowerText = text.toLowerCase();
+    return ['n/a', 'na', 'null', 'undefined', '#', '...', '…', '-', '—'].includes(lowerText);
+  };
+
+  // PT: Aceita URL comum, link do Drive ou ID plausível.
+  // EN: Accepts regular URL, Drive link or plausible ID.
+  const isPlausibleImageSource = (value) =>
+    /^https?:\/\//i.test(value) || /drive\.google\.com/i.test(value) || /^[\w-]{10,}$/.test(value);
+
+  const candidates = [
+    item.photo_url,
+    item.foto_url,
+    item.image_url,
+    item.image,
+    item.url,
+    item.foto,
+    item.image_id,
+    item.foto_id,
+  ]
+    .map(toStringValue)
+    .filter((value) => !isGarbageValue(value));
+
+  const rawSource = candidates.find(isPlausibleImageSource) || '';
+
+  if (!rawSource) {
+    return { thumbUrl: '', fullUrl: '' };
+  }
+
+  // PT: Usa data/timestamp como hint leve para cache-busting.
+  // EN: Uses date/timestamp as a light cache-busting hint.
+  const cacheHint = item?.date_ms ?? item?.date_br ?? item?.date ?? item?.timestamp ?? '';
+
+  const driveId = DaliaImageHelpers.extractDriveId(rawSource);
+
+  if (driveId) {
+    const proxiedUrl = DaliaImageHelpers.imgProxyUrl(driveId, cacheHint);
+    const safeUrl = DaliaImageHelpers.sanitizeUrl(proxiedUrl);
+    return { thumbUrl: safeUrl, fullUrl: safeUrl };
+  }
+
+  const safeHttpUrl = DaliaImageHelpers.sanitizeUrl(rawSource);
+  return { thumbUrl: safeHttpUrl, fullUrl: safeHttpUrl };
+}
+
+/* -----------------------------------------------------------------------------*/
+// Export
+/* -----------------------------------------------------------------------------*/
 
 export const DaliaImageHelpers = {
   // ----------------------------------------------------------
-  // 🔹 1. Parsers & Extractors
+  // 1. Drive Parsing
   // ----------------------------------------------------------
-  parseDrive, // extrai {id, rk} de qualquer link/ID
-  isDriveId, // valida ID puro
-  extractDriveId, // extrai ID plausível de URL ou ID
+  parseDrive,
+  isDriveId,
+  extractDriveId,
 
   // ----------------------------------------------------------
-  // 🔹 2. URL Builders (Drive → Proxy GAS)
+  // 2. Proxy URL Builders
   // ----------------------------------------------------------
-  imgProxyUrl, // constrói URL do proxy
-  ensureDriveUrl, // força conversão confiável
-  DRIVE_FULL, // proxy versão "full"
-  DRIVE_THUMB, // proxy versão "thumb"
+  imgProxyUrl,
+  ensureDriveUrl,
+  DRIVE_FULL,
+  DRIVE_THUMB,
 
   // ----------------------------------------------------------
-  // 🔹 3. Heurísticas & Pré-Carregamento
+  // 3. Image Loading & Heuristics
   // ----------------------------------------------------------
-  tryBestDriveThumb, // tenta melhor miniatura
-  preloadImage, // pré-carrega imagem
-  sanitizeUrl, // sanitização básica
-  toPublicImageUrl, // compatibilidade legada
+  tryBestDriveThumb,
+  preloadImage,
+  sanitizeUrl,
+  resolveDriveImageUrl,
 
   // ----------------------------------------------------------
-  // 🔹 4. Proxy GAS: DataURL Helpers (Base64)
+  // 4. DataURL Helpers (GAS Proxy)
   // ----------------------------------------------------------
-  FALLBACK_IMG, // imagem padrão quando falha tudo
-  fetchDataURL, // busca DataURL no GAS
-  isLikely1x1, // detecta 1x1 transparente (erro)
+  FALLBACK_IMG,
+  fetchDataURL,
+  isLikely1x1,
+
+  // ----------------------------------------------------------
+  // 5. Image Source Selection
+  // ----------------------------------------------------------
+  pickImagePair,
 };

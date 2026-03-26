@@ -1,319 +1,313 @@
-// ==================================================
+/* -----------------------------------------------------------------------------*/
 // 🌙 Liora — Form Flow Conductor
 //
-// Nível: Jovem
-//
-// File: liora-form-controller.js
+// Nível / Level: Jovem / Young
 //
 // PT: Coordena o fluxo do formulário de feedback.
-//     Liora conecta eventos do formulário (submit),
-//     delegando responsabilidades para especialistas.
-//     Ela não implementa regras de domínio nem chamadas de rede;
+//     Conecta eventos do formulário (submit) e delega responsabilidades
+//     para especialistas.
+//     Não implementa regras de domínio nem chamadas de rede;
 //     apenas garante a ordem e a coerência do processo.
 //
 // EN: Coordinates the feedback form flow.
-//     Liora wires form events (submit),
-//     delegating responsibilities to specialists.
-//     She does not implement domain rules or network calls;
-//     she only ensures the correct order and coherence of the process.
-// ==================================================
+//     Wires form events (submit) and delegates responsibilities
+//     to specialists.
+//     Does not implement domain rules or network calls;
+//     it only ensures the correct order and coherence of the process.
+/* -----------------------------------------------------------------------------*/
 
-// --------------------------------------------------
+/* -----------------------------------------------------------------------------*/
+// Imports
+/* -----------------------------------------------------------------------------*/
+
+/* -----------------------------------------------------------------------------*/
 // 🧠 Sofia — Form Validation & UX State Specialist
-// --------------------------------------------------
+// Fornece / Provides:
+// - elements
+// - collectFormValues()
+// - validateBasicRules()
+// - lockSubmit()
+// - showFormStatus()
+// - resetFormUI()
+// - getFieldElement()
+// - markFieldError()
+// - markRatingError()
+// - clearRatingError()
+// - scrollToField()
+/* -----------------------------------------------------------------------------*/
 import { SofiaFormValidationUI } from '/assets/js/feedback/form/validation/sofia-form-validation-ui.js';
 
-// --------------------------------------------------
+/* -----------------------------------------------------------------------------*/
 // 🧾 Selene — Feedback Submit Specialist (Flow)
-// PT: Executa o fluxo de envio do feedback (pipeline).
-// EN: Runs the feedback submission pipeline.
-// Provides:
-//  - submitFeedback(values)
-// --------------------------------------------------
+// Fornece / Provides:
+// - submitFeedback()
+/* -----------------------------------------------------------------------------*/
 import { SeleneSubmitFlow } from '/assets/js/feedback/form/submit/selene-submit-flow.js';
 
-// --------------------------------------------------
-// Halo — Message-box
-// provides:
-// - show,
-// - hide,
-// - refreshPosition,
-// - loading
+/* -----------------------------------------------------------------------------*/
+// 💬 Halo — Message Box
+// Fornece / Provides:
+// - show()
+/* -----------------------------------------------------------------------------*/
 import { HaloMessageBox } from '/assets/js/system/ui/notifications/messagebox/halo-message-box.js';
 
-// --------------------------------------------------
+/* -----------------------------------------------------------------------------*/
 // ⭐ Ayla — Form Rating UI Specialist
-// provides:
-// - attachStarsUI,
-// - setStarsValue,
-// - getStarsValue,
-// - clearStarsUI,
-// - detachStarsUI
+// Fornece / Provides:
+// - clearStarsUI()
+/* -----------------------------------------------------------------------------*/
 import { AylaRatingStarsUI } from '/assets/js/feedback/form/rating/ayla-rating-stars-ui.js';
 
-// --------------------------------------------------
-
-// 🍃 Luma — Loading Base (System/UI)
-// provides:
-// ensurePaint,
-// safeLabel,
-// spinnerHTML,
-// renderLoading,
-// clearLoading,
-// setButtonLoading,
-
+/* -----------------------------------------------------------------------------*/
+// 🍃 Luma — Loading Base
+// Fornece / Provides:
+// - ensurePaint()
+/* -----------------------------------------------------------------------------*/
 import { LumaLoading } from '/assets/js/system/ui/loading/luma-loading.js';
 
-// --------------------------------------------------
-// ⭐ Stella — Submit Overlay UI (System/UI)
-// provides:
-// show,
-// hide
-
+/* -----------------------------------------------------------------------------*/
+// ⭐ Stella — Submit Overlay UI
+// Fornece / Provides:
+// - show()
+// - hide()
+/* -----------------------------------------------------------------------------*/
 import { StellaSubmitOverlay } from '/assets/js/system/ui/loading/stella-submit-overlay.js';
 
-// --------------------------------------------------
-// Logger — System Observability Layer
-// Provides logging capabilities for debugging and monitoring.
-// Provides:
-//  - Logger.debug()
-//  - Logger.info()
-//  - Logger.warn()
-//  - Logger.error()
+/* -----------------------------------------------------------------------------*/
+// 📘 Logger — System Observability Layer
+// Fornece / Provides:
+// - error()
+/* -----------------------------------------------------------------------------*/
 import { Logger } from '/assets/js/system/core/logger.js';
 
-// --------------------------------------------------
-// Internal state (avoid double-binding)
-// --------------------------------------------------
+/* -----------------------------------------------------------------------------*/
+// 📡 App Events — System Tool
+// Fornece / Provides:
+// - emitAppEvent()
+/* -----------------------------------------------------------------------------*/
+import { AppEvents } from '/assets/js/system/events/appEvents.js';
+
+/* -----------------------------------------------------------------------------*/
+// Helpers
+//
+// PT: Estado interno e funções auxiliares usadas neste controller.
+// EN: Internal state and helper functions used by this controller.
+/* -----------------------------------------------------------------------------*/
+
 let isAttached = false;
 let onFormSubmitRef = null;
 
-// --------------------------------------------------
-// Helpers
-// --------------------------------------------------
-
+// PT: Alterna o estado visual e semântico de "processando" no formulário.
+// EN: Toggles the visual and semantic "processing" state on the form.
 function setFormBusy(isBusy) {
-  const formEl = SofiaFormValidationUI.elements?.form;
-  if (!formEl) return;
+  const formElement = SofiaFormValidationUI.elements?.form;
 
-  // PT: Ajuda leitores de tela e dá semântica de “processando”
-  // EN: Helps screen readers and communicates “processing” state
-  formEl.toggleAttribute('aria-busy', isBusy);
-
-  // PT: Opcional — evita interações durante envio (além do lock do submit)
-  // EN: Optional — prevents interactions during submit (besides submit lock)
-  formEl.classList.toggle('pointer-events-none', !!isBusy);
-  formEl.classList.toggle('opacity-95', !!isBusy);
-}
-
-// --------------------------------------------------
-// Internal handlers
-// --------------------------------------------------
-
-/**
- * PT: Handler do submit do form.
- * EN: Form submit handler.
- */
-async function handleSubmit(event) {
-  event.preventDefault();
-
-  const modalEl = document.getElementById('feedback-modal');
-
-  // --------------------------------------------------
-  // ① Collect (UX-level data)
-  // PT: coleta valores do form (trim) + arquivo
-  // EN: collect form values (trim) + file
-  // --------------------------------------------------
-  const values = SofiaFormValidationUI.collectFormValues();
-
-  // ✅ Adapta coleta de foto (compatibilidade)
-  const photoInput = SofiaFormValidationUI.elements?.photoInput || document.getElementById('photo');
-  values.file = photoInput?.files?.[0] || null;
-
-  // --------------------------------------------------
-  // ② Validate (UX rules first — no busy/overlay yet)
-  // PT: valida antes de entrar em "modo envio" (mobile scroll)
-  // EN: validate before entering "sending mode" (mobile scroll)
-  // --------------------------------------------------
-  const basic = SofiaFormValidationUI.validateBasicRules(values);
-
-  if (!basic.ok) {
-    // PT/EN: garante que nenhum overlay atrapalhe UX
-    StellaSubmitOverlay.hide(modalEl);
-
-    const message = basic.message || 'Verifique os dados e tente novamente.';
-
-    // ②.a Mark field error (visual)
-    if (basic.field === 'rating') {
-      SofiaFormValidationUI.markRatingError(message);
-    } else {
-      const fieldEl = SofiaFormValidationUI.getFieldElement(basic.field);
-      SofiaFormValidationUI.markFieldError(fieldEl, message);
-    }
-
-    // ②.b Guide user (scroll to invalid field)
-    SofiaFormValidationUI.scrollToField(basic.field);
-
-    // ②.c Status message
-    SofiaFormValidationUI.showFormStatus(message, 'error');
+  if (!formElement) {
     return;
   }
 
-  // --------------------------------------------------
-  // ③ Send (enter busy mode + overlay, then submit flow)
-  // PT: agora sim entra em modo envio
-  // EN: now enter sending mode
-  // --------------------------------------------------
+  formElement.toggleAttribute('aria-busy', isBusy);
+  formElement.classList.toggle('pointer-events-none', Boolean(isBusy));
+  formElement.classList.toggle('opacity-95', Boolean(isBusy));
+}
+
+// PT: Coleta os valores do formulário e adiciona o arquivo da foto.
+// EN: Collects form values and appends the selected photo file.
+function collectFormValuesWithFile() {
+  const values = SofiaFormValidationUI.collectFormValues();
+
+  const photoInputElement =
+    SofiaFormValidationUI.elements?.photoInput || document.getElementById('photo');
+
+  return {
+    ...values,
+    file: photoInputElement?.files?.[0] || null,
+  };
+}
+
+// PT: Marca o erro visualmente e guia o usuário até o campo inválido.
+// EN: Marks the error visually and guides the user to the invalid field.
+function showValidationError(validationResult) {
+  const message = validationResult?.message || 'Verifique os dados e tente novamente.';
+
+  if (validationResult?.field === 'rating') {
+    SofiaFormValidationUI.markRatingError(message);
+  } else {
+    const fieldElement = SofiaFormValidationUI.getFieldElement(validationResult?.field);
+
+    SofiaFormValidationUI.markFieldError(fieldElement, message);
+  }
+
+  SofiaFormValidationUI.scrollToField(validationResult?.field);
+  SofiaFormValidationUI.showFormStatus(message, 'error');
+}
+
+// PT: Exibe os estados de início do envio.
+// EN: Displays the submit-start UI states.
+async function showSubmittingState(modalElement) {
+  SofiaFormValidationUI.lockSubmit(true);
+  setFormBusy(true);
+
+  StellaSubmitOverlay.show(modalElement, 'Enviando seu feedback…', {
+    subtext: 'Aguarde só um instante.',
+  });
+
+  await LumaLoading.ensurePaint();
+  SofiaFormValidationUI.showFormStatus('Enviando seu feedback…', 'info');
+}
+
+// PT: Trata erro de resultado sem sucesso.
+// EN: Handles an unsuccessful result response.
+function handleFailedSubmitResult(result, modalElement) {
+  const message = result?.error?.message || 'Falha no envio. Tente novamente.';
+
+  StellaSubmitOverlay.hide(modalElement);
+
+  HaloMessageBox.show(message, 'error', {
+    duration: 0,
+  });
+
+  SofiaFormValidationUI.showFormStatus(message, 'error');
+}
+
+// PT: Trata sucesso do envio.
+// EN: Handles successful submission.
+function handleSuccessfulSubmit(modalElement) {
+  StellaSubmitOverlay.hide(modalElement);
+
+  HaloMessageBox.show('Feedback enviado com sucesso! ✨', 'success', {
+    duration: 1400,
+  });
+
+  SofiaFormValidationUI.showFormStatus('Feedback enviado com sucesso. Obrigado! ✨', 'success');
+}
+
+// PT: Executa a limpeza visual após envio bem-sucedido.
+// EN: Executes post-success visual cleanup.
+function scheduleSuccessCleanup() {
+  setTimeout(() => {
+    SofiaFormValidationUI.resetFormUI();
+    AylaRatingStarsUI.clearStarsUI();
+    SofiaFormValidationUI.clearRatingError();
+
+    AppEvents.emitAppEvent('feedback:photo:clear-request');
+  }, 800);
+}
+
+// PT: Libera sempre o estado de envio.
+// EN: Always releases the submit state.
+function releaseSubmitState() {
+  setFormBusy(false);
+  SofiaFormValidationUI.lockSubmit(false);
+}
+
+/* -----------------------------------------------------------------------------*/
+// Public API
+/* -----------------------------------------------------------------------------*/
+
+// PT: Handler principal do submit do formulário.
+// EN: Main submit handler for the form.
+async function handleSubmit(event) {
+  event.preventDefault();
+
+  const modalElement = document.getElementById('feedback-modal');
+  const values = collectFormValuesWithFile();
+
+  const validationResult = SofiaFormValidationUI.validateBasicRules(values);
+
+  if (!validationResult.ok) {
+    StellaSubmitOverlay.hide(modalElement);
+    showValidationError(validationResult);
+    return;
+  }
 
   try {
-    SofiaFormValidationUI.lockSubmit(true);
-    setFormBusy(true);
-
-    // ⭐ Stella: bloqueia o form e comunica "enviando"
-    // PT: overlay cobre o form e impede o usuário de fuçar
-    // EN: overlay covers the form and prevents interactions
-    StellaSubmitOverlay.show(modalEl, 'Enviando seu feedback…', {
-      subtext: 'Aguarde só um instante.',
-    });
-
-    // 🍃 Luma: garante 1 frame para o overlay "pintar" antes do trabalho pesado
-    // PT: evita sensação de clique sem resposta
-    // EN: avoids "no response" feeling before heavy work
-    await LumaLoading.ensurePaint();
-
-    // ✅ UX: início do envio (loading persistente)
-    SofiaFormValidationUI.showFormStatus('Enviando seu feedback…', 'info');
+    await showSubmittingState(modalElement);
 
     const result = await SeleneSubmitFlow.submitFeedback(values);
 
-    // --------------------------------------------------
-    // ④ Result handling (error/success)
-    // --------------------------------------------------
     if (!result?.ok) {
-      StellaSubmitOverlay.hide(modalEl);
-
-      // PT: erro do sistema -> Halo error (persistente)
-      // EN: system error -> Halo error (persistent)
-      HaloMessageBox.show(result?.error?.message || 'Falha no envio. Tente novamente.', 'error', {
-        duration: 0,
-      });
-
-      SofiaFormValidationUI.showFormStatus(
-        result?.error?.message || 'Falha no envio. Tente novamente.',
-        'error'
-      );
+      handleFailedSubmitResult(result, modalElement);
       return;
     }
 
-    // PT: pode esconder overlay agora e mostrar o toast
-    // EN: can hide overlay now and show toast
-    StellaSubmitOverlay.hide(modalEl);
-
-    HaloMessageBox.show('Feedback enviado com sucesso! ✨', 'success', { duration: 1400 });
-    SofiaFormValidationUI.showFormStatus('Feedback enviado com sucesso. Obrigado! ✨', 'success');
-
-    // --------------------------------------------------
-    // ⑤ Post-success cleanup (delayed reset)
-    // --------------------------------------------------
-    setTimeout(() => {
-      // PT: reset geral do form
-      // EN: general form reset
-      SofiaFormValidationUI.resetFormUI();
-
-      // ⭐ Ayla: reset visual do rating (estrelas + hidden + badge)
-      // EN: rating visual reset (stars + hidden + badge)
-      AylaRatingStarsUI.clearStarsUI();
-
-      // 🧠 Sofia: remove ring/hint do rating
-      // EN: removes rating error ring/hint
-      SofiaFormValidationUI.clearRatingError();
-
-      // 📷 Daphne/Irene: limpa foto via evento global
-      // EN: clears photo via global event
-      window.dispatchEvent(new CustomEvent('feedback:photo:clear-request'));
-    }, 800);
+    handleSuccessfulSubmit(modalElement);
+    scheduleSuccessCleanup();
   } catch (error) {
-    // --------------------------------------------------
-    // ⑥ Unhandled exception
-    // --------------------------------------------------
-    StellaSubmitOverlay.hide(modalEl);
+    StellaSubmitOverlay.hide(modalElement);
 
-    Logger.error('liora', 'Unhandled submit exception', error);
+    Logger.error('FORM', 'Liora', 'Unhandled submit exception', error);
 
-    HaloMessageBox.show(error?.message || 'Erro inesperado ao enviar.', 'error', { duration: 0 });
-    SofiaFormValidationUI.showFormStatus(error?.message || 'Erro inesperado ao enviar.', 'error');
+    const message = error?.message || 'Erro inesperado ao enviar.';
+
+    HaloMessageBox.show(message, 'error', {
+      duration: 0,
+    });
+
+    SofiaFormValidationUI.showFormStatus(message, 'error');
   } finally {
-    // --------------------------------------------------
-    // ⑦ Always release busy state
-    // --------------------------------------------------
-    setFormBusy(false);
-    SofiaFormValidationUI.lockSubmit(false);
+    releaseSubmitState();
   }
 }
 
-// --------------------------------------------------
-// Public API (Liora)
-// --------------------------------------------------
-
-/**
- * PT: Anexa o controller do formulário.
- * EN: Attaches the form controller.
- */
+// PT: Anexa o controller ao formulário.
+// EN: Attaches the controller to the form.
 function attachFormController() {
-  // PT: Se o form não existir, Liora não atua.
-  // EN: If the form does not exist, Liora stays idle.
-  const formEl = SofiaFormValidationUI.elements?.form;
-  if (!formEl) return;
+  const formElement = SofiaFormValidationUI.elements?.form;
 
-  // PT: Evita bind duplicado.
-  // EN: Prevent double-binding.
-  if (isAttached) return;
+  if (!formElement) {
+    return;
+  }
+
+  if (isAttached) {
+    return;
+  }
+
   isAttached = true;
-
   onFormSubmitRef = handleSubmit;
 
-  // PT: Liora cuida apenas do submit (UI ativa de foto/estrelas já é iniciada pela Aura).
-  // EN: Liora only wires submit (photo/stars active UI is initialized by Aura).
-  formEl.addEventListener('submit', onFormSubmitRef);
+  formElement.addEventListener('submit', onFormSubmitRef);
 }
 
-/**
- * PT: Remove listeners (SPA / modal).
- * EN: Removes listeners (SPA / modal usage).
- */
+// PT: Remove os listeners do controller.
+// EN: Removes the controller listeners.
 function detachFormController() {
-  const formEl = SofiaFormValidationUI.elements?.form;
-  if (!formEl) return;
+  const formElement = SofiaFormValidationUI.elements?.form;
 
-  if (!isAttached) return;
+  if (!formElement) {
+    return;
+  }
+
+  if (!isAttached) {
+    return;
+  }
 
   isAttached = false;
 
   if (onFormSubmitRef) {
-    formEl.removeEventListener('submit', onFormSubmitRef);
+    formElement.removeEventListener('submit', onFormSubmitRef);
   }
 
   onFormSubmitRef = null;
 }
 
-// --------------------------------------------------
-// Compatibility aliases (optional)
-// PT: Mantém nomes antigos enquanto você migra a Aura.
-// EN: Keeps old names while you migrate Aura.
-// --------------------------------------------------
+/* -----------------------------------------------------------------------------*/
+// Compatibility Aliases
+//
+// PT: Mantém nomes antigos enquanto outros módulos são migrados.
+// EN: Keeps old names while other modules are being migrated.
+/* -----------------------------------------------------------------------------*/
+
 const initFormController = attachFormController;
 const destroyFormController = detachFormController;
 
-// --------------------------------------------------
-// Export pattern (project standard)
-// Ordem de uso: attach → detach
-// --------------------------------------------------
+/* -----------------------------------------------------------------------------*/
+// Export
+/* -----------------------------------------------------------------------------*/
+
 export const LioraFormController = {
-  // Preferred (semantic)
   attachFormController,
   detachFormController,
-
-  // Backward-compatible
   initFormController,
   destroyFormController,
 };

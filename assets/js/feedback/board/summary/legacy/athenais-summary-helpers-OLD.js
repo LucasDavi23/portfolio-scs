@@ -1,5 +1,7 @@
 // ✨ Athenais — Guardiã da Lógica do Summary (Helpers)
 //
+// Nível / Level: Jovem / Young
+//
 // PT: Athenais simboliza precisão e sabedoria técnica. Aqui, ela cuida apenas
 //     da lógica “pura” do summary:
 //       • cache local (snapshot e TTL),
@@ -39,7 +41,7 @@ const CACHE_TTL_MS = 60_000;
 
 // PT: Timeout para cada requisição ao GAS (em milissegundos).
 // EN: Timeout for each GAS request (in milliseconds).
-const FETCH_TIMEOUT_MS = 4_000;
+const FETCH_TIMEOUT_MS = 8_000;
 
 // PT: Quantas tentativas extras além da primeira (0 = só uma tentativa).
 // EN: How many extra retries besides the first attempt (0 = only once).
@@ -75,6 +77,27 @@ export function loadSummaryFromCache() {
     return parsed; // PT: Retorna o resumo válido.
   } catch (err) {
     console.warn('summary.js: erro ao ler cache / error reading cache.', err);
+    return null;
+  }
+}
+
+// PT: Carrega um snapshot do resumo salvo (sem validar).
+// EN: Loads a saved summary snapshot (without validation).
+export function loadSummarySnapshot() {
+  try {
+    const raw = localStorage.getItem(CACHE_KEY); // PT: Lê do localStorage.
+    if (!raw) return null; // PT: Sem cache.
+
+    const parsed = JSON.parse(raw); // PT: Converte de JSON.
+    const { avg, total, buckets } = parsed || {}; // PT: Extrai dados.
+
+    if (typeof avg !== 'number' || typeof total !== 'number' || typeof buckets !== 'object') {
+      return null;
+    }
+    //PT: Snapshot não respeita TTL. Serve só como fallback.
+    return parsed;
+  } catch (err) {
+    console.warn('summary.js: erro ao ler snapshot / snapshot read error.', err);
     return null;
   }
 }
@@ -126,8 +149,7 @@ export async function fetchSummaryWithRetry() {
   const ENDPOINT = EndpointConfig.get();
 
   if (!ENDPOINT) {
-    console.warn('summary-helpers.js: FEEDBACK_ENDPOINT não definido / not defined.');
-    return;
+    throw new Error('summary-helpers.js: FEEDBACK_ENDPOINT não definido / not defined.');
   }
 
   // PT: Retorna uma Promise.
@@ -162,6 +184,48 @@ export async function fetchSummaryWithRetry() {
   throw lastError || new Error('Falha ao buscar summary / Failed to fetch summary.');
 }
 
+// PT: Faz a requisição ao GAS no modo META (agregado) com retry.
+// EN: Performs the request to GAS in META (aggregated) mode with retry.
+export async function fetchSummaryMetaWithRetry({ forceFresh = false } = {}) {
+  // ENDPOINT oficial do sistema — obtido via módulo base
+  const ENDPOINT = EndpointConfig.get();
+
+  if (!ENDPOINT) {
+    // PT: Aqui é melhor lançar erro para o caller tratar (Abigail).
+    // EN: Here it's better to throw an error for the caller to handle (Abigail).
+    throw new Error('summary-helpers.js: FEEDBACK_ENDPOINT não definido / not defined.');
+  }
+
+  // PT: forceFresh = bypass de cache do GAS
+  // EN: forceFresh = bypass GAS cache
+  const cb = Date.now();
+  const url = forceFresh
+    ? `${ENDPOINT}?mode=meta&plat=scs&nocache=1&cb=${cb}`
+    : `${ENDPOINT}?mode=meta&plat=scs`;
+
+  let attempt = 0;
+  let lastError = null;
+
+  while (attempt <= MAX_RETRIES) {
+    try {
+      const res = await fetchWithTimeout(url, FETCH_TIMEOUT_MS);
+
+      if (!res.ok) {
+        throw new Error('Resposta não OK do servidor / Server response not OK: ' + res.status);
+      }
+
+      const data = await res.json();
+      return data;
+    } catch (err) {
+      lastError = err;
+      attempt += 1;
+      console.warn(`summary-meta: tentativa ${attempt} falhou / attempt failed:`, err);
+    }
+  }
+
+  throw lastError || new Error('Falha ao buscar summary meta / Failed to fetch summary meta.');
+}
+
 // ============================================================
 // 4. PARSE DOS DADOS: LISTA -> SUMMARY
 // ============================================================
@@ -171,6 +235,24 @@ export async function fetchSummaryWithRetry() {
 // EN: Converts GAS response into a “summary” object:
 //     { avg, total, buckets: {1,2,3,4,5} }
 export function buildSummaryFromResponse(data) {
+  // ✅ 1) PRIMEIRO: atalho para META (agregado)
+  // PT/EN: Se veio do endpoint META, já está pronto.
+  if (data && typeof data === 'object' && !Array.isArray(data)) {
+    const hasMetaShape =
+      typeof data.avg === 'number' &&
+      typeof data.total === 'number' &&
+      typeof data.buckets === 'object' &&
+      data.buckets;
+
+    if (hasMetaShape) {
+      return {
+        avg: data.avg,
+        total: data.total,
+        buckets: data.buckets,
+      };
+    }
+  }
+
   // PT: Recebe dados brutos da API.
   // PT: Aceitamos tanto { items: [...] } quanto [...] direto.
   // EN: We accept both { items: [...] } and [...] directly.
@@ -218,6 +300,7 @@ export const AthenaisSummaryHelpers = {
   loadSummaryFromCache,
   saveSummarytoCache,
   fetchSummaryWithRetry,
+  fetchSummaryMetaWithRetry,
   buildSummaryFromResponse,
 };
 

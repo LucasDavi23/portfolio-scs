@@ -1,0 +1,160 @@
+/* ==================================================
+ * 🌫️ Veil — Message Box Skin (CSS)
+ *
+ * PT:
+ * Camada visual da MessageBox.
+ * Define cores, animações e suavidade.
+ *
+ * EN:
+ * Visual skin for MessageBox.
+ * Defines colors, animations and transitions.
+ * ================================================== */
+
+/* ------------------------------
+ * Base
+ * ------------------------------ */
+
+.message-box {
+  pointer-events: auto;
+
+  width: fit-content;
+  max-width: 92vw;
+
+  padding: 12px 24px;
+  border-radius: 12px;
+
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 1.4;
+
+  color: #ffffff;
+
+  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.18);
+  backdrop-filter: blur(6px);
+
+  opacity: 0;
+  transform: translate(-50%, -16px);
+
+  animation: veil-fade-in 0.35s ease-out forwards;
+  transition:
+    opacity 0.3s ease,
+    transform 0.3s ease;
+}
+
+/* ------------------------------
+ * Variants
+ * ------------------------------ */
+
+/* Success */
+.message-box.success {
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+}
+
+/* Warning */
+.message-box.warning {
+  background: linear-gradient(135deg, #f97316, #ea580c);
+}
+
+/* Error */
+.message-box.error {
+  background: linear-gradient(135deg, #ef4444, #b91c1c);
+}
+
+/* Info / Loading */
+.message-box.info {
+  background: linear-gradient(135deg, #64748b, #475569);
+}
+
+/* ------------------------------
+ * Exit state
+ * ------------------------------ */
+
+.message-box.fade-out {
+  animation: veil-fade-out 0.45s ease forwards;
+}
+
+/* ------------------------------
+ * Animations
+ * ------------------------------ */
+
+@keyframes veil-fade-in {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+@keyframes veil-fade-out {
+  0% {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -20px);
+  }
+}
+
+/* ------------------------------
+ * Responsive tweaks
+ * ------------------------------ */
+
+@media (max-width: 640px) {
+  .message-box {
+    font-size: 14px;
+    padding: 10px 18px;
+    border-radius: 10px;
+  }
+}
+
+/* ------------------------------
+ * Mobile: make it a real toast
+ * ------------------------------ */
+@media (max-width: 640px) {
+  #feedback-modal .message-box {
+    position: fixed;
+    left: 50%;
+    top: calc(env(safe-area-inset-top, 0px) + 12px);
+    transform: translateX(-50%); /* PT: só X / EN: only X */
+
+    width: calc(100vw - 24px);
+    max-width: 520px;
+
+    z-index: 9999;
+  }
+
+  /* PT: remove o translateY do animation (pq agora top já define) */
+  #feedback-modal .message-box {
+    animation: veil-fade-in-fixed 0.35s ease-out forwards;
+  }
+
+  @keyframes veil-fade-in-fixed {
+    0% {
+      opacity: 0;
+      transform: translateX(-50%) translateY(-12px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+  }
+
+  #feedback-modal .message-box.fade-out {
+    animation: veil-fade-out-fixed 0.45s ease forwards;
+  }
+
+  @keyframes veil-fade-out-fixed {
+    0% {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+    100% {
+      opacity: 0;
+      transform: translateX(-50%) translateY(-12px);
+    }
+  }
+}

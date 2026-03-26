@@ -1,105 +1,98 @@
-// ==================================================
+/* -----------------------------------------------------------------------------*/
 // 🧠 Alma — Submit Queue Guardian
 //
-// Nível: Jovem
+// Nível / Level: Jovem / Young
 //
-//
-// PT: Responsável por guardar tentativas de envio que falharam
+// PT: Responsável por armazenar tentativas de envio que falharam
 //     durante o fluxo de submit do formulário.
-//     Alma mantém uma fila local (queue) de payloads pendentes,
-//     preservando ordem, integridade e identidade de cada tentativa.
-//     Ela NÃO envia dados, NÃO faz retry, NÃO valida domínio
-//     e NÃO interage com UI ou API.
-//     Seu único papel é organizar, armazenar e devolver
-//     os dados pendentes quando solicitada.
+//     Mantém uma fila local de payloads pendentes,
+//     preservando ordem, integridade e identidade.
+//     Não envia dados, não faz retry, não valida domínio
+//     e não interage com UI ou API.
 //
 // EN: Responsible for storing failed submit attempts
 //     during the form submission flow.
-//     Alma maintains a local queue of pending payloads,
-//     preserving order, integrity, and identity of each attempt.
-//     She does NOT send data, does NOT retry, does NOT validate domain,
-//     and does NOT interact with UI or API.
-//     Her sole role is to organize, store, and provide
-//     pending data when requested.
-// ==================================================
+//     Maintains a local queue of pending payloads,
+//     preserving order, integrity and identity.
+//     Does not send data, does not retry, does not validate domain
+//     and does not interact with UI or API.
+/* -----------------------------------------------------------------------------*/
 
-// imports
-// 📟 UUID PT: Gerador de UUID EN: UUID Generator
+/* -----------------------------------------------------------------------------*/
+// Imports
+/* -----------------------------------------------------------------------------*/
+
+/* -----------------------------------------------------------------------------*/
+// 📟 UUID — Unique Identifier Utility
+// Fornece / Provides:
+// - generateUUID()
+/* -----------------------------------------------------------------------------*/
 import { generateUUID } from '/assets/js/system/utils/uuid.js';
 
-// --------------------------------------------------
-// Internal constants
-// --------------------------------------------------
+/* -----------------------------------------------------------------------------*/
+// Constants
+//
+// PT: Constantes internas da fila.
+// EN: Internal queue constants.
+/* -----------------------------------------------------------------------------*/
 
-/**
- * PT: Chave única usada para persistir a fila no storage local.
- * EN: Unique key used to persist the queue in local storage.
- */
-
+// PT: Chave usada para persistir a fila no localStorage.
+// EN: Key used to persist the queue in localStorage.
 const STORAGE_KEY = 'feedback_submit_outbox_queue';
 
-// --------------------------------------------------
-// Internal helpers (storage abstraction)
-// --------------------------------------------------
+/* -----------------------------------------------------------------------------*/
+// Helpers
+//
+// PT: Funções auxiliares de leitura e persistência da fila.
+// EN: Helper functions for queue reading and persistence.
+/* -----------------------------------------------------------------------------*/
 
-/**
- * PT: Lê a fila atual do storage.
- * EN: Reads the current queue from storage.
- */
+// PT: Lê a fila atual do storage local.
+// EN: Reads the current queue from local storage.
 function readQueueFromStorage() {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? JSON.parse(raw) : [];
-  } catch (error) {
-    // PT: Em caso de corrupção, assume fila vazia.
-    // EN: In case of corruption, assume empty queue.
+    const rawValue = localStorage.getItem(STORAGE_KEY);
+
+    return rawValue ? JSON.parse(rawValue) : [];
+  } catch (_error) {
     return [];
   }
 }
 
-/**
- * PT: Persiste a fila no storage.
- * EN: Persists the queue into storage.
- */
+// PT: Persiste a fila atual no storage local.
+// EN: Persists the current queue into local storage.
 function writeQueueToStorage(queue) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(queue));
 }
 
-/**
- * PT: Gera um timestamp ISO para controle interno.
- * EN: Generates an ISO timestamp for internal tracking.
- */
+// PT: Gera timestamp ISO para rastreamento interno.
+// EN: Generates an ISO timestamp for internal tracking.
 function generateTimestamp() {
   return new Date().toISOString();
 }
 
-// --------------------------------------------------
-// Alma — Internal state
-// --------------------------------------------------
+/* -----------------------------------------------------------------------------*/
+// Queue State
+//
+// PT: Estado interno da fila mantido em memória.
+// EN: Internal in-memory queue state.
+/* -----------------------------------------------------------------------------*/
 
-/**
- * PT: Estado interno da fila mantido em memória.
- * EN: Internal in-memory queue state.
- */
 let submitQueue = readQueueFromStorage();
 
-// --------------------------------------------------
-// Alma — Talents (Queue operations)
-// --------------------------------------------------
+/* -----------------------------------------------------------------------------*/
+// Public API
+//
+// PT: Operações públicas da fila local de submits.
+// EN: Public operations for the local submit queue.
+/* -----------------------------------------------------------------------------*/
 
-/**
- * 🧠 Talento: Guardar (enqueue)
- *
- * PT: Armazena um payload de submit na fila local.
- *     A ordem de inserção é preservada (FIFO).
- *     Alma não valida o conteúdo nem o motivo do erro.
- *
- * EN: Stores a submit payload into the local queue.
- *     Insertion order is preserved (FIFO).
- *     Alma does not validate content nor failure reason.
- */
+// PT: Adiciona um payload na fila local, preservando a ordem.
+// EN: Adds a payload to the local queue, preserving order.
 function enqueue(payload, meta = {}) {
-  if (!payload) return;
+  if (!payload) {
+    return;
+  }
 
   const queueItem = {
     id: payload.clientRequestId || generateUUID(),
@@ -107,31 +100,23 @@ function enqueue(payload, meta = {}) {
     meta,
     createdAt: generateTimestamp(),
   };
+
   submitQueue.push(queueItem);
   writeQueueToStorage(submitQueue);
 }
 
-/**
- * 🧠 Talento: Espiar (peek)
- *
- * PT: Retorna o próximo item da fila sem removê-lo.
- * EN: Returns the next item in the queue without removing it.
- */
+// PT: Retorna o primeiro item da fila sem removê-lo.
+// EN: Returns the first queue item without removing it.
 function peek() {
   return submitQueue.length > 0 ? submitQueue[0] : null;
 }
 
-/**
- * 🧠 Talento: Consumir (dequeue)
- *
- * PT: Remove o primeiro item da fila.
- *     Deve ser chamado somente após confirmação externa de sucesso.
- *
- * EN: Removes the first item from the queue.
- *     Should be called only after external success confirmation.
- */
+// PT: Remove e retorna o primeiro item da fila.
+// EN: Removes and returns the first queue item.
 function dequeue() {
-  if (submitQueue.length === 0) return;
+  if (submitQueue.length === 0) {
+    return;
+  }
 
   const removedItem = submitQueue.shift();
   writeQueueToStorage(submitQueue);
@@ -139,72 +124,53 @@ function dequeue() {
   return removedItem;
 }
 
-/**
- * 🧠 Talento: Remover por ID
- *
- * PT: Remove um item específico da fila usando seu identificador.
- * EN: Removes a specific item from the queue by its identifier.
- */
+// PT: Remove um item específico da fila pelo ID.
+// EN: Removes a specific queue item by ID.
 function removeById(id) {
-  if (!id) return;
+  if (!id) {
+    return;
+  }
 
-  submitQueue = submitQueue.filter((item) => item.id !== id);
+  submitQueue = submitQueue.filter((queueItem) => queueItem.id !== id);
   writeQueueToStorage(submitQueue);
 }
 
-/**
- * 🧠 Talento: Limpar tudo
- *
- * PT: Remove todos os itens da fila.
- * EN: Clears all items from the queue.
- */
+// PT: Limpa todos os itens da fila.
+// EN: Clears all items from the queue.
 function clearQueue() {
   submitQueue = [];
   writeQueueToStorage(submitQueue);
 }
 
-/**
- * 🧠 Talento: Estado da fila
- *
- * PT: Retorna o número de itens pendentes.
- * EN: Returns the number of pending items.
- */
+// PT: Retorna a quantidade de itens pendentes.
+// EN: Returns the number of pending items.
 function getQueueSize() {
   return submitQueue.length;
 }
 
-/**
- * 🧠 Talento: Atualizar Meta do Primeiro Item (updateHeadMeta)
- *
- * PT: Atualiza parcialmente o objeto meta do primeiro item da fila (head),
- *     persistindo no storage. Útil para registrar attempts/backoff.
- *
- * EN: Partially updates the meta object of the first queue item (head),
- *     persisting into storage. Useful to record attempts/backoff.
- */
+// PT: Atualiza parcialmente o meta do primeiro item da fila.
+// EN: Partially updates the meta of the first queue item.
 function updateHeadMeta(metaPatch = {}) {
-  if (submitQueue.length === 0) return;
+  if (submitQueue.length === 0) {
+    return;
+  }
 
-  const head = submitQueue[0];
-  const currentMeta = head.meta && typeof head.meta === 'object' ? head.meta : {};
+  const headItem = submitQueue[0];
+  const currentMeta = headItem.meta && typeof headItem.meta === 'object' ? headItem.meta : {};
 
-  head.meta = { ...currentMeta, ...(metaPatch || {}) };
+  headItem.meta = {
+    ...currentMeta,
+    ...(metaPatch || {}),
+  };
 
-  // EN: persist updated queue
   writeQueueToStorage(submitQueue);
 
   return true;
 }
 
-// --------------------------------------------------
-// Public API (Alma)
-// --------------------------------------------------
-// Ordem de uso:
-// - enqueue → guarda
-// - peek → consulta
-// - dequeue / removeById → consome
-// - clearQueue → reset
-// --------------------------------------------------
+/* -----------------------------------------------------------------------------*/
+// Export
+/* -----------------------------------------------------------------------------*/
 
 export const AlmaOutboxQueue = {
   enqueue,

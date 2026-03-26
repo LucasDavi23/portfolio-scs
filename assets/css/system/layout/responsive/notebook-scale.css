@@ -18,24 +18,26 @@
 @media (min-width: 1280px) and (max-width: 1440px) {
   /* Chrome/Edge: usa zoom (melhor, recalcula layout) */
   @supports (zoom: 0.8) {
-    #sobre > .mx-auto,
-    #producao > .mx-auto,
-    #contato > .mx-auto,
-    #pos-vendas > .mx-auto,
-    #galeria > .mx-auto,
-    #feedback > .mx-auto {
+    #about > .mx-auto,
+    #production > .mx-auto,
+    #contact > .mx-auto,
+    #after-sales > .mx-auto,
+    #gallery > .mx-auto,
+    #feedback > .mx-auto,
+    #system > .mx-auto {
       zoom: var(--nb-scale-1);
       transform: none;
     }
   }
   /* Firefox: fallback em scale */
   @supports not (zoom: 0.8) {
-    #sobre > .mx-auto,
-    #producao > .mx-auto,
-    #contato > .mx-auto,
-    #pos-vendas > .mx-auto,
-    #galeria > .mx-auto,
-    #feedback > .mx-auto {
+    #about > .mx-auto,
+    #production > .mx-auto,
+    #contact > .mx-auto,
+    #after-sales > .mx-auto,
+    #gallery > .mx-auto,
+    #feedback > .mx-auto,
+    #system > .mx-auto {
       transform: scale(var(--nb-scale-1));
     }
   }
@@ -44,23 +46,25 @@
 /* 1441–1600 */
 @media (min-width: 1441px) and (max-width: 1600px) {
   @supports (zoom: 0.8) {
-    #sobre > .mx-auto,
-    #producao > .mx-auto,
-    #contato > .mx-auto,
-    #pos-vendas > .mx-auto,
-    #galeria > .mx-auto,
-    #feedback > .mx-auto {
+    #about > .mx-auto,
+    #production > .mx-auto,
+    #contact > .mx-auto,
+    #after-sales > .mx-auto,
+    #gallery > .mx-auto,
+    #feedback > .mx-auto,
+    #system > .mx-auto {
       zoom: var(--nb-scale-2);
       transform: none;
     }
   }
   @supports not (zoom: 0.86) {
-    #sobre > .mx-auto,
-    #producao > .mx-auto,
-    #contato > .mx-auto,
-    #pos-vendas > .mx-auto,
-    #galeria > .mx-auto,
-    #feedback > .mx-auto {
+    #about > .mx-auto,
+    #production > .mx-auto,
+    #contact > .mx-auto,
+    #after-sales > .mx-auto,
+    #gallery > .mx-auto,
+    #feedback > .mx-auto,
+    #system > .mx-auto {
       transform: scale(var(--nb-scale-2));
     }
   }
@@ -68,12 +72,13 @@
 
 /* ≥ 1601px: normal */
 @media (min-width: 1601px) {
-  #sobre > .mx-auto,
-  #producao > .mx-auto,
-  #contato > .mx-auto,
-  #pos-vendas > .mx-auto,
-  #galeria > .mx-auto,
-  #feedback > .mx-auto {
+  #about > .mx-auto,
+  #production > .mx-auto,
+  #contact > .mx-auto,
+  #after-sales > .mx-auto,
+  #gallery > .mx-auto,
+  #feedback > .mx-auto,
+  #system > .mx-auto {
     zoom: 1;
     transform: none;
   }
@@ -81,12 +86,13 @@
 
 /* Opcional: leve respiro ao usar fallback scale (só quando NÃO há zoom) */
 @supports not (zoom: 1) {
-  #sobre,
-  #producao,
-  #contato,
-  #pos-vendas,
-  #galeria,
-  #feedback {
+  #about,
+  #production,
+  #contact,
+  #after-sales,
+  #gallery,
+  #feedback,
+  #system {
     padding-top: 2rem;
     padding-bottom: 2rem;
   }

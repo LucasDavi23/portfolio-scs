@@ -1,18 +1,20 @@
-/* ==================================================
- * 🌫️ Veil — Message Box Skin (CSS)
+/* -----------------------------------------------------------------------------*/
+/* 🌫️ Veil — Message Box Skin
  *
- * PT:
- * Camada visual da MessageBox.
- * Define cores, animações e suavidade.
+ * Nível / Level: Adulta / Adult
  *
- * EN:
- * Visual skin for MessageBox.
- * Defines colors, animations and transitions.
- * ================================================== */
+ * PT: Define a aparência visual da Message Box.
+ * EN: Defines the visual appearance of the Message Box.
+ */
+/* -----------------------------------------------------------------------------*/
 
-/* ------------------------------
- * Base
- * ------------------------------ */
+/* -----------------------------------------------------------------------------*/
+/* Base
+ *
+ * PT: Estrutura base da message box.
+ * EN: Base structure of the message box.
+ */
+/* -----------------------------------------------------------------------------*/
 
 .message-box {
   pointer-events: auto;
@@ -41,41 +43,49 @@
     transform 0.3s ease;
 }
 
-/* ------------------------------
- * Variants
- * ------------------------------ */
+/* -----------------------------------------------------------------------------*/
+/* Variants
+ *
+ * PT: Variações visuais por tipo.
+ * EN: Visual variants by type.
+ */
+/* -----------------------------------------------------------------------------*/
 
-/* Success */
 .message-box.success {
   background: linear-gradient(135deg, #22c55e, #16a34a);
 }
 
-/* Warning */
 .message-box.warning {
   background: linear-gradient(135deg, #f97316, #ea580c);
 }
 
-/* Error */
 .message-box.error {
   background: linear-gradient(135deg, #ef4444, #b91c1c);
 }
 
-/* Info / Loading */
 .message-box.info {
   background: linear-gradient(135deg, #64748b, #475569);
 }
 
-/* ------------------------------
- * Exit state
- * ------------------------------ */
+/* -----------------------------------------------------------------------------*/
+/* Exit State
+ *
+ * PT: Estado de saída com animação.
+ * EN: Exit state with animation.
+ */
+/* -----------------------------------------------------------------------------*/
 
 .message-box.fade-out {
   animation: veil-fade-out 0.45s ease forwards;
 }
 
-/* ------------------------------
- * Animations
- * ------------------------------ */
+/* -----------------------------------------------------------------------------*/
+/* Animations
+ *
+ * PT: Animações de entrada e saída.
+ * EN: Entry and exit animations.
+ */
+/* -----------------------------------------------------------------------------*/
 
 @keyframes veil-fade-in {
   0% {
@@ -99,9 +109,13 @@
   }
 }
 
-/* ------------------------------
- * Responsive tweaks
- * ------------------------------ */
+/* -----------------------------------------------------------------------------*/
+/* Responsive
+ *
+ * PT: Ajustes para telas menores.
+ * EN: Adjustments for smaller screens.
+ */
+/* -----------------------------------------------------------------------------*/
 
 @media (max-width: 640px) {
   .message-box {
@@ -111,15 +125,21 @@
   }
 }
 
-/* ------------------------------
- * Mobile: make it a real toast
- * ------------------------------ */
+/* -----------------------------------------------------------------------------*/
+/* Mobile Toast Mode
+ *
+ * PT: Ajusta a message box para comportamento de toast no mobile.
+ * EN: Adjusts message box to behave as a toast on mobile.
+ */
+/* -----------------------------------------------------------------------------*/
+
 @media (max-width: 640px) {
   #feedback-modal .message-box {
     position: fixed;
     left: 50%;
     top: calc(env(safe-area-inset-top, 0px) + 12px);
-    transform: translateX(-50%); /* PT: só X / EN: only X */
+
+    transform: translateX(-50%);
 
     width: calc(100vw - 24px);
     max-width: 520px;
@@ -127,7 +147,8 @@
     z-index: 9999;
   }
 
-  /* PT: remove o translateY do animation (pq agora top já define) */
+  /* PT: Remove translateY padrão e usa animação específica.
+     EN: Removes default translateY and uses specific animation. */
   #feedback-modal .message-box {
     animation: veil-fade-in-fixed 0.35s ease-out forwards;
   }

@@ -1,18 +1,21 @@
-<!-- ===================================================== -->
-<!-- SECTION: PRODUCTION -->
-<!-- Foundation / sections/production.html -->
-<!-- ===================================================== -->
-
-<section id="producao" class="min-h-[calc(100svh-4rem)] snap-start scroll-mt-10">
+<!-- -------------------------------------------------- -->
+<!-- 📌 Section — Production -->
+<!-- PT: Seção que apresenta o fluxo de produção da empresa. -->
+<!-- EN: Section that presents the company's production workflow. -->
+<!-- -------------------------------------------------- -->
+<section id="production" class="min-h-[calc(60vh-4rem)] snap-start scroll-mt-16">
   <div class="mx-auto max-w-screen-2xl px-4 py-12 sm:px-6 lg:px-8">
     <div class="grid grid-cols-1 gap-2 xl:min-h-[68vh] xl:grid-cols-2 xl:gap-8">
-      <!-- Texto à ESQUERDA -->
+      <!-- -------------------------------------------------- -->
+      <!-- Content -->
+      <!-- -------------------------------------------------- -->
+
       <div class="relative flex items-center bg-gray-100">
         <span
           class="hidden xl:absolute xl:inset-y-0 xl:-end-16 xl:block xl:w-16 xl:bg-gray-100"
         ></span>
 
-        <div class="p-6 sm:p-12 lg:p-16 bg-gray-100">
+        <div class="p-6 sm:p-12 lg:p-16">
           <h2 class="text-2xl font-bold sm:text-3xl">Produção</h2>
           <p class="mt-4 text-gray-600">
             Fluxo <strong>simples, direto e organizado</strong>, com foco em
@@ -21,7 +24,7 @@
             expedição.
           </p>
 
-          <!-- 4 etapas em cards curtos -->
+          <!-- Production Steps (Compact Cards) -->
           <div class="mt-6 grid grid-cols-2 gap-4 text-sm">
             <div class="rounded-xl border border-gray-200 bg-white p-3">
               <div class="font-semibold text-gray-800">Entrada</div>
@@ -41,7 +44,7 @@
             </div>
           </div>
 
-          <!-- O que pedimos (checklist enxuto) -->
+          <!-- Required Order Info (Checklist) -->
           <div class="mt-6 rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
             <h3 class="text-lg font-semibold text-gray-800 mb-4">
               O que pedimos (para acertar de primeira)
@@ -58,7 +61,7 @@
             </ul>
           </div>
 
-          <!-- CTA: pedir orçamento (fica ANTES dos <details>) -->
+          <!-- CTA: Request Quote -->
           <div class="mt-6 flex flex-col sm:flex-row gap-3">
             <a
               href="https://wa.me/551134528549?text=Ol%C3%A1%20SCS%20Molduras,%20venho%20por%20meio%20deste%20contato%20solicitar%20um%20or%C3%A7amento."
@@ -67,7 +70,7 @@
               class="inline-flex items-center justify-center gap-2 rounded-lg bg-gray-900 px-5 py-3 text-white hover:opacity-90 w-full sm:w-auto"
               aria-label="Pedir orçamento no WhatsApp"
             >
-              <!-- ícone WhatsApp -->
+              <!-- WhatsApp Icon -->
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 class="h-5 w-5"
@@ -90,8 +93,9 @@
             </a>
           </div>
 
-          <!-- Detalhes colapsáveis -->
+          <!-- Expandable Details -->
           <details class="mt-6 text-sm">
+            <!-- Full Production Steps -->
             <summary class="cursor-pointer text-gray-700 hover:opacity-80">
               Ver etapas completas
             </summary>
@@ -108,6 +112,7 @@
           </details>
 
           <details class="mt-3 text-sm">
+            <!-- Order Examples -->
             <summary class="cursor-pointer text-gray-700 hover:opacity-80">
               Exemplos de pedido
             </summary>
@@ -126,11 +131,11 @@
         </div>
       </div>
 
-      <!-- Imagem à DIREITA (carrossel com setas) -->
+      <!-- Image on the RIGHT (Carousel with Arrows) -->
       <div class="flex items-center justify-center mt-4 lg:mt-2">
-        <!-- Carrossel -->
+        <!-- Production Carousel -->
         <div
-          id="carrossel-producao"
+          id="carousel-producao"
           class="relative w-full mx-auto"
           data-viewer-group="production"
           data-viewer-images='[
@@ -149,7 +154,7 @@
             class="relative h-72 sm:h-96 lg:h-[520px] xl:h-[560px] overflow-hidden rounded-lg shadow-[0_10px_25px_-10px_rgba(0,0,0,.35)] ring-1 ring-black/10"
           >
             <!-- Item 1 -->
-            <div id="carrossel-item-1" class="absolute inset-0 translate-x-0 z-10">
+            <div data-carousel-item="0" class="absolute inset-0 translate-x-0 z-10">
               <img
                 src="assets/img/background/producao/producao-1.webp"
                 alt="Produção — pallet"
@@ -163,7 +168,7 @@
 
             <!-- Item 2 -->
             <div
-              id="carrossel-item-2"
+              data-carousel-item="1"
               class="absolute inset-0 translate-x-0 z-10 pointer-events-none"
             >
               <img
@@ -179,7 +184,7 @@
 
             <!-- Item 3 -->
             <div
-              id="carrossel-item-3"
+              data-carousel-item="2"
               class="absolute inset-0 translate-x-0 z-10 pointer-events-none"
             >
               <img
@@ -195,7 +200,7 @@
 
             <!-- Item 4 -->
             <div
-              id="carrossel-item-4"
+              data-carousel-item="3"
               class="absolute inset-0 translate-x-0 z-10 pointer-events-none"
             >
               <img
@@ -211,7 +216,7 @@
 
             <!-- Item 5 -->
             <div
-              id="carrossel-item-5"
+              data-carousel-item="4"
               class="absolute inset-0 translate-x-0 z-10 pointer-events-none"
             >
               <img
@@ -227,7 +232,7 @@
 
             <!-- Item 6 -->
             <div
-              id="carrossel-item-6"
+              data-carousel-item="5"
               class="absolute inset-0 translate-x-0 z-10 pointer-events-none"
             >
               <img
@@ -243,7 +248,7 @@
 
             <!-- Item 7 -->
             <div
-              id="carrossel-item-7"
+              data-carousel-item="6"
               class="absolute inset-0 translate-x-0 z-10 pointer-events-none"
             >
               <img
@@ -259,7 +264,7 @@
 
             <!-- Item 8 -->
             <div
-              id="carrossel-item-8"
+              data-carousel-item="7"
               class="absolute inset-0 translate-x-0 z-10 pointer-events-none"
             >
               <img
@@ -327,8 +332,8 @@
 
             <!-- Botões -->
             <button
-              id="carrossel-prev"
-              class="group absolute left-2 top-1/2 -translate-y-1/2 z-50 flex items-center focus:outline-none"
+              id="carousel-prev"
+              class="group absolute left-2 top-1/2 -translate-y-1/2 z-40 flex items-center focus:outline-none"
             >
               <span
                 class="inline-flex h-10 w-10 items-center justify-center rounded-full bg-black/40 border border-white/60 backdrop-blur-sm [backdrop-saturate:160%] shadow-md transition group-hover:bg-black/60"
@@ -346,8 +351,8 @@
             </button>
 
             <button
-              id="carrossel-next"
-              class="group absolute right-2 top-1/2 -translate-y-1/2 z-50 flex items-center focus:outline-none"
+              id="carousel-next"
+              class="group absolute right-2 top-1/2 -translate-y-1/2 z-40 flex items-center focus:outline-none"
             >
               <span
                 class="inline-flex h-10 w-10 items-center justify-center rounded-full bg-black/40 border border-white/60 backdrop-blur-sm [backdrop-saturate:160%] shadow-md transition group-hover:bg-black/60"
@@ -364,11 +369,10 @@
               </span>
             </button>
           </div>
-          <!-- /wrapper -->
+          <!-- /Carousel Wrapper -->
         </div>
-        <!-- /carrossel-producao -->
       </div>
-      <!-- /coluna direita -->
+      <!-- /right column -->
     </div>
     <!-- /grid -->
   </div>

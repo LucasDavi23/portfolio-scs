@@ -4,31 +4,65 @@
 //
 // PT: Especialista na camada de rede: rate limit, timeout, retry, cache em
 //     memória e parse seguro de JSON. Não conhece “card”, “summary” ou
-//     domínio algum – só garante chamadas estáveis.
+//     qualquer domínio — apenas garante chamadas estáveis.
+//
 // EN: Specialist in the network layer: rate limiting, timeout, retry,
 //     in-memory cache and safe JSON parsing. It knows nothing about
-//     “cards” or any domain – only stable API calls.
+//     “cards”, “summary” or any domain — it only guarantees stable calls.
 /* -----------------------------------------------------------------------------*/
 
-// ========= Config padrão da Nádia =========
-// DEFAULT_RETRIES → controla quantas vezes o
-// sistema tenta novamente quando o Apps Script responde 503, 429 ou timeout.
+/* -----------------------------------------------------------------------------*/
+// Default Config
+//
+// PT: Configurações padrão da Nádia.
+//
+// - DEFAULT_TIMEOUT_MS: tempo máximo por tentativa antes de abortar.
+// - DEFAULT_RETRIES: quantas novas tentativas serão feitas em falhas temporárias.
+// - DEFAULT_TTL_MS: duração do cache local em memória.
+//
+// EN: Nadia default settings.
+//
+// - DEFAULT_TIMEOUT_MS: maximum time per attempt before aborting.
+// - DEFAULT_RETRIES: how many extra attempts will be made on temporary failures.
+// - DEFAULT_TTL_MS: local in-memory cache duration.
+/* -----------------------------------------------------------------------------*/
 
-// DEFAULT_TIMEOUT_MS → controla quanto tempo cada tentativa
-// pode demorar antes de abortar.
+let DEFAULT_TIMEOUT_MS = 11_000;
+let DEFAULT_RETRIES = 3;
+let DEFAULT_TTL_MS = 60_000;
 
-// DEFAULT_TTL_MS → define quanto tempo o cache local (memória) é
-// mantido antes de forçar nova leitura.
+/* -----------------------------------------------------------------------------*/
+// Traffic Control — Anti-storm protection
+//
+// PT: Evita excesso de chamadas em sequência e coalesce de requests iguais.
+// EN: Prevents request bursts and coalesces identical in-flight requests.
+/* -----------------------------------------------------------------------------*/
 
-let DEFAULT_TIMEOUT_MS = 11_000; // timeout por tentativa
-let DEFAULT_RETRIES = 3; // tentativas extras
-let DEFAULT_TTL_MS = 60_000; // cache local (60s)
-
-// ========= Controle de tráfego (anti-tempestade) =========
-const _inflight = new Map(); // url -> Promise em andamento
+const _inflight = new Map(); // url -> running Promise
 let _lastCallTs = 0;
-const MIN_GAP_MS = 180; // espaçamento mínimo entre fetches
+const MIN_GAP_MS = 180;
 
+/* -----------------------------------------------------------------------------*/
+// Memory Cache
+//
+// PT: Cache simples por URL.
+// EN: Simple URL-based memory cache.
+/* -----------------------------------------------------------------------------*/
+
+const _memCache = new Map(); // key -> { exp: number, data: any }
+
+/* -----------------------------------------------------------------------------*/
+// Internal Helpers
+/* -----------------------------------------------------------------------------*/
+
+// PT: Aguarda um tempo antes de continuar.
+// EN: Waits for a period before continuing.
+function delay(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+// PT: Aplica espaçamento mínimo entre fetches para evitar tempestade de requisições.
+// EN: Applies a minimum gap between fetches to avoid request storms.
 function rateLimitedFetch(url, opts = {}) {
   const now = Date.now();
   const gap = now - _lastCallTs;
@@ -46,22 +80,15 @@ function rateLimitedFetch(url, opts = {}) {
   return fetch(url, opts);
 }
 
-// ========= Cache simples por URL =========
-const _memCache = new Map(); // key -> { exp: number, data: any }
+/* -----------------------------------------------------------------------------*/
+// Network Helpers — Timeout
+/* -----------------------------------------------------------------------------*/
 
-// ========= Helpers internos =========
-
-// ========= Helpers de rede (JSON + Retry + Timeout) =========
-function delay(ms) {
-  return new Promise((r) => setTimeout(r, ms));
-}
-
-// ========= Fetch com timeout, retry, cache e normalização =========
-// Faz fetch com timeout customizado, abortável via signal,
-// com retry em falhas temporárias (503, 429, timeout).
+// PT: Executa fetch com timeout e suporte opcional a signal externa.
+// EN: Executes fetch with timeout and optional external signal support.
 async function fetchWithTimeout(url, { timeoutMs, signal } = {}) {
   const controller = new AbortController();
-  const id = setTimeout(() => controller.abort(new Error('Timeout')), timeoutMs);
+  const timerId = setTimeout(() => controller.abort(new Error('Timeout')), timeoutMs);
 
   try {
     const finalSignal = signal
@@ -70,106 +97,131 @@ async function fetchWithTimeout(url, { timeoutMs, signal } = {}) {
         : controller.signal
       : controller.signal;
 
-    const resp = await rateLimitedFetch(url, {
+    return await rateLimitedFetch(url, {
       method: 'GET',
       signal: finalSignal,
     });
-    return resp;
   } finally {
-    clearTimeout(id);
+    clearTimeout(timerId);
   }
 }
 
-// Adiciona parâmetro anti-cache para evitar caches intermediários
+/* -----------------------------------------------------------------------------*/
+// URL Helpers
+/* -----------------------------------------------------------------------------*/
+
+// PT: Adiciona um parâmetro anti-cache para evitar reaproveitamento
+//     de respostas intermediárias.
+// EN: Adds an anti-cache parameter to avoid reusing intermediate responses.
 function addBustParam(url) {
   try {
-    const u = new URL(url, location.origin);
-    u.searchParams.set('_bust', Date.now().toString());
-    return u.toString();
+    const parsedUrl = new URL(url, location.origin);
+    parsedUrl.searchParams.set('_bust', Date.now().toString());
+    return parsedUrl.toString();
   } catch {
-    const sep = url.includes('?') ? '&' : '?';
-    return `${url}${sep}_bust=${Date.now()}`;
+    const separator = url.includes('?') ? '&' : '?';
+    return `${url}${separator}_bust=${Date.now()}`;
   }
 }
 
-// ========= JSON & normalização =========
+/* -----------------------------------------------------------------------------*/
+// JSON Helpers
+/* -----------------------------------------------------------------------------*/
 
-// Parse seguro de JSON, mesmo que o content-type esteja errado
-// (Tenta analisar o texto como JSON de qualquer forma)
-async function safeJson(res) {
-  const ct = res.headers.get('content-type') || '';
-  const txt = await res.text();
-  if (/application\/json/i.test(ct)) return JSON.parse(txt || '[]');
+// PT: Faz parse seguro de JSON, mesmo se o content-type vier incorreto.
+// EN: Safely parses JSON, even when content-type is incorrect.
+async function safeJson(response) {
+  const contentType = response.headers.get('content-type') || '';
+  const text = await response.text();
+
+  if (/application\/json/i.test(contentType)) {
+    return JSON.parse(text || '[]');
+  }
+
   try {
-    return JSON.parse(txt || '[]');
+    return JSON.parse(text || '[]');
   } catch {
-    throw new Error('Resposta inválida da API');
+    throw new Error('Invalid API response');
   }
 }
 
-// ========= Retry + JSON =========
-// Faz fetch com retry em falhas temporárias (503, 429, timeout),
+/* -----------------------------------------------------------------------------*/
+// Retry + JSON
+//
+// PT: Faz fetch com retry em falhas temporárias como timeout, HTTP 429 e HTTP 503.
+// EN: Performs fetch with retry for temporary failures such as timeout,
+//     HTTP 429 and HTTP 503.
+/* -----------------------------------------------------------------------------*/
+
 async function fetchJsonWithRetry(
   url,
   { timeoutMs = DEFAULT_TIMEOUT_MS, retries = DEFAULT_RETRIES, signal } = {}
 ) {
   if (typeof navigator !== 'undefined' && !navigator.onLine) {
-    throw new Error('Sem conexão. Tente novamente.');
+    throw new Error('No connection. Please try again.');
   }
 
-  let lastErr;
+  let lastError;
 
   for (let attempt = 0; attempt <= retries; attempt++) {
     try {
-      const resp = await fetchWithTimeout(url, { timeoutMs, signal });
-      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-      const data = await safeJson(resp);
-      return data;
-    } catch (err) {
-      lastErr = err;
-      const msg = String(err?.message || err);
-      const isTimeout = /abort|timeout|timed?out/i.test(msg);
-      const isHTTP429 = /HTTP 429/.test(msg);
-      const isHTTP503 = /HTTP 503/.test(msg);
+      const response = await fetchWithTimeout(url, { timeoutMs, signal });
 
-      // última tentativa: normalize a mensagem
-      if (attempt === retries) {
-        if (isTimeout) throw new Error('Timeout ao chamar API');
-        throw new Error(`Falha ao chamar API: ${msg}`);
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
       }
 
-      // backoff com jitter (429 espera mais e NÃO faz cache-bust)
-      const base = isHTTP429 ? 2000 : isHTTP503 ? 1200 : 600;
-      const wait = base * Math.pow(2, attempt) + Math.floor(Math.random() * 200);
+      return await safeJson(response);
+    } catch (error) {
+      lastError = error;
 
-      await delay(wait);
+      const message = String(error?.message || error);
+      const isTimeout = /abort|timeout|timed?out/i.test(message);
+      const isHTTP429 = /HTTP 429/.test(message);
+      const isHTTP503 = /HTTP 503/.test(message);
+
+      if (attempt === retries) {
+        if (isTimeout) {
+          throw new Error('Timeout while calling API');
+        }
+
+        throw new Error(`Failed to call API: ${message}`);
+      }
+
+      const baseDelay = isHTTP429 ? 2000 : isHTTP503 ? 1200 : 600;
+      const waitTime = baseDelay * Math.pow(2, attempt) + Math.floor(Math.random() * 200);
+
+      await delay(waitTime);
 
       if (!isHTTP429) {
-        url = addBustParam(url); // evita reuso de resposta intermediária
+        url = addBustParam(url);
       }
-      continue;
     }
   }
+
+  throw lastError;
 }
 
-// ========= API pública da Nádia =========
-export async function fetchJsonCached(
+/* -----------------------------------------------------------------------------*/
+// Public API
+/* -----------------------------------------------------------------------------*/
+
+// PT: Busca JSON com cache em memória, retry, timeout e coalesce.
+// EN: Fetches JSON with memory cache, retry, timeout and request coalescing.
+async function fetchJsonCached(
   url,
   {
     ttlMs = DEFAULT_TTL_MS,
     timeoutMs = DEFAULT_TIMEOUT_MS,
     retries = DEFAULT_RETRIES,
-
-    // ✅ novos flags (vêm da Naomi via opts)
     nocache = false,
     force = false,
-    cb,
+    cb, // cache-buster param (?cb=timestamp) used to bypass cache
   } = {}
 ) {
   const key = String(url);
   const now = Date.now();
 
-  // ✅ decide bypass
   const bypass =
     nocache === true ||
     String(nocache) === '1' ||
@@ -177,21 +229,27 @@ export async function fetchJsonCached(
     String(force) === '1' ||
     (typeof cb !== 'undefined' && String(cb).length > 0);
 
-  // ✅ se bypass, não usa cache e não coalesce (cada request é fresh)
+  // PT: Se houver bypass, a chamada será sempre nova.
+  // EN: If bypass is enabled, the request will always be fresh.
   if (bypass) {
     return await fetchJsonWithRetry(key, { timeoutMs, retries });
   }
 
-  // 1) cache em memória
-  const hit = _memCache.get(key);
-  if (hit && hit.exp > now) return hit.data;
+  // 1) PT: tenta cache em memória
+  //    EN: tries memory cache first
+  const cachedEntry = _memCache.get(key);
+  if (cachedEntry && cachedEntry.exp > now) {
+    return cachedEntry.data;
+  }
 
-  // 2) coalesce: se já existe chamada em andamento para o mesmo URL, espere ela
+  // 2) PT: se já existir requisição em andamento para a mesma URL, reutiliza
+  //    EN: if an identical request is already running, reuse it
   if (_inflight.has(key)) {
     return _inflight.get(key);
   }
 
-  // 3) dispara a chamada real com retry
+  // 3) PT: dispara chamada real e salva no cache
+  //    EN: performs the real request and stores it in cache
   const runner = (async () => {
     try {
       const data = await fetchJsonWithRetry(key, { timeoutMs, retries });
@@ -206,30 +264,35 @@ export async function fetchJsonCached(
   return runner;
 }
 
-// Permite ajustar os valores padrão de timeout, retry e cache TTL
-export function setTimeoutMs(ms) {
-  if (ms > 0) DEFAULT_TIMEOUT_MS = ms;
+/* -----------------------------------------------------------------------------*/
+// Runtime Config
+//
+// PT: Permite ajustar os valores padrão da Nádia em tempo de execução.
+// EN: Allows Nadia default values to be adjusted at runtime.
+/* -----------------------------------------------------------------------------*/
+
+function setTimeoutMs(ms) {
+  if (ms > 0) {
+    DEFAULT_TIMEOUT_MS = ms;
+  }
 }
 
-// Ajusta o número de tentativas de retry
-export function setRetries(n) {
-  if (n >= 0) DEFAULT_RETRIES = n;
+function setRetries(retries) {
+  if (retries >= 0) {
+    DEFAULT_RETRIES = retries;
+  }
 }
 
-// Ajusta o TTL do cache em memória
-export function setCacheTtl(ms) {
-  if (ms >= 0) DEFAULT_TTL_MS = ms;
+function setCacheTtl(ms) {
+  if (ms >= 0) {
+    DEFAULT_TTL_MS = ms;
+  }
 }
 
-// -----------------------------------------------------------------------------
-// 🧠 ApiCore — Pacote do Núcleo de Rede
-// PT: Reúne as funções essenciais da Nádia (CORE) em um único objeto, facilitando
-//     a importação e o uso. Funciona como uma “caixa de ferramentas” contendo
-//     fetch com cache, timeout, retry e ajustes dinâmicos de configuração.
-// EN: Groups Nadia’s core network functions into a single object, making it
-//     easy to import and use. Works as a “toolbox”, providing cached fetch,
-//     timeout, retry and dynamic configuration controls.
-// -----------------------------------------------------------------------------
+/* -----------------------------------------------------------------------------*/
+// Export
+/* -----------------------------------------------------------------------------*/
+
 export const NadiaAPICore = {
   fetchJsonCached,
   setTimeoutMs,

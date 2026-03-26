@@ -1,11 +1,20 @@
+<!-- -------------------------------------------------- -->
+<!-- 📌 Foundation — Avalon Layout -->
+<!-- PT: Estrutura base da página com layout, sections, modais e scripts. -->
+<!-- EN: Base page structure with layout, sections, modals and scripts. -->
+<!-- Foundation / avalon.html -->
+<!-- -------------------------------------------------- -->
+
 <!doctype html>
-<html lang="pt-BR" class="snap-y snap-mandatory scroll-smooth">
+<html lang="pt-BR" class="scroll-smooth">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>SCS Molduras — Portfólio</title>
 
+    <!-- -------------------------------------------------- -->
     <!-- Fonts -->
+    <!-- -------------------------------------------------- -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -13,77 +22,94 @@
       rel="stylesheet"
     />
 
-    <!-- Tailwind compilado -->
-    <!-- <link rel="stylesheet" href="dist/styles.css" /> -->
-
-    <!-- CSS principal do sistema
-     Ponto de entrada: Morrigan (diretora)
-     Orquestra todos os leaders e estilos -->
+    <!-- -------------------------------------------------- -->
+    <!-- System Styles -->
+    <!-- PT: CSS principal do sistema. -->
+    <!-- EN: Main system stylesheet. -->
+    <!-- -------------------------------------------------- -->
     <link rel="stylesheet" href="/assets/css/system/director/morrigan-system-director.css" />
   </head>
 
   <body>
-    <!-- PARTIAL EN: layout/header / PT: Cabeçalho principal -->
+    <!-- -------------------------------------------------- -->
+    <!-- PARTIAL: layout/header -->
+    <!-- PT: Cabeçalho principal. -->
+    <!-- EN: Main header. -->
+    <!-- -------------------------------------------------- -->
     {{> layout/header }}
 
-    <!-- MAIN: o contêiner que rola -->
+    <!-- -------------------------------------------------- -->
+    <!-- Main -->
+    <!-- PT: Contêiner principal com scroll. -->
+    <!-- EN: Main scroll container. -->
+    <!-- -------------------------------------------------- -->
     <main id="snap">
-      <!-- PARTIAL EN: sections/hero / PT: Seção principal (Hero) -->
+      <!-- PARTIAL: sections/hero -->
       {{> sections/hero }}
 
-      <!-- PARTIAL EN: sections/divider-light / PT: Divisor claro -->
+      <!-- PARTIAL: sections/divider-light -->
       {{> sections/divider-light }}
 
-      <!-- PARTIAL EN: sections/about / PT: Seção sobre -->
+      <!-- PARTIAL: sections/about -->
       {{> sections/about }}
-      <!-- PARTIAL EN: sections/divider-light / PT: Divisor claro -->
+
+      <!-- PARTIAL: sections/divider-light -->
       {{> sections/divider-light }}
 
-      <!-- PARTIAL EN: sections/production / PT: Seção de produção -->
+      <!-- PARTIAL: sections/production -->
       {{> sections/production }}
-      <!-- PARTIAL EN: sections/divider-light / PT: Divisor claro -->
+
+      <!-- PARTIAL: sections/divider-light -->
       {{> sections/divider-light }}
 
-      <!-- PARTIAL EN: sections/after-sales / PT: Seção de pós-venda -->
+      <!-- PARTIAL: sections/after-sales -->
       {{> sections/after-sales }}
-      <!-- PARTIAL EN: sections/divider-light / PT: Divisor claro -->
+
+      <!-- PARTIAL: sections/divider-light -->
       {{> sections/divider-light }}
 
-      <!-- PARTIAL EN: sections/location / PT: Seção de localização -->
+      <!-- PARTIAL: sections/location -->
       {{> sections/location }}
-      <!-- PARTIAL EN: sections/divider-light / PT: Divisor claro -->
-      {{> sections/divider-light }}
 
-      <!-- PARTIAL EN: sections/products / PT: Seção de produtos -->
+      <!-- PARTIAL: sections/products -->
       {{> sections/products }}
-      <!-- PARTIAL EN: sections/divider-light / PT: Divisor claro -->
-      {{> sections/divider-light }}
 
-      <!-- PARTIAL EN: sections/gallery / PT: Seção de galeria -->
+      <!-- PARTIAL: sections/gallery -->
       {{> sections/gallery }}
-      <!-- PARTIAL EN: sections/divider-light / PT: Divisor claro -->
+
+      <!-- PARTIAL: sections/divider-light -->
       {{> sections/divider-light }}
 
-      <!-- PARTIAL EN: sections/feedback / PT: Seção de feedback -->
+      <!-- PARTIAL: sections/feedback -->
       {{> sections/feedback }}
-      <!-- PARTIAL EN: sections/divider-light / PT: Divisor claro -->
-      {{> sections/divider-light }}
 
-      <!-- PARTIAL EN: sections/system / PT: Seção do sistema -->
+      <!-- PARTIAL: sections/system -->
       {{> sections/system }}
     </main>
 
-    <!-- PARTIAL EN: layout/footer / PT: Rodapé -->
+    <!-- -------------------------------------------------- -->
+    <!-- PARTIAL: layout/footer -->
+    <!-- -------------------------------------------------- -->
     {{> layout/footer }}
 
-    <!-- PARTIAL EN: modals/feedback-form-modal / PT: Modal de formulário de feedback -->
+    <!-- -------------------------------------------------- -->
+    <!-- PARTIAL: modals/feedback-form-modal -->
+    <!-- -------------------------------------------------- -->
     {{> modals/feedback-form-modal }}
-    <!-- PARTIAL EN: modals/image-modal / PT: Modal de imagem -->
+
+    <!-- -------------------------------------------------- -->
+    <!-- PARTIAL: modals/image-modal -->
+    <!-- -------------------------------------------------- -->
     {{> modals/image-modal }}
-    <!-- PARTIAL EN: modals/feedback-list-modal / PT: Modal de lista de feedback -->
+
+    <!-- -------------------------------------------------- -->
+    <!-- PARTIAL: modals/feedback-list-modal -->
+    <!-- -------------------------------------------------- -->
     {{> modals/feedback-list-modal }}
 
-    <!-- botão backToTop -->
+    <!-- -------------------------------------------------- -->
+    <!-- Back To Top -->
+    <!-- -------------------------------------------------- -->
     <button
       type="button"
       id="backToTopBtn"
@@ -106,14 +132,18 @@
       </svg>
     </button>
 
+    <!-- -------------------------------------------------- -->
     <!-- Scripts -->
-    <!-- FORÇA o endpoint do deploy ATUAL antes de qualquer script -->
+    <!-- -------------------------------------------------- -->
+
+    <!-- Feedback Endpoint -->
     <script>
       window.FEEDBACK_ENDPOINT =
         'https://script.google.com/macros/s/AKfycbzzCFgGmXhIDc7xlaJa_XpacGMu3GBn7d0kg2ntRgUrpuisnV__AjF_8pJGXgG6NaMP0A/exec';
       console.log('[init] FEEDBACK_ENDPOINT =', window.FEEDBACK_ENDPOINT);
     </script>
 
+    <!-- Rating Sync -->
     <script>
       document.addEventListener('change', (e) => {
         if (e.target && e.target.name === 'rating_star') {
@@ -122,16 +152,14 @@
         }
       });
     </script>
-    <!-- Feedback -->
 
-    <!-- 1) Define o endpoint UMA vez -->
-    <!-- 1) Base — seta window.FEEDBACK_ENDPOINT automaticamente ao carregar -->
-    <script type="module" src="/assets/js//feedback//core//config/feedback-endpoint.js"></script>
+    <!-- Feedback Config -->
+    <script type="module" src="/assets/js/feedback/core/config/feedback-endpoint.js"></script>
 
-    <!-- Sistema (Morgana – Diretora Geral) -->
-    <script type="module" src="/assets//js//system//director/morgana-system-director.js"></script>
+    <!-- System Director -->
+    <script type="module" src="/assets/js/system/director/morgana-system-director.js"></script>
 
-    <!-- <script src="assets/js/base.js"></script> -->
+    <!-- App Entry -->
     <script type="module" src="/main.js"></script>
   </body>
 </html>

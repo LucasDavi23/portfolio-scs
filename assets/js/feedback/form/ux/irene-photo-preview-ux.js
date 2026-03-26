@@ -1,68 +1,77 @@
-// ==================================================
-// ✨ Irene — Photo Preview UX Specialist
+// ✨ Irene — Photo Preview UX
 //
-// Nível: Aprendiz
+// Nível / Level: Aprendiz / Apprentice
 //
-// File: irene-photo-preview-ux.js
+// PT: Responsável pela experiência de preview da foto no formulário.
+//     Padroniza o container como card, sincroniza a imagem inserida,
+//     controla overlay, permite abrir a imagem em modal e solicita
+//     a limpeza do preview quando necessário.
+//     Não valida input, não processa imagem, não controla o input de arquivo
+//     e não chama API.
 //
-// PT: Irene cuida da experiência (UX) do preview de foto no formulário.
-//     Ela:
-//     - padroniza o container do preview como um "card"
-//     - ajusta automaticamente a <img> inserida no preview (MutationObserver)
-//     - controla overlay (mostra/esconde) quando há imagem
-//     - abre a imagem em um modal ao clicar/teclar (Enter/Espaço)
-//       usando o modal padrão do sistema se existir; caso contrário,
-//       usa um fallback simples com <dialog>.
-//     Irene não valida inputs (Sofia), não processa imagem (Athena),
-//     não controla input/label do arquivo (Daphne) e não chama API/Flow.
+// EN: Responsible for the photo preview experience in the form.
+//     Standardizes the container as a card, syncs the inserted image,
+//     controls the overlay, allows opening the image in a modal,
+//     and requests preview clearing when needed.
+//     Does not validate input, does not process images,
+//     does not control the file input, and does not call APIs.
+/* -----------------------------------------------------------------------------*/
+
+/* -----------------------------------------------------------------------------*/
+// Imports
+/* -----------------------------------------------------------------------------*/
+
+/* -----------------------------------------------------------------------------*/
+// 👁️ Iris — Image Viewer
+// Fornece / Provides:
+// - initImageViewer()
+/* -----------------------------------------------------------------------------*/
+import { IrisImageViewer } from '/assets/js/layout/modal/iris-image-viewer.js';
+
+/* -----------------------------------------------------------------------------*/
+// 📡 App Events — System Tool
+// Fornece / Provides:
+// - emitAppEvent()
+/* -----------------------------------------------------------------------------*/
+import { AppEvents } from '/assets/js/system/events/appEvents.js';
+
+/* -----------------------------------------------------------------------------*/
+// Internal State
+/* -----------------------------------------------------------------------------*/
+
+// PT: Referências principais do DOM.
+// EN: Main DOM references.
+let previewElement = null;
+let overlayElement = null;
+
+// PT: Observer do preview para inserção ou remoção de imagem.
+// EN: Preview observer for image insertion or removal.
+let previewObserver = null;
+
+// PT: Handlers do preview para abertura do modal.
+// EN: Preview handlers for modal opening.
+let onPreviewClick = null;
+let onPreviewKeydown = null;
+
+// PT: Botão de remoção da foto no preview.
+// EN: Remove photo button in the preview.
+let removeButtonElement = null;
+let onRemoveClick = null;
+let onRemoveKeydown = null;
+
+/* -----------------------------------------------------------------------------*/
+// Internal Helpers — Preview Card
 //
-// EN: Irene handles the photo preview UX in the form.
-//     She:
-//     - styles the preview container as a "card"
-//     - auto-tunes the <img> inserted into the preview (MutationObserver)
-//     - controls overlay visibility when an image is present
-//     - opens the image in a modal on click/keyboard (Enter/Space)
-//       using the system modal if available; otherwise falls back to <dialog>.
-//     Irene does not validate inputs (Sofia), does not process images (Athena),
-//     does not handle file input/label UI (Daphne) and does not call API/Flow.
-// ==================================================
+// PT: Funções auxiliares para estrutura e estado visual do preview.
+// EN: Helper functions for preview structure and visual state.
+/* -----------------------------------------------------------------------------*/
 
-// ------------------------------
-// Module state (Irene)
-// ------------------------------
-
-// PT: referências principais do DOM
-// EN: main DOM references
-let previewEl = null;
-let overlayEl = null;
-
-// PT: observer do preview (img insert/remove)
-// EN: preview observer (img insert/remove)
-let observerRef = null;
-
-// PT: handlers do preview (abrir modal)
-// EN: preview handlers (open modal)
-let onPreviewClickRef = null;
-let onPreviewKeydownRef = null;
-
-// PT: botão X (remoção de foto no preview)
-// EN: remove photo button (preview)
-let removeBtnEl = null;
-let onRemoveClickRef = null;
-let onRemoveKeydownRef = null;
-
-// ------------------------------
-// Internal helpers (UX only)
-// ------------------------------
-
-// PT: Aplica estilos de card ao container do preview
-// EN: Applies card styles to the preview container
+// PT: Aplica estilos de card ao container do preview.
+// EN: Applies card styles to the preview container.
 function applyPreviewCardStyles() {
-  if (!previewEl) return;
+  if (!previewElement) return;
 
-  // PT: Mantém o preview no tamanho de card sem depender de runtime Tailwind
-  // EN: Keeps the preview in card size without relying on Tailwind runtime
-  previewEl.classList.add(
+  previewElement.classList.add(
     'w-full',
     'max-w-sm',
     'h-24',
@@ -75,123 +84,144 @@ function applyPreviewCardStyles() {
   );
 }
 
-// PT: Sincroniza estado do preview (com ou sem imagem)
-// EN: Syncs preview state (with or without image)
+// PT: Sincroniza o estado do preview com ou sem imagem.
+// EN: Syncs the preview state with or without an image.
 function syncPreviewState() {
-  if (!previewEl) return;
+  if (!previewElement) return;
 
-  const img = previewEl.querySelector('img');
+  const imageElement = previewElement.querySelector('img');
 
-  if (!img) {
-    previewEl.classList.remove('has-image');
-    if (overlayEl) overlayEl.classList.add('hidden');
+  if (!imageElement) {
+    previewElement.classList.remove('has-image');
+
+    if (overlayElement) {
+      overlayElement.classList.add('hidden');
+    }
 
     syncRemoveButtonVisibility(false);
-
     return;
   }
 
-  // PT: Padroniza estilo da imagem inserida por outra UI (ex: Daphne)
-  // EN: Standardize image style inserted by another UI (e.g., Daphne)
-  img.classList.add('w-full', 'h-full', 'object-cover', 'rounded-md');
+  // PT: Padroniza a imagem inserida por outra UI.
+  // EN: Standardizes the image inserted by another UI.
+  imageElement.classList.add('w-full', 'h-full', 'object-cover', 'rounded-md');
 
-  previewEl.classList.add('has-image');
-  if (overlayEl) overlayEl.classList.remove('hidden');
+  previewElement.classList.add('has-image');
+
+  if (overlayElement) {
+    overlayElement.classList.remove('hidden');
+  }
+
   syncRemoveButtonVisibility(true);
 }
 
-// PT: Abre um modal fallback simples com <dialog>
-// EN: Opens a simple fallback modal with <dialog>
+/* -----------------------------------------------------------------------------*/
+// Internal Helpers — Modal
+//
+// PT: Funções auxiliares para abertura do modal de imagem.
+// EN: Helper functions for opening the image modal.
+/* -----------------------------------------------------------------------------*/
+
+// PT: Abre um modal fallback simples com dialog.
+// EN: Opens a simple fallback modal with dialog.
 function openFallbackDialog({ src, alt }) {
-  let dlg = document.getElementById('feedback-preview-modal');
+  let dialogElement = document.getElementById('feedback-preview-modal');
 
-  if (!dlg) {
-    dlg = document.createElement('dialog');
-    dlg.id = 'feedback-preview-modal';
-    dlg.className = 'rounded-xl p-0';
-    dlg.innerHTML = `
+  if (!dialogElement) {
+    dialogElement = document.createElement('dialog');
+    dialogElement.id = 'feedback-preview-modal';
+    dialogElement.className = 'rounded-xl p-0';
+    dialogElement.innerHTML = `
       <div class="relative">
-        <button type="button" aria-label="Close"
-          class="absolute right-2 top-2 z-10 rounded-full bg-black/60 text-white px-2 py-1 text-xs"
-          data-close>Close</button>
-        <img alt="" class="max-h-[85vh] w-auto object-contain block">
-      </div>`;
+        <button
+          type="button"
+          aria-label="Close"
+          class="absolute right-2 top-2 z-10 rounded-full bg-black/60 px-2 py-1 text-xs text-white"
+          data-close
+        >
+          Close
+        </button>
+        <img alt="" class="block max-h-[85vh] w-auto object-contain">
+      </div>
+    `;
 
-    document.body.appendChild(dlg);
+    document.body.appendChild(dialogElement);
 
-    dlg.addEventListener('click', (e) => {
-      if (e.target === dlg || e.target.hasAttribute('data-close')) dlg.close();
+    dialogElement.addEventListener('click', (event) => {
+      if (event.target === dialogElement || event.target.hasAttribute('data-close')) {
+        dialogElement.close();
+      }
     });
   }
 
-  const img = dlg.querySelector('img');
-  img.src = src;
-  img.alt = alt || 'Feedback image';
+  const imageElement = dialogElement.querySelector('img');
+  imageElement.src = src;
+  imageElement.alt = alt || 'Feedback image';
 
-  dlg.showModal();
+  dialogElement.showModal();
 }
 
-// PT: Abre o modal de imagem (padrão do sistema ou fallback)
-// EN: Opens the image modal (system default or fallback)
+// PT: Abre o modal de imagem usando a Iris (viewer global).
+// EN: Opens the image modal using Iris (global viewer).
 function openImageModal({ src, alt }) {
-  // PT: Se existir modal padrão do projeto, usa ele
-  // EN: If the project modal exists, use it
-  if (window.FeedbackCardModal?.open) {
-    window.FeedbackCardModal.open({ src, alt });
-    return;
-  }
+  if (!src) return;
 
-  // PT/EN: fallback mínimo
-  openFallbackDialog({ src, alt });
+  IrisImageViewer.openImageViewer({ src, alt });
 }
 
-// PT: Lida com abertura do modal ao clicar/teclar no preview
-// EN: Handles modal opening on preview click/keyboard
+// PT: Abre o modal a partir da imagem atual do preview.
+// EN: Opens the modal from the current preview image.
 function handlePreviewOpen() {
-  if (!previewEl) return;
+  if (!previewElement) return;
 
-  const img = previewEl.querySelector('img');
-  if (!img || !img.src) return;
+  const imageElement = previewElement.querySelector('img');
+  if (!imageElement || !imageElement.src) return;
 
   openImageModal({
-    src: img.src,
-    alt: img.alt || 'Feedback image',
+    src: imageElement.src,
+    alt: imageElement.alt || 'Feedback image',
   });
 }
 
-// PT: Dispara evento global solicitando limpeza do input de foto
-// EN: Dispatches global event requesting photo input clearing
+/* -----------------------------------------------------------------------------*/
+// Internal Helpers — Clear Request
+//
+// PT: Solicita limpeza do input de foto sem manipular o input diretamente.
+// EN: Requests photo input clearing without manipulating the input directly.
+/* -----------------------------------------------------------------------------*/
+
+// PT: Dispara evento global solicitando limpeza do input de foto.
+// EN: Dispatches a global event requesting photo input clearing.
 function dispatchClearRequest() {
-  // PT: Irene só solicita a limpeza (quem limpa input é a Daphne)
-  // EN: Irene only requests clearing (Daphne clears the file input)
-  window.dispatchEvent(
-    new CustomEvent('feedback:photo:clear-request', {
-      detail: { source: 'IrenePhotoPreviewUX' },
-    })
-  );
+  AppEvents.emitAppEvent('feedback:photo:clear-request', {
+    source: 'IrenePhotoPreviewUX',
+  });
 }
 
-// PT: Garante que o botão de remoção exista e tenha handlers
-// EN: Ensures the remove button exists and has handlers
+/* -----------------------------------------------------------------------------*/
+// Internal Helpers — Remove Button
+//
+// PT: Cria, sincroniza e remove handlers do botão de exclusão da foto.
+// EN: Creates, syncs, and removes handlers for the photo removal button.
+/* -----------------------------------------------------------------------------*/
 
+// PT: Garante que o botão de remoção exista e tenha handlers.
+// EN: Ensures the remove button exists and has handlers.
 function ensureRemoveButton() {
-  if (!previewEl) return;
+  if (!previewElement) return;
 
-  // PT/EN: garante que não vai duplicar handlers se attach rodar de novo
   detachRemoveButtonHandlers();
 
-  // PT: evita duplicar se o botão já existir no DOM
-  // EN: avoid duplicates if button already exists in DOM
-  removeBtnEl = previewEl.querySelector('[data-photo-remove]');
+  removeButtonElement = previewElement.querySelector('[data-photo-remove]');
 
-  if (!removeBtnEl) {
-    removeBtnEl = document.createElement('button');
-    removeBtnEl.type = 'button';
-    removeBtnEl.setAttribute('aria-label', 'Remove photo');
-    removeBtnEl.setAttribute('data-photo-remove', '');
+  if (!removeButtonElement) {
+    removeButtonElement = document.createElement('button');
+    removeButtonElement.type = 'button';
+    removeButtonElement.setAttribute('aria-label', 'Remove photo');
+    removeButtonElement.setAttribute('data-photo-remove', '');
 
-    removeBtnEl.innerHTML = `
-      <svg viewBox="0 0 24 24" class="w-3.5 h-3.5" aria-hidden="true">
+    removeButtonElement.innerHTML = `
+      <svg viewBox="0 0 24 24" class="h-3.5 w-3.5" aria-hidden="true">
         <path
           d="M6 6l12 12M18 6l-12 12"
           stroke="currentColor"
@@ -201,9 +231,7 @@ function ensureRemoveButton() {
       </svg>
     `;
 
-    // PT: estilo do X (somente UX do preview)
-    // EN: X styling (preview UX only)
-    removeBtnEl.classList.add(
+    removeButtonElement.classList.add(
       'hidden',
       'absolute',
       'top-2',
@@ -212,138 +240,134 @@ function ensureRemoveButton() {
       'w-6',
       'h-6',
       'rounded-full',
-
       'inline-flex',
       'items-center',
       'justify-center',
-
       'text-gray-700',
       'bg-white/70',
       'hover:bg-white/90',
       'hover:text-gray-900',
-
       'select-none',
       'backdrop-blur-sm'
     );
 
-    // PT: garante que o preview seja âncora do absolute
-    // EN: ensure preview is the anchor for absolute positioning
-    previewEl.classList.add('relative');
-
-    previewEl.appendChild(removeBtnEl);
+    previewElement.classList.add('relative');
+    previewElement.appendChild(removeButtonElement);
   }
 
-  // PT/EN: handlers (refs para detach)
-  onRemoveClickRef = (e) => {
-    e.preventDefault();
-    e.stopPropagation(); // PT/EN: não abrir modal ao clicar no X
+  onRemoveClick = (event) => {
+    event.preventDefault();
+    event.stopPropagation();
     dispatchClearRequest();
   };
 
-  onRemoveKeydownRef = (e) => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      e.stopPropagation(); // PT/EN: não abrir modal ao teclar no X
+  onRemoveKeydown = (event) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      event.stopPropagation();
       dispatchClearRequest();
     }
   };
 
-  removeBtnEl.addEventListener('click', onRemoveClickRef);
-  removeBtnEl.addEventListener('keydown', onRemoveKeydownRef);
+  removeButtonElement.addEventListener('click', onRemoveClick);
+  removeButtonElement.addEventListener('keydown', onRemoveKeydown);
 }
 
+// PT: Sincroniza a visibilidade do botão de remoção.
+// EN: Syncs the visibility of the remove button.
 function syncRemoveButtonVisibility(hasImage) {
-  if (!removeBtnEl) return;
+  if (!removeButtonElement) return;
 
-  // PT: X só aparece quando há imagem
-  // EN: X only shows when an image exists
-  if (hasImage) removeBtnEl.classList.remove('hidden');
-  else removeBtnEl.classList.add('hidden');
+  if (hasImage) {
+    removeButtonElement.classList.remove('hidden');
+  } else {
+    removeButtonElement.classList.add('hidden');
+  }
 }
 
-// PT: Remove listeners do botão X (sem remover do DOM)
-// EN: Removes X button listeners (without removing from DOM)
+// PT: Remove os listeners do botão de remoção.
+// EN: Removes the listeners from the remove button.
 function detachRemoveButtonHandlers() {
-  if (!removeBtnEl) return;
+  if (!removeButtonElement) return;
 
-  if (onRemoveClickRef) {
-    removeBtnEl.removeEventListener('click', onRemoveClickRef);
-  }
-  if (onRemoveKeydownRef) {
-    removeBtnEl.removeEventListener('keydown', onRemoveKeydownRef);
+  if (onRemoveClick) {
+    removeButtonElement.removeEventListener('click', onRemoveClick);
   }
 
-  onRemoveClickRef = null;
-  onRemoveKeydownRef = null;
+  if (onRemoveKeydown) {
+    removeButtonElement.removeEventListener('keydown', onRemoveKeydown);
+  }
+
+  onRemoveClick = null;
+  onRemoveKeydown = null;
 }
 
-// ------------------------------
-// Public API (Irene)
-// ------------------------------
+/* -----------------------------------------------------------------------------*/
+// Public API
+/* -----------------------------------------------------------------------------*/
 
+// PT: Anexa a UX do preview de foto ao container informado.
+// EN: Attaches photo preview UX to the provided container.
 function attachPhotoPreviewUX(options = {}) {
   const { previewId = 'photo-preview', overlayId = 'photo-preview-overlay' } = options;
 
-  previewEl = document.getElementById(previewId);
+  previewElement = document.getElementById(previewId);
+  overlayElement = document.getElementById(overlayId);
 
-  console.log('[Irene] attachPhotoPreviewUX: previewEl?', !!previewEl);
-
-  overlayEl = document.getElementById(overlayId);
-
-  if (!previewEl) return;
+  if (!previewElement) return;
 
   applyPreviewCardStyles();
   syncPreviewState();
   ensureRemoveButton();
 
-  console.log('[Irene] ensureRemoveButton executed');
+  // PT: Observa mudanças no preview, como inserção ou remoção de imagem.
+  // EN: Observes changes in the preview, such as image insertion or removal.
+  previewObserver = new MutationObserver(syncPreviewState);
+  previewObserver.observe(previewElement, { childList: true, subtree: true });
 
-  // PT: Observa mudanças (ex: <img> inserida/removida pelo preview)
-  // EN: Observes changes (e.g., <img> inserted/removed by preview UI)
-  observerRef = new MutationObserver(syncPreviewState);
-  observerRef.observe(previewEl, { childList: true, subtree: true });
-
-  // PT: Clique/teclado no preview abre modal
-  // EN: Click/keyboard on preview opens modal
-  onPreviewClickRef = () => handlePreviewOpen();
-  onPreviewKeydownRef = (e) => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
+  // PT: Clique ou teclado no preview abre o modal.
+  // EN: Click or keyboard on the preview opens the modal.
+  onPreviewClick = () => handlePreviewOpen();
+  onPreviewKeydown = (event) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
       handlePreviewOpen();
     }
   };
 
-  previewEl.addEventListener('click', onPreviewClickRef);
-  previewEl.addEventListener('keydown', onPreviewKeydownRef);
+  previewElement.addEventListener('click', onPreviewClick);
+  previewElement.addEventListener('keydown', onPreviewKeydown);
 }
 
+// PT: Remove a UX do preview e limpa referências.
+// EN: Detaches preview UX and clears references.
 function detachPhotoPreviewUX() {
-  if (observerRef) observerRef.disconnect();
-  observerRef = null;
-
-  if (previewEl && onPreviewClickRef) {
-    previewEl.removeEventListener('click', onPreviewClickRef);
+  if (previewObserver) {
+    previewObserver.disconnect();
   }
-  if (previewEl && onPreviewKeydownRef) {
-    previewEl.removeEventListener('keydown', onPreviewKeydownRef);
+  previewObserver = null;
+
+  if (previewElement && onPreviewClick) {
+    previewElement.removeEventListener('click', onPreviewClick);
   }
 
-  onPreviewClickRef = null;
-  onPreviewKeydownRef = null;
+  if (previewElement && onPreviewKeydown) {
+    previewElement.removeEventListener('keydown', onPreviewKeydown);
+  }
 
-  // PT: limpa botão de remoção
-  // EN: cleans up remove button
+  onPreviewClick = null;
+  onPreviewKeydown = null;
+
   detachRemoveButtonHandlers();
-  removeBtnEl = null;
+  removeButtonElement = null;
 
-  previewEl = null;
-  overlayEl = null;
+  previewElement = null;
+  overlayElement = null;
 }
 
-// ------------------------------
-// Export pattern (project standard)
-// Ordem de uso: attach → detach
-// ------------------------------
+/* -----------------------------------------------------------------------------*/
+// Export
+/* -----------------------------------------------------------------------------*/
 
 export const IrenePhotoPreviewUX = {
   attachPhotoPreviewUX,

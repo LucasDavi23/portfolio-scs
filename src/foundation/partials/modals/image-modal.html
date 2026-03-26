@@ -1,13 +1,16 @@
-<!-- ===================================================== -->
-<!-- PARTIAL: MODAL / IMAGE -->
-<!-- Foundation / partials/modals/image-modal.html -->
-<!-- ===================================================== -->
+<!-- -------------------------------------------------- -->
+<!-- 📌 Modal — Image Viewer -->
+<!-- PT: Modal para visualização ampliada de imagens com navegação. -->
+<!-- EN: Modal for enlarged image viewing with navigation. -->
+<!-- -------------------------------------------------- -->
 
 <div
   id="modalImg"
   class="fixed inset-0 z-[60] hidden grid place-items-center bg-black/70 p-4 opacity-0 transition-opacity"
 >
-  <!-- botão fechar -->
+  <!-- -------------------------------------------------- -->
+  <!-- Close Button -->
+  <!-- -------------------------------------------------- -->
   <button
     type="button"
     id="modalClose"
@@ -17,13 +20,14 @@
     ✕
   </button>
 
-  <!-- Viewer wrapper (relative para setas/contador) -->
+  <!-- -------------------------------------------------- -->
   <!-- Panel -->
+  <!-- -------------------------------------------------- -->
   <div
     id="modalImgPanel"
     class="relative flex items-center justify-center opacity-0 transition-[opacity, transform]"
   >
-    <!-- imagem ampliada -->
+    <!-- Image -->
     <img
       id="modalImgSrc"
       class="max-w-[92vw] max-h-[90dvh] rounded-xl shadow-2xl ring-1 ring-white/20 object-contain"
@@ -31,7 +35,9 @@
       draggable="false"
     />
 
-    <!-- Controls (Echo mode only) -->
+    <!-- -------------------------------------------------- -->
+    <!-- Viewer Controls -->
+    <!-- -------------------------------------------------- -->
     <div
       id="modalViewerControls"
       class="pointer-events-none absolute inset-0 hidden"

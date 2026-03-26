@@ -1,17 +1,27 @@
-<!-- ===================================================== -->
-<!-- PARTIAL: NAV / MOBILE -->
-<!-- Foundation / partials/nav/mobile-nav.html -->
-<!-- ===================================================== -->
+<!-- -------------------------------------------------- -->
+<!-- 📌 Nav — Mobile Menu -->
+<!-- PT: Menu lateral mobile com navegação e ação principal. -->
+<!-- EN: Mobile side menu with navigation and primary action. -->
+<!-- -------------------------------------------------- -->
 
-<!-- Backdrop do menu (cobre a tela ao abrir) -->
+<!-- -------------------------------------------------- -->
+<!-- Backdrop -->
+<!-- -------------------------------------------------- -->
 <div id="mobile-menu-backdrop" class="fixed inset-0 z-[55] bg-black/40 hidden"></div>
 
+<!-- -------------------------------------------------- -->
+<!-- Panel -->
+<!-- -------------------------------------------------- -->
 <aside
   id="mobile-menu"
   class="fixed inset-y-0 right-0 z-[61] w-full sm:max-w-sm bg-white shadow-xl hidden"
 >
+  <!-- -------------------------------------------------- -->
+  <!-- Header -->
+  <!-- -------------------------------------------------- -->
   <div class="flex items-center justify-between px-6 py-5">
-    <a href="#inicio" class="sr-only">Início</a>
+    <a href="#home" class="sr-only">Início</a>
+
     <button id="mobile-menu-close" class="p-2 rounded-md text-gray-700">
       <span class="sr-only">Fechar menu</span>
       <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
@@ -20,64 +30,78 @@
     </button>
   </div>
 
+  <!-- -------------------------------------------------- -->
+  <!-- Navigation -->
+  <!-- -------------------------------------------------- -->
   <nav class="px-6 pb-8">
     <div class="space-y-2 text-center">
       <a
-        href="#sobre"
-        data-nav="sobre"
+        href="#about"
+        data-nav="about"
         class="nav-link block px-4 py-2 text-sm font-semibold text-gray-900 hover:bg-gray-100"
-        >Sobre</a
       >
+        Sobre
+      </a>
 
       <a
-        href="#producao"
-        data-nav="producao"
+        href="#production"
+        data-nav="production"
         class="nav-link block px-4 py-2 text-sm font-semibold text-gray-900 hover:bg-gray-100"
-        >Produção</a
       >
+        Produção
+      </a>
 
       <a
-        href="#pos-vendas"
-        data-nav="pos-vendas"
+        href="#after-sales"
+        data-nav="after-sales"
         class="nav-link block px-4 py-2 text-sm font-semibold text-gray-900 hover:bg-gray-100"
-        >Pós-vendas</a
       >
+        Pós-vendas
+      </a>
 
       <a
-        href="#localizacao"
-        data-nav="localizacao"
+        href="#location"
+        data-nav="location"
         class="nav-link block px-4 py-2 text-sm font-semibold text-gray-900 hover:bg-gray-100"
-        >Localização</a
       >
+        Localização
+      </a>
 
       <a
-        href="#produtos"
-        data-nav="produtos"
+        href="#products"
+        data-nav="products"
         class="nav-link block px-4 py-2 text-sm font-semibold text-gray-900 hover:bg-gray-100"
-        >Produtos</a
       >
+        Produtos
+      </a>
 
       <a
-        href="#galeria"
-        data-nav="galeria"
+        href="#gallery"
+        data-nav="gallery"
         class="nav-link block px-4 py-2 text-sm font-semibold text-gray-900 hover:bg-gray-100"
-        >Galeria</a
       >
+        Galeria
+      </a>
 
       <a
         href="#feedback-s"
         data-nav="feedback-s"
         class="nav-link block px-4 py-2 text-sm font-semibold text-gray-900 hover:bg-gray-100"
-        >Feedback</a
       >
+        Feedback
+      </a>
 
       <a
         href="#celine-s"
         data-nav="celine-s"
         class="nav-link block px-4 py-2 text-sm font-semibold text-gray-900 hover:bg-gray-100"
-        >Sistema (Celine)</a
       >
+        Sistema (Celine)
+      </a>
 
+      <!-- -------------------------------------------------- -->
+      <!-- Primary Action -->
+      <!-- -------------------------------------------------- -->
       <a
         href="https://wa.me/551134528549?text=Ol%C3%A1%20SCS%20Molduras."
         target="_blank"

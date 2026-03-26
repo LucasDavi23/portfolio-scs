@@ -9,14 +9,24 @@
 // ------------------------------------------------------------
 
 // Imports
-// -----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------------
 // ✨ Latch — Body Scroll Lock (System Utils)
 // Provides:
 //  - lockBodyScroll()
 //  - unlockBodyScroll()
 //  - getScrollLockCount()
 
-import { LatchBodyScroll } from '/assets/js/system/utils/latch-body-scroll-lock.js';
+import { LatchRootScroll } from '/assets/js/system/utils/latch-root-scroll-lock.js';
+
+// ----------------------------------------------------------------------------------
+// 🕯️ Vela — Modal Motion (System Utils)
+// Provides:
+// openModalMotion,
+// closeModalMotion,
+
+import { VelaModalMotion } from '/assets/js/layout/modal/vela-modal-motion.js';
+
+// ----------------------------------------------------------------------------------
 
 const MODAL_ID = 'feedback-modal';
 const OPEN_SELECTOR = '[data-open-feedback]';
@@ -25,34 +35,27 @@ const CLOSE_BTN_SELECTOR = '[data-feedback-close]';
 
 let modal;
 let dialog;
+let backdrop;
 let openButtons;
-
-/**
- * PT: Trava o scroll da página
- * EN: Locks page scroll
- */
-function lockScroll() {
-  document.documentElement.classList.add('no-scroll');
-}
-
-/**
- * PT: Libera o scroll da página
- * EN: Unlocks page scroll
- */
-function unlockScroll() {
-  document.documentElement.classList.remove('no-scroll');
-}
 
 /**
  * PT: Abre o modal
  * EN: Opens the modal
  */
 function openModal() {
-  if (!modal) return;
+  if (!modal || !dialog || !backdrop) return;
 
   modal.classList.remove('hidden');
   modal.setAttribute('aria-hidden', 'false');
-  lockScroll();
+  LatchRootScroll.lockScroll();
+
+  // 🎞️ Motion premium (Lyra)
+  VelaModalMotion.openModalMotion({
+    rootEl: backdrop,
+    panelEl: dialog,
+    enablePanelTranslate: false,
+    timings: { openMs: 360, closeMs: 450 },
+  });
 
   // foco inicial (acessibilidade)
   requestAnimationFrame(() => {
@@ -64,12 +67,24 @@ function openModal() {
  * PT: Fecha o modal
  * EN: Closes the modal
  */
-function closeModal() {
-  if (!modal) return;
+let isClosing = false; // flag para evitar múltiplos closes
+
+async function closeModal() {
+  if (!modal || !dialog || !backdrop || isClosing) return;
+  isClosing = true;
+
+  await VelaModalMotion.closeModalMotion({
+    rootEl: backdrop,
+    panelEl: dialog,
+    enablePanelTranslate: false,
+    timings: { openMs: 360, closeMs: 450 },
+  });
 
   modal.classList.add('hidden');
   modal.setAttribute('aria-hidden', 'true');
-  unlockScroll();
+  LatchRootScroll.unlockScroll();
+
+  isClosing = false;
 }
 
 /**
@@ -81,6 +96,7 @@ export function initLyraFormModal() {
   if (!modal) return;
 
   dialog = modal.querySelector('[role="dialog"]');
+  backdrop = modal.querySelector(BACKDROP_SELECTOR);
   openButtons = document.querySelectorAll(OPEN_SELECTOR);
 
   // Abrir
@@ -96,6 +112,7 @@ export function initLyraFormModal() {
     const clickedBackdrop = e.target.closest(BACKDROP_SELECTOR);
     const clickedCloseBtn = e.target.closest(CLOSE_BTN_SELECTOR);
     if (clickedBackdrop || clickedCloseBtn) {
+      e.stopPropagation();
       closeModal();
     }
   });

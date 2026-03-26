@@ -1,69 +1,85 @@
-// 🌷 Lívia — UI do Avatar
+// 🌷 Lívia — Avatar UI
 //
 // Nível / Level: Aprendiz / Apprentice
 //
-// PT: Responsável pela camada visual do avatar: criação do wrap, estilo e atualização das iniciais.
-// EN: Handles the visual layer of the avatar: wrap creation, styling and initials updates.
+// PT: Responsável pela camada visual do avatar.
+//     Cria o wrapper do autor, renderiza o avatar e mantém as iniciais atualizadas.
+//
+// EN: Responsible for the avatar visual layer.
+//     Creates the author wrapper, renders the avatar and keeps initials updated.
 /* -----------------------------------------------------------------------------*/
 
-// 🌷 Helena — lógica de avatar
-// EN 🌷 Helena — avatar logic
+/* -----------------------------------------------------------------------------*/
+// Imports
+/* -----------------------------------------------------------------------------*/
+
+/* -----------------------------------------------------------------------------*/
+// 🌷 Helena — Avatar Logic
 // Fornece / Provides:
-//   - getInitials()
+// - getInitials()
 /* -----------------------------------------------------------------------------*/
 import { HelenaAvatarHelpers } from '/assets/js/feedback/board/avatar/helena-avatar-helpers.js';
 
-export function attachAvatarToAuthor(card) {
-  const nameEl = card.querySelector('.meta-row [data-c-author]');
-  if (!nameEl) return;
+/* -----------------------------------------------------------------------------*/
+// Avatar Attachment
+/* -----------------------------------------------------------------------------*/
+
+function attachAvatarToAuthor(card) {
+  const authorElement = card.querySelector('.meta-row [data-c-author]');
+  if (!authorElement) return;
 
   // PT: Evita duplicação do wrapper.
-  // EN: Avoids wrapper duplication.
-  if (nameEl.parentElement?.classList.contains('author-wrap')) return;
+  // EN: Prevents wrapper duplication.
+  if (authorElement.parentElement?.classList.contains('author-wrap')) return;
 
-  const wrap = document.createElement('div');
-  wrap.className = 'author-wrap';
+  const wrapper = document.createElement('div');
+  wrapper.className = 'author-wrap';
 
   const avatar = document.createElement('span');
   avatar.className = 'avatar-initials';
   avatar.setAttribute('aria-hidden', 'true');
 
-  nameEl.parentNode.insertBefore(wrap, nameEl);
-  wrap.appendChild(avatar);
-  wrap.appendChild(nameEl);
+  authorElement.parentNode.insertBefore(wrapper, authorElement);
+  wrapper.appendChild(avatar);
+  wrapper.appendChild(authorElement);
 
-  // PT: Atualiza iniciais baseado no texto do autor.
+  // PT: Atualiza iniciais com base no texto do autor.
   // EN: Updates initials based on author text.
-  const update = () => {
-    const txt = (nameEl.textContent || '').trim();
-    avatar.textContent = HelenaAvatarHelpers.getInitials(txt);
+  const updateInitials = () => {
+    const authorText = (authorElement.textContent || '').trim();
+    avatar.textContent = HelenaAvatarHelpers.getInitials(authorText);
   };
 
   // PT: Observa mudanças no nome para manter iniciais corretas.
   // EN: Observes name changes to keep initials correct.
-  const mo = new MutationObserver(update);
-  mo.observe(nameEl, { childList: true, characterData: true, subtree: true });
+  const observer = new MutationObserver(updateInitials);
+  observer.observe(authorElement, {
+    childList: true,
+    characterData: true,
+    subtree: true,
+  });
 
-  update();
+  updateInitials();
 }
 
-/**
- * PT: Inicializa a UI de avatar para todos os cards do board.
- * EN: Initializes avatar UI for all board cards.
- */
+/* -----------------------------------------------------------------------------*/
+// Avatar Initialization
+/* -----------------------------------------------------------------------------*/
 
-export function initAvatar() {
+// PT: Inicializa a UI de avatar para todos os cards do board.
+// EN: Initializes avatar UI for all board cards.
+function initAvatar() {
   document
     .querySelectorAll('section[data-feedback-card][data-variant="media"]')
-    // PT: Se já tem wrap, não reinjeta.
-    // EN: If wrap already exists, do not reinject.
+    // PT: Se já tiver wrapper, não reinjeta.
+    // EN: If wrapper already exists, do not reinject.
     .forEach(attachAvatarToAuthor);
 }
 
-/**
- * PT/EN: Export padrão da persona (sem autoexec).
- * A Kendra é quem chama initAvatar().
- */
+/* -----------------------------------------------------------------------------*/
+// Export
+/* -----------------------------------------------------------------------------*/
+
 export const LiviaAvatarUI = {
   attachAvatarToAuthor,
   initAvatar,

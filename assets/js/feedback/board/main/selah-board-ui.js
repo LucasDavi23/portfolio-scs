@@ -1,77 +1,81 @@
-// /assets/js/feedback/board/main/selah-board-ui.js
-// 🌿 Selah — Board de Avaliações (UI)
+/* -----------------------------------------------------------------------------*/
+// 🌿 Selah — Board UI Controller
 //
 // Nível / Level: Adulto / Adult
 //
-// PT: Simboliza contemplação. Exibe o Board de avaliações com transições suaves.
+// PT: Controladora da interface do mural de avaliações.
+//     Renderiza o Hero, os cards por plataforma e gerencia refresh,
+//     loading, erros e atualizações em tempo real.
 //
-// EN: Symbolizes contemplation. Renders the review board with smooth transitions.
-//
+// EN: UI controller for the review board.
+//     Renders the Hero, platform cards and manages refresh,
+//     loading states, errors and real-time updates.
 /* -----------------------------------------------------------------------------*/
 
-// Imports / Dependências
-// -----------------------------------------------------------------------------
+/* -----------------------------------------------------------------------------*/
+// Imports
+/* -----------------------------------------------------------------------------*/
 
-// 🌿 Dalia — lógica de imagem (helpers)
-// EN 🌿 Dalia — image logic (helpers)
-// Fornece:
+/* -----------------------------------------------------------------------------*/
+// 🧬 Naomi — Card API Helpers
+// Fornece / Provides:
+// - list()
+// - listMeta()
+/* -----------------------------------------------------------------------------*/
+import { NaomiFeedbackCardAPI } from '/assets/js/feedback/board/api/card/naomi-card-api-helpers.js';
+
+/* -----------------------------------------------------------------------------*/
+// 🌿 Dália — Image Helpers
+// Fornece / Provides:
 // - FALLBACK_IMG
-
+// - pickImagePair()
+/* -----------------------------------------------------------------------------*/
 import { DaliaImageHelpers } from '/assets/js/feedback/board/image/dalia-image-helpers.js';
 
 /* -----------------------------------------------------------------------------*/
-
-// 🎨 Petra — UI da imagem (thumb + auto-recover)
-// EN 🎨 Petra — Image UI (thumb + auto-recover)
+// 🎨 Petra — Image UI
 // Fornece / Provides:
-// - LoadThumbWithRetries,
-// - smartAutoRecover,
-// - markHasPhoto
-
-import { PetraImageUI } from '/assets/js/feedback/board/image/petra-image-ui.js';
+// - loadThumbWithRetries()
+// - smartAutoRecover()
+// - markHasPhoto()
 /* -----------------------------------------------------------------------------*/
+import { PetraImageUI } from '/assets/js/feedback/board/image/petra-image-ui.js';
 
-// ✨ Elara — helpers do board (estrelas, datas, imagens)
-// EN ✨ Elara — board helpers (stars, dates, images)
+/* -----------------------------------------------------------------------------*/
+// ✨ Elara — Board Helpers
 // Fornece / Provides:
-//  - formatDate()
-//  - skeletonLines()
-//  - pickImagePair()
-//  - NET (retry/backoff config)
-
+// - skeletonLines()
+// - NET
+/* -----------------------------------------------------------------------------*/
 import { ElaraBoardHelpers } from '/assets/js/feedback/board/main/elara-board-helpers.js';
 
-// ------------------------------------------------------------
-// ⭐ Zoe — rating UI do system (avaliações por estrelas)
-// EN ⭐ Zoe — system rating UI (star-based ratings)
+/* -----------------------------------------------------------------------------*/
+// ⭐ Zoe — Rating UI
 // Fornece / Provides:
-//  - renderRating()
-//  - normalizeRating()
-//  - mountInput()
-
+// - renderRating()
+/* -----------------------------------------------------------------------------*/
 import { ZoeRating } from '/assets/js/system/ui/rating/zoe-rating.js';
 
-// ------------------------------------------------------------
-// Juniper — utilitário de data/hora do system
-// EN Juniper — system date/time utility
+/* -----------------------------------------------------------------------------*/
+// 🕰️ Juniper — Date/Time Utilities
 // Fornece / Provides:
-//  - parseDateTime()
-//  - formatDateTime()
-//  - formatDate()
-
+// - formatFromItem()
+/* -----------------------------------------------------------------------------*/
 import { JuniperDateTime } from '/assets/js/system/utils/juniper-date-time.js';
 
-// ------------------------------------------------------------
+/* -----------------------------------------------------------------------------*/
+// 📡 App Events — System Tool
+// Fornece / Provides:
+// - onAppEvent()
+/* -----------------------------------------------------------------------------*/
+import { AppEvents } from '/assets/js/system/events/appEvents.js';
 
-// Módulo do Board de feedbacks (Hero SCS + Shopee, ML, Google)
-// Carrega apenas quando chamar FeedbackMural.init() (mantido por compat)
-// Requer: window.FeedbackAPI.list(plat, page, limit) e window.FeedbackLista.open(plat)
-// Hero e Cards mostram skeleton enquanto carregam.
-// Em erro, exibem mensagem + botão “Tentar novamente”.
-// Fazem autorretry em 5s quando online.
-// Atualizam o Hero imediatamente quando o form dispara feedback:novo.
-// Recarregam ao voltar a conexão (window.online).
-
+/* -----------------------------------------------------------------------------*/
+// Defaults
+//
+// PT: Configuração padrão do Hero, cards e seletores do Board.
+// EN: Default configuration for the Hero, cards and Board selectors.
+/* -----------------------------------------------------------------------------*/
 const DEFAULTS = {
   hero: { plat: 'scs', page: 1, limit: 1 },
   cards: { perPlatform: 2 },
@@ -84,507 +88,381 @@ const DEFAULTS = {
   },
 };
 
-let CFG = JSON.parse(JSON.stringify(DEFAULTS));
-let _initSeq = 0;
+let CFG = {
+  hero: { ...DEFAULTS.hero },
+  cards: { ...DEFAULTS.cards },
+  selectors: { ...DEFAULTS.selectors },
+};
+let initSequence = 0;
 let heroAutoRetryTimer = null;
 let cardsAutoRetryTimer = null;
 
-// --------------------------------------------------
-// Realtime refresh (debounce) — internal state
-// --------------------------------------------------
+/* -----------------------------------------------------------------------------*/
+// Refresh State
+//
+// PT: Estado interno usado para debounce e controle de refresh.
+// EN: Internal state used for debounce and refresh control.
+/* -----------------------------------------------------------------------------*/
 let committedRefreshTimer = null;
 let lastCommittedClientRequestId = '';
 
-// ---------- FEATURED REVIEW (Hero)
-// PT: Renderiza UM único review em destaque no layout Hero.
-//     Atualiza o conteúdo in-place (não recria HTML).
-//     Não decide origem, ordem ou filtros.
-// EN: Renders a SINGLE highlighted review into the Hero layout.
-//     Uses in-place updates (no HTML recreation).
-//     Does not decide source, order or filtering.
-// ----------
+const lastSignatureByPlat = Object.create(null);
 
+/* -----------------------------------------------------------------------------*/
+// Featured Review Renderer
+//
+// PT: Renderiza um único review em destaque no Hero.
+// EN: Renders a single featured review into the Hero.
+/* -----------------------------------------------------------------------------*/
 function renderFeaturedReview(root, item) {
   if (!root) return;
 
-  // --------------------------------------------------
-  // Hero text fields (EN selectors)
-  // --------------------------------------------------
-  const elAuthor = root.querySelector('[data-h-author]');
-  const elRating = root.querySelector('[data-h-rating]');
-  const elDate = root.querySelector('[data-h-date]');
-  const elText = root.querySelector('[data-h-text]');
+  const authorElement = root.querySelector('[data-h-author]');
+  const ratingElement = root.querySelector('[data-h-rating]');
+  const dateElement = root.querySelector('[data-h-date]');
+  const textElement = root.querySelector('[data-h-text]');
 
-  // --------------------------------------------------
-  // Empty state
-  // --------------------------------------------------
   if (!item) {
-    if (elAuthor) elAuthor.textContent = '';
-    if (elRating) elRating.innerHTML = '';
-    if (elDate) elDate.textContent = '';
-    if (elText) elText.textContent = '';
+    if (authorElement) authorElement.textContent = '';
+    if (ratingElement) ratingElement.innerHTML = '';
+    if (dateElement) dateElement.textContent = '';
+    if (textElement) textElement.textContent = '';
   } else {
-    // --------------------------------------------------
-    // Item (EN contract)
-    // --------------------------------------------------
     const author = item.author ?? 'Customer';
-    const rating = item.rating ?? item.stars ?? 0; // fallback, temporary
-    let dateLabel = '';
+    const rating = item.rating ?? item.stars ?? 0;
+    const dateLabel = JuniperDateTime.formatFromItem(item);
     const text = item.text ?? item.comment ?? '';
 
-    if (elAuthor) elAuthor.textContent = author;
-    if (elRating) elRating.innerHTML = ZoeRating.renderRating(rating);
-    dateLabel = JuniperDateTime.formatFromItem(item);
-    if (elDate) elDate.textContent = dateLabel;
-    if (elText) elText.textContent = text;
+    if (authorElement) authorElement.textContent = author;
+    if (ratingElement) ratingElement.innerHTML = ZoeRating.renderRating(rating);
+    if (dateElement) dateElement.textContent = dateLabel;
+    if (textElement) textElement.textContent = text;
   }
 
-  // --------------------------------------------------
-  // Hero thumb (clickable)
-  // --------------------------------------------------
-  const btnThumb = root.querySelector('.thumb-container');
-  const img = btnThumb?.querySelector('img');
+  const thumbButtonElement = root.querySelector('.thumb-container');
+  const imageElement = thumbButtonElement?.querySelector('img');
 
-  if (btnThumb && img) {
-    const { thumbUrl, fullUrl } = ElaraBoardHelpers.pickImagePair(item);
+  if (thumbButtonElement && imageElement) {
+    const { thumbUrl, fullUrl } = DaliaImageHelpers.pickImagePair(item);
 
-    // Reset state
-    btnThumb.classList.add('hidden');
-    btnThumb.classList.remove('js-open-modal');
+    thumbButtonElement.classList.add('hidden');
+    thumbButtonElement.classList.remove('js-open-modal');
 
-    img.removeAttribute('data-full');
-    btnThumb.removeAttribute('data-full');
+    imageElement.removeAttribute('data-full');
+    thumbButtonElement.removeAttribute('data-full');
 
-    img.removeAttribute('srcset');
-    img.removeAttribute('loading');
+    imageElement.removeAttribute('srcset');
+    imageElement.removeAttribute('loading');
 
-    img.onload = null;
-    img.onerror = null;
-
-    // IMPORTANT: reset retry flag when reusing the same img element
-    img.removeAttribute('data-retried');
+    imageElement.onload = null;
+    imageElement.onerror = null;
+    imageElement.removeAttribute('data-retried');
 
     if (thumbUrl) {
-      img.onload = () => {
-        btnThumb.classList.remove('hidden');
-        btnThumb.classList.add('js-open-modal');
-        img.setAttribute('data-full', fullUrl);
-        btnThumb.setAttribute('data-full', fullUrl);
+      imageElement.onload = () => {
+        thumbButtonElement.classList.remove('hidden');
+        thumbButtonElement.classList.add('js-open-modal');
+        imageElement.setAttribute('data-full', fullUrl);
+        thumbButtonElement.setAttribute('data-full', fullUrl);
       };
 
-      img.onerror = () => {
-        const retried = img.getAttribute('data-retried') === '1';
-        if (!retried && fullUrl && fullUrl !== thumbUrl) {
-          img.setAttribute('data-retried', '1');
-          img.src = fullUrl; // fallback
+      imageElement.onerror = () => {
+        const hasRetried = imageElement.getAttribute('data-retried') === '1';
+
+        if (!hasRetried && fullUrl && fullUrl !== thumbUrl) {
+          imageElement.setAttribute('data-retried', '1');
+          imageElement.src = fullUrl;
           return;
         }
 
-        btnThumb.classList.add('hidden');
-        btnThumb.classList.remove('js-open-modal');
-        img.removeAttribute('src');
+        thumbButtonElement.classList.add('hidden');
+        thumbButtonElement.classList.remove('js-open-modal');
+        imageElement.removeAttribute('src');
       };
 
-      img.removeAttribute('src');
-      img.src = thumbUrl;
+      imageElement.removeAttribute('src');
+      imageElement.src = thumbUrl;
     } else {
-      img.removeAttribute('src');
+      imageElement.removeAttribute('src');
     }
   }
 }
 
-// ---------- FEATURED REVIEW (Hero) — Loading State
-// PT: Renderiza o estado de carregamento do review em destaque.
-//     Aplica skeletons no layout Hero existente.
-// EN: Renders the loading state for the featured review.
-//     Applies skeleton placeholders to the existing Hero layout.
-// ----------
-
+/* -----------------------------------------------------------------------------*/
+// Featured Review Loading
+//
+// PT: Renderiza o estado de carregamento do Hero.
+// EN: Renders the Hero loading state.
+/* -----------------------------------------------------------------------------*/
 function renderFeaturedReviewLoading(root) {
-  const elText = root?.querySelector('[data-h-text]');
-  const elRating = root?.querySelector('[data-h-rating]');
-  const elAuthor = root?.querySelector('[data-h-author]');
-  const elDate = root?.querySelector('[data-h-date]');
+  const textElement = root?.querySelector('[data-h-text]');
+  const ratingElement = root?.querySelector('[data-h-rating]');
+  const authorElement = root?.querySelector('[data-h-author]');
+  const dateElement = root?.querySelector('[data-h-date]');
 
-  if (elRating) elRating.innerHTML = ElaraBoardHelpers.skeletonLines(1);
-  if (elAuthor) elAuthor.textContent = '';
-  if (elDate) elDate.textContent = '';
-  if (elText) elText.innerHTML = ElaraBoardHelpers.skeletonLines(3);
+  if (ratingElement) ratingElement.innerHTML = ElaraBoardHelpers.skeletonLines(1);
+  if (authorElement) authorElement.textContent = '';
+  if (dateElement) dateElement.textContent = '';
+  if (textElement) textElement.innerHTML = ElaraBoardHelpers.skeletonLines(3);
 }
 
-// ---------- FEATURED REVIEW (Hero) — Error State
-// PT: Renderiza o estado de erro do review em destaque.
-//     Exibe uma mensagem de erro inline e uma ação opcional de retry
-//     dentro do layout Hero existente.
-// EN: Renders the error state for the featured review.
-//     Displays an inline error message and an optional retry action
-//     inside the existing Hero layout.
-// ----------
+/* -----------------------------------------------------------------------------*/
+// Featured Review Error
+//
+// PT: Renderiza o estado de erro do Hero com ação opcional de retry.
+// EN: Renders the Hero error state with an optional retry action.
+/* -----------------------------------------------------------------------------*/
+function renderFeaturedReviewError(root, message, onRetry) {
+  const textElement = root?.querySelector('[data-h-text]');
+  const ratingElement = root?.querySelector('[data-h-rating]');
+  const authorElement = root?.querySelector('[data-h-author]');
+  const dateElement = root?.querySelector('[data-h-date]');
 
-function renderFeaturedReviewError(root, msg, onRetry) {
-  const elText = root?.querySelector('[data-h-text]');
-  const elRating = root?.querySelector('[data-h-rating]');
-  const elAuthor = root?.querySelector('[data-h-author]');
-  const elDate = root?.querySelector('[data-h-date]');
-  if (elRating) elRating.innerHTML = '';
-  if (elAuthor) elAuthor.textContent = '';
-  if (elDate) elDate.textContent = '';
-  if (elText) {
-    elText.innerHTML = `
-        <div class="rounded-lg border p-3">
-          <p class="text-sm text-red-600 mb-2">${msg || 'Falha ao carregar.'}</p>
-          <button type="button" class="px-3 py-1.5 rounded bg-neutral-900 text-white text-sm" data-h-retry>
-            Tentar novamente
-          </button>
-        </div>`;
-    elText.querySelector('[data-h-retry]')?.addEventListener('click', () => onRetry && onRetry());
+  if (ratingElement) ratingElement.innerHTML = '';
+  if (authorElement) authorElement.textContent = '';
+  if (dateElement) dateElement.textContent = '';
+
+  if (textElement) {
+    textElement.innerHTML = `
+      <div class="rounded-lg border p-3">
+        <p class="text-sm text-red-600 mb-2">${message || 'Falha ao carregar.'}</p>
+        <button type="button" class="px-3 py-1.5 rounded bg-neutral-900 text-white text-sm" data-h-retry>
+          Tentar novamente
+        </button>
+      </div>
+    `;
+
+    textElement
+      .querySelector('[data-h-retry]')
+      ?.addEventListener('click', () => onRetry && onRetry());
   }
 }
 
-// -----------------------------------------------------------------------------
-// ⭐ Featured Review Loader (Hero Slot)
+/* -----------------------------------------------------------------------------*/
+// Featured Review Loader
 //
-// PT: Carrega 1 review para o bloco "Featured" (slot Hero).
-//     - Renderiza skeleton (loading) quando não está em modo silent
-//     - Busca via FeedbackAPI (fast=1) e faz fallback para fast=0 se vier vazio
-//     - Protege contra concorrência usando "seq" (se outra rodada iniciou, não pinta)
-//     - Em erro, renderiza estado de erro com botão de retry
-//     - Se estiver online, agenda auto-retry (silent) após X ms
-//
-// EN: Loads 1 review into the "Featured" area (Hero slot).
-//     - Renders skeleton (loading) when not in silent mode
-//     - Fetches via FeedbackAPI (fast=1) and falls back to fast=0 if empty
-//     - Prevents race conditions using "seq" (if a new run started, skip rendering)
-//     - On error, renders an error state with a retry button
-//     - If online, schedules an auto-retry (silent) after X ms
-// -----------------------------------------------------------------------------
+// PT: Carrega 1 review para o Hero com fallback e auto-retry.
+// EN: Loads 1 review into the Hero with fallback and auto-retry.
+/* -----------------------------------------------------------------------------*/
 async function loadFeaturedReview(seq, { silent = false } = {}) {
   const root = document.querySelector(CFG.selectors.heroRoot);
   if (!root) return;
 
   clearTimeout(heroAutoRetryTimer);
 
-  // Loading state (unless silent)
   if (!silent) renderFeaturedReviewLoading(root);
 
   try {
-    // 1) Fast path (cache-friendly)
-    let list = await window.FeedbackAPI.list(CFG.hero.plat, CFG.hero.page, CFG.hero.limit, {
+    let list = await NaomiFeedbackCardAPI.list(CFG.hero.plat, CFG.hero.page, CFG.hero.limit, {
       fast: 1,
     });
 
-    // 2) Fallback: if empty, try full mode (cache may be stale)
     if (!Array.isArray(list) || !list.length) {
-      list = await window.FeedbackAPI.list(CFG.hero.plat, CFG.hero.page, CFG.hero.limit, {
+      list = await NaomiFeedbackCardAPI.list(CFG.hero.plat, CFG.hero.page, CFG.hero.limit, {
         fast: 0,
       });
     }
 
-    console.log('[loadFeaturedReview] items loaded', {
-      count: list?.length,
-      list,
-    });
-
-    // If another run started, do not render
-    if (seq !== _initSeq) return;
+    if (seq !== initSequence) return;
 
     const review = Array.isArray(list) && list[0] ? list[0] : null;
     if (!review) throw new Error('No data to display.');
 
     renderFeaturedReview(root, review);
-  } catch (err) {
-    console.warn('[feedbackMural] Featured load error:', err);
-
+  } catch (error) {
     const offline = typeof navigator !== 'undefined' && !navigator.onLine;
 
     const message = offline
       ? 'Sem conexão. Verifique sua internet.'
-      : err?.message || 'Falha ao carregar.';
+      : error?.message || 'Falha ao carregar.';
 
-    renderFeaturedReviewError(root, message, () => loadFeaturedReview(_initSeq, { silent: false }));
+    renderFeaturedReviewError(root, message, () =>
+      loadFeaturedReview(initSequence, { silent: false })
+    );
 
-    // Auto-retry (only if online)
     if (!offline) {
       heroAutoRetryTimer = setTimeout(
-        () => loadFeaturedReview(_initSeq, { silent: true }),
+        () => loadFeaturedReview(initSequence, { silent: true }),
         ElaraBoardHelpers.NET.autoRetryAfterMs
       );
     }
   }
 }
 
-// ---------- CARD (Fixed Slot) — In-place Render
-// PT: Preenche um card fixo com 1 item (texto/autor/data/rating + thumb).
-//     Mantém o layout existente e respeita variants (ex.: "media").
-// EN: Renders a fixed card with 1 item (text/author/date/rating + thumb).
-//     Updates in-place and respects layout variants (e.g., "media").
-// ----------
-
+/* -----------------------------------------------------------------------------*/
+// Fixed Card Renderer
+//
+// PT: Preenche um card fixo in-place e respeita variants como "media".
+// EN: Fills a fixed card in-place and respects variants such as "media".
+/* -----------------------------------------------------------------------------*/
 async function fillCardFixed(root, item) {
-  const listEl = root.querySelector('[data-c-list]');
-  if (!listEl) return;
+  const listElement = root.querySelector('[data-c-list]');
+  if (!listElement) return;
 
-  // ✅ 1) Detect if this card uses the "media" layout variant (SCS style)
-  // PT: Verifica se o card é do tipo mídia (layout especial da SCS)
-  // EN: Checks whether the card uses the media layout variant
   const isMediaLayout =
-    root.getAttribute('data-variant') === 'media' || !!listEl.querySelector('.media-row');
+    root.getAttribute('data-variant') === 'media' || !!listElement.querySelector('.media-row');
 
-  // ✅ 2) Only rewrite the inner markup if NOT using media layout
-  // PT: Reescreve o conteúdo interno apenas se NÃO for layout mídia
-  // EN: Rewrites inner content only when not using the media layout
   if (!isMediaLayout) {
-    listEl.innerHTML = `
-    <div class="grid grid-cols-[3.5rem_1fr_auto] items-start gap-3">
-      
-      <button
-        type="button"
-        class="thumb-container hidden relative w-[84px] aspect-square rounded-md overflow-hidden border border-gray-200 bg-gray-50 p-1 shrink-0"
-        aria-label="Ver foto"
-      >
-        <img
-          alt=""
-          class="w-full h-full object-cover object-center"
-        />
-      </button>
+    listElement.innerHTML = `
+      <div class="grid grid-cols-[3.5rem_1fr_auto] items-start gap-3">
+        <button
+          type="button"
+          class="thumb-container hidden relative w-[84px] aspect-square rounded-md overflow-hidden border border-gray-200 bg-gray-50 p-1 shrink-0"
+          aria-label="Ver foto"
+        >
+          <img
+            alt=""
+            class="w-full h-full object-cover object-center"
+          />
+        </button>
 
-      <div class="min-w-0">
-        <p
-          class="text-gray-800 leading-6 line-clamp-2"
-          data-c-text
-        ></p>
-        <p
-          class="mt-1 text-[12px] text-gray-600 font-medium tracking-wide"
-          data-c-author
-        ></p>
+        <div class="min-w-0">
+          <p
+            class="text-gray-800 leading-6 line-clamp-2"
+            data-c-text
+          ></p>
+          <p
+            class="mt-1 text-[12px] text-gray-600 font-medium tracking-wide"
+            data-c-author
+          ></p>
+        </div>
+
+        <time
+          class="text-[11px] text-gray-500 whitespace-nowrap"
+          data-c-date
+        ></time>
       </div>
-
-      <time
-        class="text-[11px] text-gray-500 whitespace-nowrap"
-        data-c-date
-      ></time>
-    </div>
-  `;
+    `;
   }
 
-  // ⭐ Rating (stars)
-  // PT: Renderiza as estrelas principais do card
-  // EN: Renders the main rating stars for the card
-  const headerRatingEl = root.querySelector('[data-c-rating]');
+  const headerRatingElement = root.querySelector('[data-c-rating]');
   const ratingValue = Number(item.rating ?? item.estrelas) || 0;
 
-  if (headerRatingEl) {
-    headerRatingEl.innerHTML = ZoeRating.renderRating(ratingValue);
+  if (headerRatingElement) {
+    headerRatingElement.innerHTML = ZoeRating.renderRating(ratingValue);
   }
 
-  // ⭐ Mini stars (compact textual fallback)
-  // PT: Versão compacta em texto (★★★★★) usada em layouts específicos
-  // EN: Compact textual stars (★★★★★) used in specific layouts
-  const miniStarsEl = listEl.querySelector('[data-c-item-stars]');
-  if (miniStarsEl) {
-    const v = Math.max(0, Math.min(ratingValue, 5));
-    miniStarsEl.textContent = '★★★★★'.slice(0, Math.max(1, Math.round(v)));
+  const miniStarsElement = listElement.querySelector('[data-c-item-stars]');
+  if (miniStarsElement) {
+    const normalizedValue = Math.max(0, Math.min(ratingValue, 5));
+    miniStarsElement.textContent = '★★★★★'.slice(0, Math.max(1, Math.round(normalizedValue)));
   }
 
-  // 📅 Date / 💬 Text / 👤 Author
-  // PT: Mapeia campos com aliases para manter compatibilidade
-  // EN: Maps fields with aliases to keep backward compatibility
-  const dateEl = listEl.querySelector('[data-c-date]');
-  const textEl = listEl.querySelector('[data-c-text]');
-  const authorEl = listEl.querySelector('[data-c-author]');
+  const dateElement = listElement.querySelector('[data-c-date]');
+  const textElement = listElement.querySelector('[data-c-text]');
+  const authorElement = listElement.querySelector('[data-c-author]');
 
   const text = item.text ?? item.texto ?? item.comment ?? item.comentario ?? '';
   const author = item.author ?? item.autor ?? item.name ?? item.nome ?? '';
 
-  // 📅 Date label (safe: prefers date_br, then date_ms, then legacy)
-  if (dateEl) {
-    dateEl.textContent = JuniperDateTime.formatFromItem(item);
-  }
-  if (textEl) {
-    textEl.textContent = text;
-  }
-  if (authorEl) {
-    authorEl.textContent = author ? `— ${author}` : '';
+  if (dateElement) {
+    dateElement.textContent = JuniperDateTime.formatFromItem(item);
   }
 
-  // 🖼️ Photo sanity check (defensive)
-  // PT: Evita casos onde foto_url vem como objeto serializado incorretamente
-  // EN: Guards against invalid serialized photo_url values
-  if (typeof item.photo_url === 'string' && item.photo_url.trim() === '[object Object]') {
-    console.warn('[invalid photo_url detected]', { item });
+  if (textElement) {
+    textElement.textContent = text;
   }
 
-  /* ------------------------------------------------------------
-   * 🖼️ Card Thumbnail (Proxy → Retries → Modal)
-   * ------------------------------------------------------------
-   * PT: Carrega a thumb via pipeline (proxy + retries + auto-recover) e
-   *     prepara o modal usando a SRC final que o navegador conseguiu exibir.
-   * EN: Loads the thumbnail via pipeline (proxy + retries + auto-recover) and
-   *     prepares the modal using the final SRC that the browser could render.
-   * ------------------------------------------------------------ */
+  if (authorElement) {
+    authorElement.textContent = author ? `— ${author}` : '';
+  }
+
   {
-    const thumbBtnEl = listEl.querySelector('.thumb-container'); // clickable area (opens modal)
-    const thumbImgEl = thumbBtnEl?.querySelector('img'); // image node
+    const thumbButtonElement = listElement.querySelector('.thumb-container');
+    const thumbImageElement = thumbButtonElement?.querySelector('img');
 
-    if (!thumbBtnEl || !thumbImgEl) {
-      console.warn('[thumb] nós não encontrados', {
-        btnThumb: !!thumbBtnEl,
-        img: !!thumbImgEl,
-        root,
-      });
-    } else {
-      // URLs normalizadas (proxy p/ Drive; http normal como está)
-      const { thumbUrl, fullUrl } = ElaraBoardHelpers.pickImagePair(item);
+    if (thumbButtonElement && thumbImageElement) {
+      const { thumbUrl, fullUrl } = DaliaImageHelpers.pickImagePair(item);
 
-      /*  
-          PT: sourceForThumb = URL usada para tentar carregar a imagem da thumb.
-              Essa URL entra no "moedor" (proxy + retries + base64).
-
-          EN: sourceForThumb = the URL we try to load through the proxy pipeline.
-        */
       const thumbSourceUrl = thumbUrl || fullUrl || '';
-
-      /*  
-          PT: rawBigUrl = URL original maior (caso queira futuro HD).
-              Ela NÃO é usada no modal atualmente, somente guardada.
-
-          EN: rawBigUrl = original bigger image URL (kept for future use only).
-        */
       const rawFullUrl = fullUrl || thumbUrl || '';
+      const cardRootElement = root || listElement.closest('section[data-feedback-card]');
 
-      // PT: garante um root consistente do card (pra marcar hasPhoto)
-      // EN: ensures a consistent card root (to mark hasPhoto)
-      const cardRootEl = root || listEl.closest('section[data-feedback-card]');
+      PetraImageUI.markHasPhoto(cardRootElement, false);
 
-      // PT/EN: default state = no photo
-      PetraImageUI.markHasPhoto(cardRootEl, false);
+      thumbButtonElement.classList.add('hidden');
+      thumbButtonElement.classList.remove('js-open-modal');
 
-      // PT:Reset de estado visual e atributos
-      // EN: reset visual state + attributes
-      thumbBtnEl.classList.add('hidden');
-      thumbBtnEl.classList.remove('js-open-modal');
+      thumbImageElement.onload = null;
+      thumbImageElement.onerror = null;
 
-      thumbImgEl.onload = null;
-      thumbImgEl.onerror = null;
+      thumbImageElement.removeAttribute('data-full');
+      thumbButtonElement.removeAttribute('data-full');
 
-      thumbImgEl.removeAttribute('data-full');
-      thumbBtnEl.removeAttribute('data-full');
-
-      thumbImgEl.removeAttribute('src');
-      thumbImgEl.referrerPolicy = 'no-referrer';
-      thumbImgEl.decoding = 'async';
-      thumbImgEl.setAttribute('loading', 'eager');
+      thumbImageElement.removeAttribute('src');
+      thumbImageElement.referrerPolicy = 'no-referrer';
+      thumbImageElement.decoding = 'async';
+      thumbImageElement.setAttribute('loading', 'eager');
 
       if (!thumbSourceUrl) {
-        console.log('[thumb] no valid URL — keeping hidden');
-        PetraImageUI.markHasPhoto(cardRootEl, false);
+        PetraImageUI.markHasPhoto(cardRootElement, false);
       } else {
         try {
-          // PT/EN: short retries (doesn't block card rendering)
-          let maxAttempts = 2;
+          const maxAttempts = 2;
 
           await PetraImageUI.loadThumbWithRetries(
-            thumbImgEl,
-            thumbBtnEl,
+            thumbImageElement,
+            thumbButtonElement,
             thumbSourceUrl,
             rawFullUrl,
             maxAttempts
           );
 
-          // If it loaded, button should no longer be hidden
-          const isVisible = !thumbBtnEl.classList.contains('hidden');
-          PetraImageUI.markHasPhoto(cardRootEl, isVisible);
+          const isVisible = !thumbButtonElement.classList.contains('hidden');
+          PetraImageUI.markHasPhoto(cardRootElement, isVisible);
 
-          // PT: usa a SRC FINAL (já renderizável) como fonte do modal
-          // EN: use the FINAL SRC (already renderable) as modal source
-          const modalSrcUrl = thumbImgEl.src;
+          const modalSourceUrl = thumbImageElement.src;
 
-          if (modalSrcUrl && isVisible) {
-            thumbImgEl.dataset.full = modalSrcUrl;
-            thumbBtnEl.dataset.full = modalSrcUrl;
+          if (modalSourceUrl && isVisible) {
+            thumbImageElement.dataset.full = modalSourceUrl;
+            thumbButtonElement.dataset.full = modalSourceUrl;
 
-            thumbBtnEl.classList.add('js-open-modal');
-            thumbBtnEl.setAttribute('role', 'button');
-            thumbBtnEl.setAttribute('tabindex', '0');
+            thumbButtonElement.classList.add('js-open-modal');
+            thumbButtonElement.setAttribute('role', 'button');
+            thumbButtonElement.setAttribute('tabindex', '0');
           }
 
-          // PT/EN: background auto-recover (proxy may "wake up" later)
-          PetraImageUI.smartAutoRecover(thumbImgEl, thumbSourceUrl, 60000, 10000);
-        } catch (err) {
-          console.warn('[thumb] failed after retries → fallback + auto-recover', err);
+          PetraImageUI.smartAutoRecover(thumbImageElement, thumbSourceUrl, 60000, 10000);
+        } catch {
+          thumbImageElement.src = DaliaImageHelpers.FALLBACK_IMG;
+          thumbButtonElement.classList.remove('js-open-modal');
 
-          thumbImgEl.src = DaliaImageHelpers.FALLBACK_IMG;
-          thumbBtnEl.classList.remove('js-open-modal');
-
-          PetraImageUI.smartAutoRecover(thumbImgEl, thumbSourceUrl, 60000, 10000);
-          PetraImageUI.markHasPhoto(cardRootEl, false);
+          PetraImageUI.smartAutoRecover(thumbImageElement, thumbSourceUrl, 60000, 10000);
+          PetraImageUI.markHasPhoto(cardRootElement, false);
         }
       }
     }
   }
 
-  /* ------------------------------------------------------------
-   * 🔗 Card Actions (Platform link + "View more")
-   * ------------------------------------------------------------
-   * PT: Controla ações auxiliares do card:
-   *     - Oculta o link da plataforma (quando presente no markup)
-   *     - Liga o botão "Ver mais" ao modal/lista completa
-   *
-   * EN: Handles auxiliary card actions:
-   *     - Hides the platform link (when present in markup)
-   *     - Wires the "View more" button to the full list/modal
-   * ------------------------------------------------------------ */
-
-  // Hide platform link (if present in markup)
-  const platformLinkEl = root.querySelector('[data-c-link-plat]');
-  if (platformLinkEl) {
-    platformLinkEl.classList.add('hidden');
-    platformLinkEl.removeAttribute('href');
-  }
-
-  // "View more" button (bind once)
-  const viewMoreBtnEl = root.querySelector('[data-c-view-more]');
-  if (viewMoreBtnEl && !viewMoreBtnEl._bound) {
-    viewMoreBtnEl.addEventListener(
-      'click',
-      (event) => {
-        event.preventDefault();
-        window.FeedbackLista?.open?.(root.getAttribute('data-feedback-card'));
-      },
-      { once: true }
-    );
-
-    // PT/EN: mark as bound to avoid duplicate listeners
-    viewMoreBtnEl._bound = true;
+  const platformLinkElement = root.querySelector('[data-c-link-plat]');
+  if (platformLinkElement) {
+    platformLinkElement.classList.add('hidden');
+    platformLinkElement.removeAttribute('href');
   }
 }
 
-/* ------------------------------------------------------------
- * 🧩 Card Fallback Renderer
- * ------------------------------------------------------------
- * PT: Render simples (fallback) quando o card não usa o layout normal
- *     ou quando precisamos mostrar 1 item sem montar o template completo.
- * EN: Simple fallback renderer when the card isn't using the normal layout
- *     or when we need to display a single item without the full template.
- * ------------------------------------------------------------ */
+/* -----------------------------------------------------------------------------*/
+// Card Fallback Renderer
+//
+// PT: Render simples quando o card não usa o layout normal.
+// EN: Simple renderer when the card does not use the normal layout.
+/* -----------------------------------------------------------------------------*/
 function renderCardFallback(root, items) {
-  const listEl = root.querySelector('[data-c-list]');
-  if (!listEl) return;
+  const listElement = root.querySelector('[data-c-list]');
+  if (!listElement) return;
 
   if (!items?.length) {
-    listEl.innerHTML = `<div class="text-sm text-neutral-500">Ainda não há avaliações aprovadas aqui.</div>`;
+    listElement.innerHTML = `<div class="text-sm text-neutral-500">Ainda não há avaliações aprovadas aqui.</div>`;
     return;
   }
 
-  const first = items[0];
+  const firstItem = items[0];
+  const author = firstItem.author ?? firstItem.autor ?? firstItem.nome ?? 'Cliente';
+  const dateLabel = JuniperDateTime.formatFromItem(firstItem);
+  const text = firstItem.text ?? firstItem.texto ?? firstItem.comentario ?? '';
+  const ratingValue = Number(firstItem.rating ?? firstItem.estrelas) || 0;
 
-  // PT/EN: keep aliases for backward compatibility
-  const author = first.author ?? first.autor ?? first.nome ?? 'Cliente';
-  const dateLabel = ElaraBoardHelpers.resolveDateLabel(first);
-  const text = first.text ?? first.texto ?? first.comentario ?? '';
-  const ratingValue = Number(first.rating ?? first.estrelas) || 0;
-
-  listEl.innerHTML = `
+  listElement.innerHTML = `
     <article class="p-3 border rounded-lg bg-white">
       <div class="flex items-center justify-between gap-3 mb-1">
         <div class="font-medium truncate">${author}</div>
@@ -600,46 +478,36 @@ function renderCardFallback(root, items) {
   `;
 }
 
-/* ------------------------------------------------------------
- * 🧩 Card Loading Renderer
- * ------------------------------------------------------------
- * PT: Renderiza o estado de carregamento (skeleton) do card.
- *     Não altera o DOM quando o layout é do tipo "media" (SCS),
- *     preservando o HTML original desse variant.
- *
- * EN: Renders the loading (skeleton) state for a feedback card.
- *     Does not touch the DOM when using the "media" layout (SCS),
- *     preserving the original markup for that variant.
- * ------------------------------------------------------------ */
+/* -----------------------------------------------------------------------------*/
+// Card Loading Renderer
+//
+// PT: Renderiza o loading do card sem alterar o variant "media".
+// EN: Renders the card loading state without changing the "media" variant.
+/* -----------------------------------------------------------------------------*/
 function renderCardLoading(root) {
-  const isMedia =
+  const isMediaLayout =
     root.getAttribute('data-variant') === 'media' ||
     !!root.querySelector('[data-c-list] .media-row');
 
-  if (isMedia) return; // PT/EN: do not replace SCS media layout DOM
+  if (isMediaLayout) return;
 
-  const listEl = root.querySelector('[data-c-list]');
-  if (listEl) {
-    listEl.innerHTML = ElaraBoardHelpers.skeletonLines(3);
+  const listElement = root.querySelector('[data-c-list]');
+  if (listElement) {
+    listElement.innerHTML = ElaraBoardHelpers.skeletonLines(3);
   }
 }
 
-/* ------------------------------------------------------------
- * 🧩 Card Error Renderer
- * ------------------------------------------------------------
- * PT: Renderiza o estado de erro do card.
- *     Exibe uma mensagem inline e um botão opcional de retry
- *     dentro do container existente do card.
- *
- * EN: Renders the error state for a feedback card.
- *     Displays an inline error message and an optional retry
- *     action inside the existing card container.
- * ------------------------------------------------------------ */
+/* -----------------------------------------------------------------------------*/
+// Card Error Renderer
+//
+// PT: Renderiza o estado de erro do card com retry opcional.
+// EN: Renders the card error state with optional retry.
+/* -----------------------------------------------------------------------------*/
 function renderCardError(root, message, onRetry) {
-  const listEl = root.querySelector('[data-c-list]');
-  if (!listEl) return;
+  const listElement = root.querySelector('[data-c-list]');
+  if (!listElement) return;
 
-  listEl.innerHTML = `
+  listElement.innerHTML = `
     <div class="rounded-lg border p-3">
       <p class="text-sm text-red-600 mb-2">
         ${message || 'Falha ao carregar.'}
@@ -654,106 +522,80 @@ function renderCardError(root, message, onRetry) {
     </div>
   `;
 
-  listEl.querySelector('[data-c-retry]')?.addEventListener('click', () => onRetry && onRetry());
+  listElement
+    .querySelector('[data-c-retry]')
+    ?.addEventListener('click', () => onRetry && onRetry());
 }
 
-/* ------------------------------------------------------------
- * 🧱 Platform Card Loader (per-platform)
- * ------------------------------------------------------------
- * PT: Carrega e renderiza o card de uma plataforma (scs/shopee/ml/google).
- *     - Usa FeedbackAPI.list() com fast-mode (cache) e fallback sem fast
- *     - Evita "pintar" rodadas antigas (seq vs _initSeq)
- *     - Para SCS: evita repintar o mesmo item (signature) e tenta avançar
- *       quando o topo ainda é o mesmo (via avoidSignature/lastSignatureByPlat)
- *     - Renderiza: loading → fillCardFixed (in-place) → fallback/error
- *
- * EN: Loads and renders a per-platform feedback card (scs/shopee/ml/google).
- *     - Uses FeedbackAPI.list() with fast-mode (cache) + non-fast fallback
- *     - Prevents stale renders (seq vs _initSeq)
- *     - For SCS: avoids repainting the same item (signature) and tries to
- *       advance when the top item is unchanged (avoidSignature/lastSignatureByPlat)
- *     - Renders: loading → fillCardFixed (in-place) → fallback/error
- * ------------------------------------------------------------ */
+/* -----------------------------------------------------------------------------*/
+// Platform Card Loader
+//
+// PT: Carrega e renderiza o card de uma plataforma.
+// EN: Loads and renders the card for a given platform.
+/* -----------------------------------------------------------------------------*/
 async function loadPlatformCard(
   selector,
   platform,
   seq,
   { silent = false, forceFresh = false, avoidSignature = '' } = {}
 ) {
-  console.log('[loadPlatformCard] ENTER', { selector, platform, seq, _initSeq });
-
   const root = document.querySelector(selector);
   if (!root) {
-    console.warn('[loadPlatformCard] root NOT found for', selector);
     return { ok: false, plat: platform, hasPhotoUrl: false, signature: '', item: null };
   }
 
   clearTimeout(cardsAutoRetryTimer);
-  if (!silent) renderCardLoading(root);
+
+  if (!silent) {
+    renderCardLoading(root);
+  }
 
   const fastMode = forceFresh ? 0 : 1;
-
-  // PT/EN: decide how many items to request per platform
   const limit = platform === 'scs' ? 3 : CFG.cards.perPlatform;
 
   try {
-    let items = await window.FeedbackAPI.list(platform, 1, limit, {
+    let items = await NaomiFeedbackCardAPI.list(platform, 1, limit, {
       fast: fastMode,
       nocache: forceFresh,
     });
 
     if ((!Array.isArray(items) || !items.length) && !forceFresh) {
-      items = await window.FeedbackAPI.list(platform, 1, limit, { fast: 0, nocache: true });
+      items = await NaomiFeedbackCardAPI.list(platform, 1, limit, {
+        fast: 0,
+        nocache: true,
+      });
     }
 
-    console.log('[loadPlatformCard] items loaded', {
-      platform,
-      count: items?.length,
-      items,
-    });
-
-    // PT/EN: avoid painting stale rounds
-    if (seq !== _initSeq) {
-      console.warn('[loadPlatformCard] ABORT seq mismatch', { seq, _initSeq });
+    if (seq !== initSequence) {
       return { ok: false, plat: platform, hasPhotoUrl: false, signature: '', item: null };
     }
 
-    // PT/EN: normalize candidates
     const candidates = Array.isArray(items) ? items : [];
 
-    function getSignature(x) {
+    function getSignature(value) {
       const date =
-        x?.date_ms ??
-        x?.date_br ??
-        x?.date_iso ??
-        x?.dateIso ??
-        x?.date ??
-        x?.data_iso ??
-        x?.data ??
+        value?.date_ms ??
+        value?.date_br ??
+        value?.date_iso ??
+        value?.dateIso ??
+        value?.date ??
+        value?.data_iso ??
+        value?.data ??
         '';
 
-      const author = x?.author || x?.autor || x?.name || x?.nome || '';
-      const text = x?.text || x?.texto || x?.comment || x?.comentario || '';
+      const author = value?.author || value?.autor || value?.name || value?.nome || '';
+      const text = value?.text || value?.texto || value?.comment || value?.comentario || '';
+
       return `${date}|${author}|${text.slice(0, 40)}`;
     }
 
-    // PT/EN: "blocked" signature comes from backoff or last painted signature
     const blockedSignature = (avoidSignature || lastSignatureByPlat[platform] || '').trim();
-
     const topSignatures = candidates.map(getSignature);
-    console.log('[loadPlatformCard] top signatures', { platform, topSignatures });
-
-    // DEBUG (can keep for now)
-    if (platform === 'scs') {
-      console.log('[SCS top signatures]', topSignatures);
-      console.log('[SCS blockedSignature]', blockedSignature);
-    }
 
     if (platform === 'scs' && blockedSignature) {
-      const idx = topSignatures.indexOf(blockedSignature);
+      const index = topSignatures.indexOf(blockedSignature);
 
-      // A) stale response: does not contain what is currently on screen
-      if (idx === -1) {
+      if (index === -1) {
         return {
           ok: false,
           plat: platform,
@@ -765,8 +607,7 @@ async function loadPlatformCard(
         };
       }
 
-      // B) not advanced yet: top item is still the one on screen
-      if (idx === 0) {
+      if (index === 0) {
         return {
           ok: true,
           plat: platform,
@@ -777,11 +618,9 @@ async function loadPlatformCard(
           advanced: false,
         };
       }
-
-      // C) advanced: blockedSignature exists but is no longer top (carry on)
     }
 
-    let item = candidates[0] || null;
+    const item = candidates[0] || null;
 
     if (!item) {
       renderCardFallback(root, []);
@@ -797,30 +636,9 @@ async function loadPlatformCard(
     }
 
     const signature = getSignature(item);
+    const listElement = root.querySelector('[data-c-list]');
 
-    console.log('[loadPlatformCard] first item snapshot', {
-      platform,
-      author: item?.author ?? item?.autor ?? item?.name ?? item?.nome,
-      date:
-        item?.date_br ??
-        item?.date_ms ??
-        item?.date ??
-        item?.date_iso ??
-        item?.dateIso ??
-        item?.data ??
-        item?.data_iso ??
-        '',
-      text: (item?.text ?? item?.texto ?? item?.comment ?? item?.comentario ?? '').slice(0, 60),
-      signature,
-    });
-
-    // PT/EN: check if this is a fixed card (has [data-c-list])
-    const listEl = root.querySelector('[data-c-list]');
-    console.log('[loadPlatformCard] list exists?', !!listEl);
-
-    // 👉 always uses fillCardFixed for fixed cards; it builds the inner structure
-    if (listEl) {
-      // PT/EN: SCS guard — avoid repainting the same signature
+    if (listElement) {
       if (platform === 'scs' && lastSignatureByPlat[platform] === signature) {
         return {
           ok: true,
@@ -831,13 +649,9 @@ async function loadPlatformCard(
         };
       }
 
-      console.log('[loadPlatformCard] calling fillCardFixed...');
       await fillCardFixed(root, item);
-
-      // ✅ PT/EN: store the last actually painted item signature
       lastSignatureByPlat[platform] = signature;
     } else {
-      console.log('[loadPlatformCard] missing [data-c-list] -> fallback');
       renderCardFallback(root, [item]);
     }
 
@@ -849,21 +663,19 @@ async function loadPlatformCard(
       topSigs: topSignatures,
       item,
     };
-  } catch (e) {
-    console.error(`[feedbackMural] Card error ${platform}:`, e);
-
+  } catch (error) {
     const offline = typeof navigator !== 'undefined' && !navigator.onLine;
     const message = offline
       ? 'Sem conexão. Verifique sua internet.'
-      : e?.message || 'Falha ao carregar.';
+      : error?.message || 'Falha ao carregar.';
 
     renderCardError(root, message, () =>
-      loadPlatformCard(selector, platform, _initSeq, { silent: false, forceFresh })
+      loadPlatformCard(selector, platform, initSequence, { silent: false, forceFresh })
     );
 
     if (!offline) {
       cardsAutoRetryTimer = setTimeout(
-        () => loadPlatformCard(selector, platform, _initSeq, { silent: true, forceFresh }),
+        () => loadPlatformCard(selector, platform, initSequence, { silent: true, forceFresh }),
         ElaraBoardHelpers.NET.autoRetryAfterMs
       );
     }
@@ -872,163 +684,114 @@ async function loadPlatformCard(
   }
 }
 
-/* ------------------------------------------------------------
- * 🔁 Board Refresh Scheduler (after "feedback:committed")
- * ------------------------------------------------------------
- * PT: Agenda um refresh do board quando um feedback foi confirmado (committed),
- *     evitando duplicar refresh para o mesmo clientRequestId.
- *     No momento do refresh, captura a signature atual do card SCS (previousSignature)
- *     para permitir backoff/advance sem “voltar” visualmente.
- *
- * EN: Schedules a board refresh after a feedback commit event,
- *     deduping refreshes by clientRequestId.
- *     At refresh time, captures the current SCS card signature (previousSignature)
- *     to support backoff/advance without visually rolling back.
- * ------------------------------------------------------------ */
+/* -----------------------------------------------------------------------------*/
+// Board Refresh Scheduler
+//
+// PT: Agenda o refresh do Board após um feedback confirmado.
+// EN: Schedules the Board refresh after a committed feedback.
+/* -----------------------------------------------------------------------------*/
 function scheduleBoardRefreshFromCommitted(detail) {
   const clientRequestId = String(detail?.clientRequestId || '');
   if (!clientRequestId) return;
   if (clientRequestId === lastCommittedClientRequestId) return;
+
   lastCommittedClientRequestId = clientRequestId;
 
   clearTimeout(committedRefreshTimer);
+
   committedRefreshTimer = setTimeout(() => {
-    const seq = ++_initSeq;
-
-    // ✅ PT: captura no momento do refresh (sempre o que está na tela agora)
-    // ✅ EN: capture at refresh time (always what is currently on screen)
-    const previousSignature = lastSignatureByPlat['scs'] || '';
-
-    console.log('[Selah] previousSignature before refresh', { previousSignature, seq, _initSeq });
+    const seq = ++initSequence;
+    const previousSignature = lastSignatureByPlat.scs || '';
 
     refreshSCSWithBackoff(seq, { expectPhoto: true, previousSig: previousSignature });
   }, 250);
 }
 
-const lastSignatureByPlat = Object.create(null);
-
-// ------------------------------------------------------------
-// 🔁 SCS Refresh Backoff (force-fresh + photo consolidation)
-// PT: Após um "committed" (envio confirmado), tenta atualizar o card SCS com
-//     backoff curto para evitar snapshot atrasado do cache e garantir que a foto
-//     já esteja consolidada (quando esperado).
+/* -----------------------------------------------------------------------------*/
+// SCS Refresh Backoff
 //
-// EN: After a "committed" event, retries the SCS card refresh with a short
-//     backoff to avoid stale cache snapshots and ensure the photo is consolidated
-//     (when expected).
-//
-// Notes:
-// - Uses forceFresh=true and avoidSignature to prevent repainting the same item.
-// - Stops early when a new item is confirmed (and photo is present, if required).
-// ------------------------------------------------------------
+// PT: Após um committed, tenta atualizar o card SCS com backoff curto.
+// EN: After a committed event, retries the SCS card refresh with short backoff.
+/* -----------------------------------------------------------------------------*/
 async function refreshSCSWithBackoff(seq, { expectPhoto = true, previousSig = '' } = {}) {
   const delaysMs = [0, 1200, 3200];
 
   for (let attemptIndex = 0; attemptIndex < delaysMs.length; attemptIndex++) {
     const delayMs = delaysMs[attemptIndex];
 
-    if (delayMs) await new Promise((r) => setTimeout(r, delayMs));
-    if (seq !== _initSeq) return;
-
-    const res = await loadPlatformCard(CFG.selectors.cardSCS, 'scs', seq, {
-      silent: true,
-      forceFresh: true,
-      avoidSignature: previousSig, // ✅ IMPORTANT: prevents repainting the same item
-    });
-
-    if (seq !== _initSeq) return;
-    if (!res?.ok) continue;
-
-    // ✅ New contract: if it hasn't advanced yet, keep trying
-    if (res.advanced === false) {
-      console.log('[SCS backoff] not advanced yet', { attempt: attemptIndex + 1, previousSig });
-      continue;
+    if (delayMs) {
+      await new Promise((resolve) => setTimeout(resolve, delayMs));
     }
 
-    const topSigs = Array.isArray(res.topSigs) ? res.topSigs : [];
-    const hasPreviousInList = !previousSig || topSigs.includes(previousSig);
-    const isNewItem = !!res.signature && res.signature !== previousSig;
+    if (seq !== initSequence) return;
 
-    console.log('[SCS backoff] result', {
-      attempt: attemptIndex + 1,
-      previousSig,
-      hasPreviousInList,
-      isNewItem,
-      hasPhotoUrl: !!res.hasPhotoUrl,
-      signature: res.signature,
+    const result = await loadPlatformCard(CFG.selectors.cardSCS, 'scs', seq, {
+      silent: true,
+      forceFresh: true,
+      avoidSignature: previousSig,
     });
 
-    // Stale/inconsistent snapshot → try again
+    if (seq !== initSequence) return;
+    if (!result?.ok) continue;
+
+    if (result.advanced === false) continue;
+
+    const topSignatures = Array.isArray(result.topSigs) ? result.topSigs : [];
+    const hasPreviousInList = !previousSig || topSignatures.includes(previousSig);
+    const isNewItem = !!result.signature && result.signature !== previousSig;
+
     if (previousSig && !hasPreviousInList) continue;
 
     if (isNewItem) {
       if (!expectPhoto) return;
-      if (res.hasPhotoUrl) return;
-
-      // New item but photo not consolidated yet → retry
+      if (result.hasPhotoUrl) return;
       continue;
     }
   }
 }
 
-// ------------------------------------------------------------
-// 🌟 Selah — Public API (modern)
-// PT: API pública do mural. Inicializa o Featured Review (Hero) + cards fixos
-//     por plataforma e expõe refresh manual.
-// EN: Public board API. Initializes the featured review (Hero) + fixed cards
-//     per platform and exposes a manual refresh method.
-// ------------------------------------------------------------
+/* -----------------------------------------------------------------------------*/
+// Public API
+//
+// PT: API pública do Board.
+// EN: Public API for the Board.
+/* -----------------------------------------------------------------------------*/
 const SelahBoardUI = {
-  // ----------------------------------------------------------
-  // ✅ init()
-  // PT: Monta CFG com defaults + overrides e carrega Hero + cards.
-  //     Usa _initSeq para evitar “pintar” respostas antigas.
-  // EN: Builds CFG from defaults + overrides and loads Hero + cards.
-  //     Uses _initSeq to prevent rendering stale responses.
-  // ----------------------------------------------------------
-  async init(opts = {}) {
+  async init(options = {}) {
     CFG = {
-      hero: { ...DEFAULTS.hero, ...(opts.hero || {}) },
-      cards: { ...DEFAULTS.cards, ...(opts.cards || {}) },
-      selectors: { ...DEFAULTS.selectors, ...(opts.selectors || {}) },
+      hero: { ...DEFAULTS.hero, ...(options.hero || {}) },
+      cards: { ...DEFAULTS.cards, ...(options.cards || {}) },
+      selectors: { ...DEFAULTS.selectors, ...(options.selectors || {}) },
     };
 
-    if (!window.FeedbackAPI?.list) {
-      console.warn('[feedbackMural] FeedbackAPI.list not found.');
+    if (!NaomiFeedbackCardAPI.list) {
       return;
     }
 
-    const runSeq = ++_initSeq;
+    const runSeq = ++initSequence;
 
-    // Featured review (Hero)
     await loadFeaturedReview(runSeq);
 
-    // Fixed cards by platform (staggered for smoother paint)
     await Promise.allSettled([
       loadPlatformCard(CFG.selectors.cardSCS, 'scs', runSeq),
       loadPlatformCard(CFG.selectors.cardShopee, 'shopee', runSeq),
 
       (async () => {
-        await new Promise((r) => setTimeout(r, 200));
+        await new Promise((resolve) => setTimeout(resolve, 200));
         return loadPlatformCard(CFG.selectors.cardML, 'ml', runSeq);
       })(),
 
       (async () => {
-        await new Promise((r) => setTimeout(r, 400));
+        await new Promise((resolve) => setTimeout(resolve, 400));
         return loadPlatformCard(CFG.selectors.cardGoogle, 'google', runSeq);
       })(),
     ]);
   },
 
-  // ----------------------------------------------------------
-  // 🔄 refresh()
-  // PT: Recarrega os cards em modo silencioso (sem skeleton).
-  // EN: Reloads cards in silent mode (no skeleton placeholders).
-  // ----------------------------------------------------------
   async refresh() {
-    if (!window.FeedbackAPI?.list) return;
+    if (!NaomiFeedbackCardAPI.list) return;
 
-    const runSeq = ++_initSeq;
+    const runSeq = ++initSequence;
 
     await Promise.allSettled([
       loadPlatformCard(CFG.selectors.cardSCS, 'scs', runSeq, { silent: true }),
@@ -1039,50 +802,42 @@ const SelahBoardUI = {
   },
 };
 
-// ------------------------------------------------------------
-// 🔔 Realtime — Immediate Hero update on new feedback (form)
-// ------------------------------------------------------------
-// PT: Quando um novo feedback é enviado pelo formulário,
-//     atualiza o Featured Review (Hero) imediatamente,
-//     sem aguardar refresh completo.
-// EN: When a new feedback is submitted via form,
-//     immediately updates the Featured Review (Hero),
-//     without waiting for a full board refresh.
-// ------------------------------------------------------------
-window.addEventListener('feedback:novo', (ev) => {
-  const detail = ev?.detail || {};
+/* -----------------------------------------------------------------------------*/
+// New Feedback Listener
+//
+// PT: Atualiza o Hero imediatamente quando um novo feedback é enviado.
+// EN: Updates the Hero immediately when a new feedback is submitted.
+/* -----------------------------------------------------------------------------*/
+AppEvents.onAppEvent('feedback:novo', (event) => {
+  const detail = event?.detail || {};
   if (detail?.avaliacao?.plataforma !== 'scs') return;
 
   const root = document.querySelector(CFG.selectors.heroRoot);
   if (!root) return;
 
   if (detail.item) {
-    // In-place render using the Hero contract (English-only)
     renderFeaturedReview(root, {
       rating: detail.item.rating,
       author: detail.item.author ?? detail.item.name,
       text: detail.item.text ?? detail.item.comment,
       date_br: detail.item.date_br,
       date_ms: detail.item.date_ms,
-      // fallback compatível
       date_iso: detail.item.date_iso ?? detail.item.dateIso,
       photo_url: detail.item.photo_url,
     });
   } else {
-    // ⚠️ Mantido como estava para preservar o comportamento atual
-    // ⚠️ Kept as-is to avoid changing existing behavior
-    loadFeaturedReview(_initSeq, { silent: false });
+    loadFeaturedReview(initSequence, { silent: false });
   }
 });
 
-// ------------------------------------------------------------
-// 🌐 Network — Reload when connection is restored
-// ------------------------------------------------------------
-// PT: Quando a conexão volta, recarrega os cards em modo silencioso.
-// EN: When the connection is restored, reloads cards in silent mode.
-// ------------------------------------------------------------
-window.addEventListener('online', () => {
-  const seq = ++_initSeq;
+/* -----------------------------------------------------------------------------*/
+// Online Listener
+//
+// PT: Recarrega os cards em modo silencioso quando a conexão volta.
+// EN: Reloads cards in silent mode when the connection is restored.
+/* -----------------------------------------------------------------------------*/
+AppEvents.onAppEvent('online', () => {
+  const seq = ++initSequence;
 
   loadPlatformCard(CFG.selectors.cardSCS, 'scs', seq, { silent: true });
   loadPlatformCard(CFG.selectors.cardShopee, 'shopee', seq, { silent: true });
@@ -1090,29 +845,38 @@ window.addEventListener('online', () => {
   loadPlatformCard(CFG.selectors.cardGoogle, 'google', seq, { silent: true });
 });
 
-// ------------------------------------------------------------
-// 🔄 Realtime — Board refresh after committed feedback
-// ------------------------------------------------------------
-// PT: Disparado quando um feedback é confirmado
-//     (submit direto OU via outbox).
-// EN: Fired when a feedback is committed
-//     (direct submit OR outbox processing).
-// ------------------------------------------------------------
-window.addEventListener('feedback:committed', (ev) => {
-  const detail = ev?.detail || null;
+/* -----------------------------------------------------------------------------*/
+// Committed Feedback Listener
+//
+// PT: Agenda refresh do Board quando o feedback é confirmado.
+// EN: Schedules a Board refresh when the feedback is committed.
+/* -----------------------------------------------------------------------------*/
+AppEvents.onAppEvent('feedback:committed', (event) => {
+  const detail = event?.detail || null;
   if (!detail) return;
-
-  // Log opcional (pode remover depois)
-  console.log('[Selah] feedback:committed -> refresh', {
-    source: detail.source,
-    clientRequestId: detail.clientRequestId,
-  });
 
   scheduleBoardRefreshFromCommitted(detail);
 });
 
-// Compatibilidade com legado
-window.FeedbackMural = SelahBoardUI;
-
-// Export moderno para o bootstrap
+/* -----------------------------------------------------------------------------*/
+// Export
+/* -----------------------------------------------------------------------------*/
 export { SelahBoardUI };
+
+/* -----------------------------------------------------------------------------*/
+// 🧪 DEV TOOLS (optional)
+//
+// PT: Ferramentas de diagnóstico. Usar apenas em desenvolvimento.
+// EN: Diagnostic tools. Use only in development.
+/* -----------------------------------------------------------------------------*/
+
+// 🧪 Performance Probe
+// PT: Descomente para medir o tempo de resposta da API (GAS).
+// EN: Uncomment to measure API response time.
+
+// if (import.meta.env.DEV) {
+//   import('/assets/js/feedback/dev/performance-probe.js')
+//     .then(({ runPerformanceProbe }) => {
+//       runPerformanceProbe(NaomiFeedbackCardAPI);
+//     });
+// }

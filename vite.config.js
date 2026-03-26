@@ -29,18 +29,6 @@ export default defineConfig({
     port: 5173,
     strictPort: true,
     proxy: {
-      // JSON (lista de avaliações, etc.)
-      '/gas': {
-        target: 'https://script.google.com',
-        changeOrigin: true,
-        secure: true,
-        rewrite: (path) =>
-          path.replace(
-            /^\/gas/,
-            '/macros/s/AKfycbzzCFgGmXhIDc7xlaJa_XpacGMu3GBn7d0kg2ntRgUrpuisnV__AjF_8pJGXgG6NaMP0A/exec'
-          ),
-      },
-
       // Imagens (mesmo exec, mas com action=img...)
       '/gas-img': {
         target: 'https://script.google.com',
@@ -49,6 +37,18 @@ export default defineConfig({
         rewrite: (path) =>
           path.replace(
             /^\/gas-img/,
+            '/macros/s/AKfycbzzCFgGmXhIDc7xlaJa_XpacGMu3GBn7d0kg2ntRgUrpuisnV__AjF_8pJGXgG6NaMP0A/exec'
+          ),
+      },
+
+      // JSON (lista de avaliações, etc.)
+      '/gas': {
+        target: 'https://script.google.com',
+        changeOrigin: true,
+        secure: true,
+        rewrite: (path) =>
+          path.replace(
+            /^\/gas/,
             '/macros/s/AKfycbzzCFgGmXhIDc7xlaJa_XpacGMu3GBn7d0kg2ntRgUrpuisnV__AjF_8pJGXgG6NaMP0A/exec'
           ),
       },

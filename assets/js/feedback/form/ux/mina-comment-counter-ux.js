@@ -1,75 +1,86 @@
-// ==================================================
-// 🧮 Mina — Comment Counter UX Specialist
+// 🧮 Mina — Comment Counter UX
 //
-// Nível: Aprendiz
+// Nível / Level: Aprendiz / Apprentice
 //
-// File: mina-comment-counter-ux.js
+// PT: Responsável pela experiência do contador de caracteres do comentário.
+//     Observa o textarea do comentário, atualiza o contador em tempo real
+//     e sincroniza o estado inicial ao anexar.
+//     Não valida limites, não controla envio e não interage com outras
+//     partes do formulário.
 //
-// PT: Mina cuida da experiência (UX) do contador de caracteres do comentário.
-//     Ela:
-//     - observa o textarea de comentário
-//     - atualiza o contador em tempo real (input)
-//     - sincroniza o estado inicial ao anexar
-//     Mina não valida limites (isso é Sofia), não mexe em envio (Selene)
-//     e não toca em outras partes do formulário.
+// EN: Responsible for the comment character counter experience.
+//     Observes the comment textarea, updates the counter in real time,
+//     and syncs the initial state on attach.
+//     Does not validate limits, does not control submission,
+//     and does not interact with other parts of the form.
+/* -----------------------------------------------------------------------------*/
+
+/* -----------------------------------------------------------------------------*/
+// Imports
+/* -----------------------------------------------------------------------------*/
+// (nenhum necessário / none needed)
+
+/* -----------------------------------------------------------------------------*/
+// Internal State
+/* -----------------------------------------------------------------------------*/
+
+let commentElement = null;
+let counterElement = null;
+
+let onInputHandler = null;
+
+/* -----------------------------------------------------------------------------*/
+// Internal Helpers
 //
-// EN: Mina handles the comment character counter UX.
-//     She:
-//     - watches the comment textarea
-//     - updates the counter in real time (input event)
-//     - syncs the initial state on attach
-//     Mina does not validate limits (Sofia does), does not handle submit (Selene),
-//     and does not touch other parts of the form.
-// ==================================================
+// PT: Funções auxiliares para atualização visual do contador.
+// EN: Helper functions for visual counter updates.
+/* -----------------------------------------------------------------------------*/
 
-let commentEl = null;
-let counterEl = null;
-
-let onInputRef = null;
-
-// ------------------------------
-// Internal helpers (UX only)
-// ------------------------------
-
+// PT: Atualiza o texto do contador com base no tamanho atual do comentário.
+// EN: Updates the counter text based on the current comment length.
 function updateCounterText() {
-  if (!commentEl || !counterEl) return;
-  counterEl.textContent = String(commentEl.value.length);
+  if (!commentElement || !counterElement) return;
+
+  counterElement.textContent = String(commentElement.value.length);
 }
 
-// ------------------------------
-// Public API (Mina)
-// ------------------------------
+/* -----------------------------------------------------------------------------*/
+// Public API
+/* -----------------------------------------------------------------------------*/
 
+// PT: Anexa a UX do contador de comentário.
+// EN: Attaches the comment counter UX.
 function attachCommentCounterUX(options = {}) {
   const { commentId = 'commentInput', counterId = 'counter-comment' } = options;
 
-  commentEl = document.getElementById(commentId);
-  counterEl = document.getElementById(counterId);
+  commentElement = document.getElementById(commentId);
+  counterElement = document.getElementById(counterId);
 
-  if (!commentEl || !counterEl) return;
+  if (!commentElement || !counterElement) return;
 
-  onInputRef = () => updateCounterText();
-  commentEl.addEventListener('input', onInputRef);
+  onInputHandler = () => updateCounterText();
+  commentElement.addEventListener('input', onInputHandler);
 
-  // PT: Estado inicial
-  // EN: Initial state
+  // PT: Sincroniza o estado inicial do contador.
+  // EN: Syncs the initial counter state.
   updateCounterText();
 }
 
+// PT: Remove a UX do contador e limpa referências.
+// EN: Detaches the counter UX and clears references.
 function detachCommentCounterUX() {
-  if (commentEl && onInputRef) {
-    commentEl.removeEventListener('input', onInputRef);
+  if (commentElement && onInputHandler) {
+    commentElement.removeEventListener('input', onInputHandler);
   }
 
-  onInputRef = null;
-  commentEl = null;
-  counterEl = null;
+  onInputHandler = null;
+  commentElement = null;
+  counterElement = null;
 }
 
-// ------------------------------
-// Export pattern (project standard)
-// Ordem de uso: attach → detach
-// ------------------------------
+/* -----------------------------------------------------------------------------*/
+// Export
+/* -----------------------------------------------------------------------------*/
 
 export const MinaCommentCounterUX = {
   attachCommentCounterUX,

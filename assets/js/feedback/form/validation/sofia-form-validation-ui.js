@@ -1,69 +1,63 @@
-// ---------------------------------------------------------------------------------------
-// 🧠 Sofia — Form Validation & UX State Specialist
+// 🧠 Sofia — Form Validation and UX State
 //
-// Nível: Jovem
+// Nível / Level: Jovem / Young
 //
-// File: sofia-form-validation-ui.js
+// PT: Responsável pela validação básica de UX do formulário e pelo estado
+//     visual durante o preenchimento e envio.
+//     Coleta valores dos inputs, valida regras simples, exibe status,
+//     trava ou destrava o botão de envio e marca ou limpa erros de campo
+//     sem exigir alterações no HTML.
+//     Não processa imagem, não controla UI de foto, não controla UI de estrelas,
+//     não emite eventos e não chama API.
 //
-// PT: Sofia cuida da validação básica de UX do formulário e do estado visual
-//     durante o preenchimento/envio. Ela:
-//     - coleta valores dos inputs (trim)
-//     - valida regras simples (honeypot, obrigatórios, limites de texto)
-//     - exibe status (info/success/error) via data-attribute
-//     - trava/destrava o botão de envio (aria-busy + texto)
-//     - marca/limpa erro de campo sem exigir mudanças no HTML
-//
-//     Sofia não processa imagem (Athena), não controla UI de foto (Daphne),
-//     não controla UI de estrelas (Ayla), não emite eventos e não chama API/Flow.
-//
-// EN: Sofia handles basic UX validation and the visual state of the form
-//     during input and submission. She:
-//     - collects input values (trim)
-//     - validates simple rules (honeypot, required fields, text limits)
-//     - displays status (info/success/error) via data-attribute
-//     - locks/unlocks the submit button (aria-busy + label text)
-//     - marks/clears field errors without requiring HTML changes
-//
-//     Sofia does not process images (Athena), does not handle photo UI (Daphne),
-//     does not handle rating UI (Ayla), does not emit events and does not call API/Flow.
-// --------------------------------------------------------------------------------------
+// EN: Responsible for basic form UX validation and visual state
+//     during input and submission.
+//     Collects input values, validates simple rules, displays status,
+//     locks or unlocks the submit button, and marks or clears field errors
+//     without requiring HTML changes.
+//     Does not process images, does not control photo UI, does not control rating UI,
+//     does not emit events, and does not call APIs.
+/* -----------------------------------------------------------------------------*/
 
-// ------------------------------
-// Internal element map
-// ------------------------------
+/* -----------------------------------------------------------------------------*/
+// Internal State
+/* -----------------------------------------------------------------------------*/
 
-// Logger — System Observability Layer
-// Provides logging capabilities for debugging and monitoring.
-// Provides:
-//  - Logger.debug()
-//  - Logger.info()
-//  - Logger.warn()
-//  - Logger.error()
-import { Logger } from '/assets/js/system/core/logger.js';
-
-const dom = document;
+const documentRoot = document;
 
 let autoClearAttached = false;
 
+/* -----------------------------------------------------------------------------*/
+// Internal Elements Map
+//
+// PT: Mapa centralizado dos elementos usados pela Sofia.
+// EN: Centralized map of elements used by Sofia.
+/* -----------------------------------------------------------------------------*/
+
 const elements = {
-  form: dom.querySelector('#feedback-form'),
-  ratingGroup: dom.querySelector('#rating-group'),
-  ratingHidden: dom.querySelector('#rating'),
+  form: documentRoot.querySelector('#feedback-form'),
+  ratingGroup: documentRoot.querySelector('#rating-group'),
+  ratingHidden: documentRoot.querySelector('#rating'),
 
-  nameInput: dom.querySelector('#nameInput'),
-  commentInput: dom.querySelector('#commentInput'),
-  contactInput: dom.querySelector('#contactInput'),
+  nameInput: documentRoot.querySelector('#nameInput'),
+  commentInput: documentRoot.querySelector('#commentInput'),
+  contactInput: documentRoot.querySelector('#contactInput'),
 
-  honeypotInput: dom.querySelector('#honeypot'),
-  photoInput: dom.querySelector('#photo'),
-  submitButton: dom.querySelector('#btn-submit'),
-  statusEl: dom.querySelector('#form-status'),
+  honeypotInput: documentRoot.querySelector('#honeypot'),
+  photoInput: documentRoot.querySelector('#photo'),
+  submitButton: documentRoot.querySelector('#btn-submit'),
+  statusElement: documentRoot.querySelector('#form-status'),
 };
 
-// ------------------------------
-// Data collection (UX-level)
-// ------------------------------
+/* -----------------------------------------------------------------------------*/
+// Data Collection
+//
+// PT: Coleta valores do formulário em nível de UX.
+// EN: Collects form values at UX level.
+/* -----------------------------------------------------------------------------*/
 
+// PT: Coleta e normaliza os valores atuais do formulário.
+// EN: Collects and normalizes the current form values.
 function collectFormValues() {
   return {
     rating: String(elements.ratingHidden?.value || '').trim(),
@@ -75,23 +69,31 @@ function collectFormValues() {
   };
 }
 
-// ------------------------------
-// Basic UX validation
-// Returns: { ok: boolean, message: string }
-// ------------------------------
+/* -----------------------------------------------------------------------------*/
+// Basic Validation
+//
+// PT: Valida regras básicas do formulário.
+// EN: Validates basic form rules.
+/* -----------------------------------------------------------------------------*/
 
+// PT: Valida regras simples de UX e retorna resultado padronizado.
+// EN: Validates simple UX rules and returns a standardized result.
 function validateBasicRules(values) {
-  // PT: Honeypot preenchido → provável bot
-  // EN: Filled honeypot → likely bot
+  // PT: Honeypot preenchido indica possível bot.
+  // EN: Filled honeypot indicates a likely bot.
   if (values.honeypot) {
-    return { ok: false, message: 'Validação falhou (possível bot).', field: 'honeypot' };
+    return {
+      ok: false,
+      message: 'Validação falhou (possível bot).',
+      field: 'honeypot',
+    };
   }
 
-  // PT: Rating deve ser 1..5 (FormData vem string)
-  // EN: Rating must be 1..5 (FormData comes as string)
-  const ratingNum = Number(values.rating);
+  // PT: Rating deve estar entre 1 e 5.
+  // EN: Rating must be between 1 and 5.
+  const ratingNumber = Number(values.rating);
 
-  if (!Number.isInteger(ratingNum) || ratingNum < 1 || ratingNum > 5) {
+  if (!Number.isInteger(ratingNumber) || ratingNumber < 1 || ratingNumber > 5) {
     return {
       ok: false,
       message: 'Por favor, escolha uma avaliação (1 a 5 estrelas).',
@@ -99,8 +101,8 @@ function validateBasicRules(values) {
     };
   }
 
-  // PT: Nome mínimo para evitar lixo
-  // EN: Minimum name length to avoid junk input
+  // PT: Nome mínimo para evitar entradas inválidas.
+  // EN: Minimum name length to avoid invalid input.
   if (values.name.length < 4) {
     return {
       ok: false,
@@ -109,8 +111,8 @@ function validateBasicRules(values) {
     };
   }
 
-  // PT: Comentário com limites básicos de UX
-  // EN: Comment with basic UX limits
+  // PT: Comentário com limites básicos de UX.
+  // EN: Comment with basic UX limits.
   if (values.comment.length < 20 || values.comment.length > 600) {
     return {
       ok: false,
@@ -122,35 +124,64 @@ function validateBasicRules(values) {
   return { ok: true, message: '' };
 }
 
-// ------------------------------
-// UX status (message + type)
-// type: "info" | "success" | "error"
-// ------------------------------
+/* -----------------------------------------------------------------------------*/
+// Form Status
+//
+// PT: Controla a mensagem e o tipo visual do status do formulário.
+// EN: Controls the form status message and visual type.
+/* -----------------------------------------------------------------------------*/
 
+// PT: Exibe mensagem de status com tipo visual.
+// EN: Displays a status message with visual type.
 function showFormStatus(message, type = 'info') {
-  if (!elements.statusEl) return;
-  elements.statusEl.textContent = message;
-  elements.statusEl.dataset.type = type; // style via [data-type="..."]
+  if (!elements.statusElement) return;
+
+  elements.statusElement.textContent = message;
+  elements.statusElement.dataset.type = type;
 }
 
-// ------------------------------
-// Submit button lock/unlock
-// ------------------------------
+// PT: Limpa o status visual do formulário.
+// EN: Clears the form visual status.
+function clearFormStatus() {
+  if (!elements.statusElement) return;
 
+  elements.statusElement.textContent = '';
+  delete elements.statusElement.dataset.type;
+}
+
+/* -----------------------------------------------------------------------------*/
+// Submit Button State
+//
+// PT: Controla o estado visual e interativo do botão de envio.
+// EN: Controls the visual and interactive state of the submit button.
+/* -----------------------------------------------------------------------------*/
+
+// PT: Trava ou destrava o botão de envio.
+// EN: Locks or unlocks the submit button.
 function lockSubmit(isLocked) {
   if (!elements.submitButton) return;
 
-  const locked = !!isLocked;
+  const locked = Boolean(isLocked);
+
   elements.submitButton.disabled = locked;
   elements.submitButton.setAttribute('aria-busy', locked ? 'true' : 'false');
   elements.submitButton.textContent = locked ? 'Enviando…' : 'Enviar';
 }
 
+/* -----------------------------------------------------------------------------*/
+// Field Mapping
+//
+// PT: Resolve o elemento visual correspondente a um campo lógico.
+// EN: Resolves the visual element corresponding to a logical field.
+/* -----------------------------------------------------------------------------*/
+
+// PT: Retorna o elemento relacionado ao campo informado.
+// EN: Returns the element related to the provided field.
 function getFieldElement(field) {
   switch (field) {
     case 'rating':
-      // PT: rating não é input visível, então retornamos null
-      // EN: rating isn't a visible input, so return null
+      // PT: Rating não possui input visível direto.
+      // EN: Rating does not have a direct visible input.
       return null;
     case 'name':
       return elements.nameInput;
@@ -165,119 +196,124 @@ function getFieldElement(field) {
   }
 }
 
-// ------------------------------
-// Form UI reset (UX helper)
-// ------------------------------
+/* -----------------------------------------------------------------------------*/
+// Form UI Reset
+//
+// PT: Limpa estado visual e campos com erro no formulário.
+// EN: Clears visual state and errored fields in the form.
+/* -----------------------------------------------------------------------------*/
 
-function clearFormStatus() {
-  if (!elements.statusEl) return;
-  elements.statusEl.textContent = '';
-  delete elements.statusEl.dataset.type;
-}
-
+// PT: Reseta a UI do formulário.
+// EN: Resets the form UI.
 function resetFormUI() {
-  // PT: reset do form (valores)
-  // EN: form reset (values)
+  // PT: Reseta os valores do formulário.
+  // EN: Resets form values.
   elements.form?.reset();
 
-  // PT/EN: clear toast/status
   clearFormStatus();
 
-  // PT/EN: clear field errors
   clearFieldError(elements.nameInput);
   clearFieldError(elements.commentInput);
   clearFieldError(elements.contactInput);
-
-  // PT/EN: clear rating visual error
   clearRatingError();
 }
 
-// ------------------------------
-// Focus & Scroll UX Helpers
-// ------------------------------
+/* -----------------------------------------------------------------------------*/
+// Focus and Scroll Helpers
+//
+// PT: Controla foco e rolagem até campos com erro dentro do modal.
+// EN: Controls focus and scrolling to errored fields inside the modal.
+/* -----------------------------------------------------------------------------*/
 
-// ------------------------------
-// Focus & Scroll UX Helpers
-// ------------------------------
+// PT: Verifica se um elemento possui rolagem vertical útil.
+// EN: Checks whether an element has usable vertical scrolling.
+function isScrollableY(element) {
+  if (!element) return false;
 
-function isScrollableY(el) {
-  if (!el) return false;
-  const s = window.getComputedStyle(el);
-  const oy = s.overflowY;
-  return (oy === 'auto' || oy === 'scroll') && el.scrollHeight > el.clientHeight + 1;
+  const styles = window.getComputedStyle(element);
+  const overflowY = styles.overflowY;
+
+  return (
+    (overflowY === 'auto' || overflowY === 'scroll') &&
+    element.scrollHeight > element.clientHeight + 1
+  );
 }
 
+// PT: Retorna o container raiz do modal.
+// EN: Returns the modal root container.
 function getModalRoot() {
   return document.getElementById('feedback-modal');
 }
 
-function getDialogEl() {
+// PT: Retorna o elemento de diálogo do modal.
+// EN: Returns the modal dialog element.
+function getDialogElement() {
   return document.querySelector('#feedback-modal [role="dialog"]');
 }
 
-function getHeaderOffset(dialogEl) {
-  const header = dialogEl?.querySelector('[data-modal-header]');
-  const h = header ? header.getBoundingClientRect().height : 0;
-  return h + 12; // respiro
+// PT: Calcula o offset do cabeçalho do modal.
+// EN: Computes the modal header offset.
+function getHeaderOffset(dialogElement) {
+  const headerElement = dialogElement?.querySelector('[data-modal-header]');
+  const headerHeight = headerElement ? headerElement.getBoundingClientRect().height : 0;
+
+  return headerHeight + 12;
 }
 
-// PT: acha o container rolável REAL subindo do target até o modal
-// EN: finds the REAL scroll container going up from target to modal
-function findScrollParentWithinModal(targetEl) {
-  const modal = getModalRoot();
-  if (!modal || !targetEl) return null;
+// PT: Encontra o container realmente rolável do target até o modal.
+// EN: Finds the truly scrollable container from the target up to the modal.
+function findScrollParentWithinModal(targetElement) {
+  const modalRoot = getModalRoot();
+  if (!modalRoot || !targetElement) return null;
 
-  let el = targetEl.parentElement;
-  while (el && el !== modal) {
-    if (isScrollableY(el)) return el;
-    el = el.parentElement;
+  let currentElement = targetElement.parentElement;
+
+  while (currentElement && currentElement !== modalRoot) {
+    if (isScrollableY(currentElement)) return currentElement;
+    currentElement = currentElement.parentElement;
   }
 
-  // fallback: tenta dialog, se ele for scrollável
-  const dialog = getDialogEl();
-  if (isScrollableY(dialog)) return dialog;
+  const dialogElement = getDialogElement();
+  if (isScrollableY(dialogElement)) return dialogElement;
 
   return null;
 }
 
-function forceScrollTo(containerEl, dialogEl, targetEl) {
-  if (!containerEl || !dialogEl || !targetEl) return;
+// PT: Força a rolagem do container até o target.
+// EN: Forces container scrolling to the target.
+function forceScrollTo(containerElement, dialogElement, targetElement) {
+  if (!containerElement || !dialogElement || !targetElement) return;
 
-  const containerRect = containerEl.getBoundingClientRect();
-  const targetRect = targetEl.getBoundingClientRect();
+  const containerRect = containerElement.getBoundingClientRect();
+  const targetRect = targetElement.getBoundingClientRect();
 
-  // posição do target dentro do container rolável
-  const topInContainer = targetRect.top - containerRect.top + containerEl.scrollTop;
-  const top = Math.max(0, topInContainer - getHeaderOffset(dialogEl));
+  const topInsideContainer = targetRect.top - containerRect.top + containerElement.scrollTop;
 
-  // FORÇA (sem smooth, mobile-friendly)
-  containerEl.scrollTop = top;
+  const targetTop = Math.max(0, topInsideContainer - getHeaderOffset(dialogElement));
 
-  // reassert no próximo frame (alguns mobiles reancoram)
+  containerElement.scrollTop = targetTop;
+
   requestAnimationFrame(() => {
-    containerEl.scrollTop = top;
+    containerElement.scrollTop = targetTop;
   });
 }
 
+// PT: Rola até o campo informado dentro do modal.
+// EN: Scrolls to the provided field inside the modal.
 function scrollToField(field) {
-  const dialogEl = getDialogEl();
-  const targetEl = field === 'rating' ? elements.ratingGroup : getFieldElement(field);
-  if (!dialogEl || !targetEl) return;
+  const dialogElement = getDialogElement();
+  const targetElement = field === 'rating' ? elements.ratingGroup : getFieldElement(field);
 
-  const containerEl = findScrollParentWithinModal(targetEl);
-  if (!containerEl) return;
+  if (!dialogElement || !targetElement) return;
 
-  // debug opcional (se quiser manter)
-  // console.log('[Sofia scroll] container:', {
-  //   overflowY: getComputedStyle(containerEl).overflowY,
-  //   scrollTop: containerEl.scrollTop,
-  //   scrollHeight: containerEl.scrollHeight,
-  //   clientHeight: containerEl.clientHeight,
-  // });
+  const containerElement = findScrollParentWithinModal(targetElement);
+  if (!containerElement) return;
 
-  forceScrollTo(containerEl, dialogEl, targetEl);
+  forceScrollTo(containerElement, dialogElement, targetElement);
 }
 
+// PT: Aplica foco ao campo informado.
+// EN: Focuses the provided field.
 function focusField(field) {
   if (field === 'rating') {
     elements.ratingGroup?.setAttribute('tabindex', '-1');
@@ -285,110 +321,134 @@ function focusField(field) {
     return;
   }
 
-  const el = getFieldElement(field);
-  el?.focus?.({ preventScroll: true });
+  const fieldElement = getFieldElement(field);
+  fieldElement?.focus?.({ preventScroll: true });
 }
 
-// ------------------------------
-// Field error UI (no HTML changes required)
-// ------------------------------
+/* -----------------------------------------------------------------------------*/
+// Field Error UI
+//
+// PT: Marca e limpa erros visuais dos campos sem depender de HTML extra.
+// EN: Marks and clears visual field errors without depending on extra HTML.
+/* -----------------------------------------------------------------------------*/
 
-function markFieldError(inputEl, message) {
-  if (!inputEl) return;
+// PT: Marca erro visual em um campo.
+// EN: Marks visual error on a field.
+function markFieldError(inputElement, message) {
+  if (!inputElement) return;
 
-  inputEl.classList.add('border-red-500', 'ring-1', 'ring-red-400', 'focus:ring-red-400');
-  inputEl.setAttribute('aria-invalid', 'true');
+  inputElement.classList.add('border-red-500', 'ring-1', 'ring-red-400', 'focus:ring-red-400');
+  inputElement.setAttribute('aria-invalid', 'true');
 
-  // PT/EN: unique hint id tied to this input
   const hintId =
-    inputEl.dataset.errId || `err_${inputEl.id || Math.random().toString(16).slice(2)}`;
-  inputEl.dataset.errId = hintId;
+    inputElement.dataset.errId || `err_${inputElement.id || Math.random().toString(16).slice(2)}`;
 
-  let hint = dom.getElementById(hintId);
-  if (!hint) {
-    hint = dom.createElement('p');
-    hint.id = hintId;
-    hint.className = 'hint-error mt-1 text-xs text-red-600';
-    // PT/EN: insert right after the input (safe even with wrappers)
-    inputEl.insertAdjacentElement('afterend', hint);
+  inputElement.dataset.errId = hintId;
+
+  let hintElement = documentRoot.getElementById(hintId);
+
+  if (!hintElement) {
+    hintElement = documentRoot.createElement('p');
+    hintElement.id = hintId;
+    hintElement.className = 'hint-error mt-1 text-xs text-red-600';
+    inputElement.insertAdjacentElement('afterend', hintElement);
   }
 
-  hint.textContent = message;
+  hintElement.textContent = message;
 }
 
+// PT: Marca erro visual no grupo de rating.
+// EN: Marks visual error on the rating group.
 function markRatingError(message) {
-  const wrapper = elements.ratingGroup;
-  if (!wrapper) return;
+  const ratingWrapper = elements.ratingGroup;
+  if (!ratingWrapper) return;
 
-  wrapper.classList.add('ring-2', 'ring-red-400', 'rounded-md');
-  wrapper.setAttribute('aria-invalid', 'true');
+  ratingWrapper.classList.add('ring-2', 'ring-red-400', 'rounded-md');
+  ratingWrapper.setAttribute('aria-invalid', 'true');
 
   const hintId = 'rating-error-hint';
-  let hint = dom.getElementById(hintId);
-  if (!hint) {
-    hint = dom.createElement('p');
-    hint.id = hintId;
-    hint.className = 'hint-error mt-1 text-xs text-red-600';
-    wrapper.insertAdjacentElement('afterend', hint);
+  let hintElement = documentRoot.getElementById(hintId);
+
+  if (!hintElement) {
+    hintElement = documentRoot.createElement('p');
+    hintElement.id = hintId;
+    hintElement.className = 'hint-error mt-1 text-xs text-red-600';
+    ratingWrapper.insertAdjacentElement('afterend', hintElement);
   }
-  hint.textContent = message;
+
+  hintElement.textContent = message;
 }
 
+// PT: Limpa erro visual do grupo de rating.
+// EN: Clears visual error from the rating group.
 function clearRatingError() {
-  const wrapper = elements.ratingGroup;
-  if (!wrapper) return;
+  const ratingWrapper = elements.ratingGroup;
+  if (!ratingWrapper) return;
 
-  wrapper.classList.remove('ring-2', 'ring-red-400', 'rounded-md');
-  wrapper.removeAttribute('aria-invalid');
+  ratingWrapper.classList.remove('ring-2', 'ring-red-400', 'rounded-md');
+  ratingWrapper.removeAttribute('aria-invalid');
 
-  const hint = dom.getElementById('rating-error-hint');
-  if (hint) hint.remove();
-}
-
-function clearFieldError(inputEl) {
-  if (!inputEl) return;
-
-  inputEl.classList.remove('border-red-500', 'ring-1', 'ring-red-400', 'focus:ring-red-400');
-  inputEl.removeAttribute('aria-invalid');
-
-  const hintId = inputEl.dataset.errId;
-  if (hintId) {
-    const hint = dom.getElementById(hintId);
-    if (hint) hint.remove();
-    delete inputEl.dataset.errId;
+  const hintElement = documentRoot.getElementById('rating-error-hint');
+  if (hintElement) {
+    hintElement.remove();
   }
 }
 
+// PT: Limpa erro visual de um campo.
+// EN: Clears visual error from a field.
+function clearFieldError(inputElement) {
+  if (!inputElement) return;
+
+  inputElement.classList.remove('border-red-500', 'ring-1', 'ring-red-400', 'focus:ring-red-400');
+  inputElement.removeAttribute('aria-invalid');
+
+  const hintId = inputElement.dataset.errId;
+  if (!hintId) return;
+
+  const hintElement = documentRoot.getElementById(hintId);
+  if (hintElement) {
+    hintElement.remove();
+  }
+
+  delete inputElement.dataset.errId;
+}
+
+/* -----------------------------------------------------------------------------*/
+// Auto Clear Field Errors
+//
+// PT: Limpa erros automaticamente quando o usuário interage novamente.
+// EN: Clears errors automatically when the user interacts again.
+/* -----------------------------------------------------------------------------*/
+
+// PT: Anexa limpeza automática de erros aos campos.
+// EN: Attaches automatic error clearing to the fields.
 function attachAutoClearFieldErrors() {
-  Logger.debug('sofia', 'attachAutoClearFieldErrors called');
-
   if (autoClearAttached) {
-    autoClearAttached = true;
+    return;
   }
 
-  // PT: Limpa erro ao digitar/modificar campo
-  // EN: Clears error on typing/modifying field
-  const bind = (el) => {
-    if (!el) return;
-    el.addEventListener('input', () => clearFieldError(el));
-    el.addEventListener('blur', () => clearFieldError(el));
+  autoClearAttached = true;
+
+  const bindAutoClear = (element) => {
+    if (!element) return;
+
+    element.addEventListener('input', () => clearFieldError(element));
+    element.addEventListener('blur', () => clearFieldError(element));
   };
 
-  bind(elements.nameInput);
-  bind(elements.commentInput);
-  bind(elements.contactInput);
+  bindAutoClear(elements.nameInput);
+  bindAutoClear(elements.commentInput);
+  bindAutoClear(elements.contactInput);
 
-  // PT/EN: Rating stars – clear visual error when user interacts
   if (elements.ratingGroup) {
     elements.ratingGroup.addEventListener('click', clearRatingError);
     elements.ratingGroup.addEventListener('change', clearRatingError);
   }
 }
 
-// ------------------------------
-// Export pattern (project standard)
-// Ordem de uso: collect → validate → status/lock → fieldErrors
-// ------------------------------
+/* -----------------------------------------------------------------------------*/
+// Export
+/* -----------------------------------------------------------------------------*/
 
 export const SofiaFormValidationUI = {
   elements,

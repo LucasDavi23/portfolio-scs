@@ -1,109 +1,115 @@
-// ==================================================
+/* -----------------------------------------------------------------------------*/
 // ⭐ Zaya — Guardiã da Nota
 //
-// Nível: Jovem
-//
-// File: zaya-rating-helpers.js
+// Nível / Level: Jovem / Young
 //
 // PT: Mantém a nota (rating) consistente e válida.
-//     Zaya resolve a nota final do feedback conciliando
-//     diferentes fontes (ex: input hidden e radio button),
-//     garantindo um valor numérico entre 1 e 5.
-//     Ela não renderiza estrelas e não altera UI — apenas
+//     Resolve a nota final conciliando diferentes fontes
+//     (ex: input hidden e radio button), garantindo um valor
+//     numérico entre 1 e 5.
+//     Não renderiza estrelas e não altera UI — apenas
 //     normaliza, resolve e valida o valor.
 //
 // EN: Keeps the rating consistent and valid.
-//     Zaya resolves the final feedback rating by reconciling
-//     different sources (e.g., hidden input and radio button),
-//     ensuring a numeric value between 1 and 5.
-//     She does not render stars and does not change UI — she only
+//     Resolves the final feedback rating by reconciling different
+//     sources (e.g., hidden input and radio button), ensuring
+//     a numeric value between 1 and 5.
+//     Does not render stars and does not change UI — only
 //     normalizes, resolves and validates the value.
-// ==================================================
+/* -----------------------------------------------------------------------------*/
 
-/**
- * PT: Converte valores variados para número inteiro seguro.
- * EN: Converts mixed inputs into a safe integer number.
- */
+/* -----------------------------------------------------------------------------*/
+// Imports
+/* -----------------------------------------------------------------------------*/
+// (nenhum necessário / none needed)
+
+/* -----------------------------------------------------------------------------*/
+// Helpers
+//
+// PT: Funções auxiliares para normalização e leitura da nota.
+// EN: Helper functions for rating normalization and reading.
+/* -----------------------------------------------------------------------------*/
+
+// PT: Converte valores variados para inteiro seguro.
+// EN: Converts mixed values into a safe integer.
 function toInt(value) {
-  const n = Number(value);
-  if (!Number.isFinite(n)) return 0;
-  return Math.trunc(n);
+  const parsedNumber = Number(value);
+
+  if (!Number.isFinite(parsedNumber)) {
+    return 0;
+  }
+
+  return Math.trunc(parsedNumber);
 }
 
-/**
- * PT: Valida se o rating está no intervalo permitido (1..5).
- * EN: Validates whether rating is within allowed range (1..5).
- */
+// PT: Verifica se a nota está dentro do intervalo permitido.
+// EN: Checks whether the rating is within the allowed range.
 function isValidRating(rating) {
-  const r = toInt(rating);
-  return r >= 1 && r <= 5;
+  const normalizedRating = toInt(rating);
+
+  return normalizedRating >= 1 && normalizedRating <= 5;
 }
 
-/**
- * PT: Resolve a nota final conciliando duas fontes:
- *     - hidden (ex: #rating)
- *     - radio (ex: input[name="rating_star"]:checked)
- *     Regra: se hidden for válido, ele vence; senão usa radio.
- *
- * EN: Resolves final rating by reconciling two sources:
- *     - hidden (e.g., #rating)
- *     - radio (e.g., input[name="rating_star"]:checked)
- *     Rule: if hidden is valid, it wins; otherwise use radio.
- */
+// PT: Resolve a nota final conciliando as fontes hidden e radio.
+//     Se o hidden for válido, ele tem prioridade.
+// EN: Resolves the final rating by reconciling hidden and radio sources.
+//     If the hidden value is valid, it takes priority.
 function resolveRating({ hiddenValue = 0, radioValue = 0 } = {}) {
-  const hidden = toInt(hiddenValue);
-  const radio = toInt(radioValue);
+  const hiddenRating = toInt(hiddenValue);
+  const radioRating = toInt(radioValue);
 
-  if (isValidRating(hidden)) return hidden;
-  if (isValidRating(radio)) return radio;
+  if (isValidRating(hiddenRating)) {
+    return hiddenRating;
+  }
 
-  return 0; // PT/EN: invalid or not selected
+  if (isValidRating(radioRating)) {
+    return radioRating;
+  }
+
+  return 0;
 }
 
-/**
- * PT: Lê do DOM as duas fontes mais comuns (hidden e radio)
- *     e devolve { hiddenValue, radioValue }.
- * EN: Reads the two most common sources from the DOM (hidden and radio)
- *     and returns { hiddenValue, radioValue }.
- */
+// PT: Lê do DOM as fontes mais comuns da nota.
+// EN: Reads the most common rating sources from the DOM.
 function readRatingSourcesFromDOM({
   hiddenSelector = '#rating',
   radioSelector = 'input[name="rating_star"]:checked',
   root = document,
 } = {}) {
-  const hiddenEl = root?.querySelector?.(hiddenSelector) || null;
-  const radioEl = root?.querySelector?.(radioSelector) || null;
+  const hiddenElement = root?.querySelector?.(hiddenSelector) || null;
+  const radioElement = root?.querySelector?.(radioSelector) || null;
 
   return {
-    hiddenValue: hiddenEl?.value ?? 0,
-    radioValue: radioEl?.value ?? 0,
+    hiddenValue: hiddenElement?.value ?? 0,
+    radioValue: radioElement?.value ?? 0,
   };
 }
 
-/**
- * PT: Obtém a nota final diretamente do DOM (com fallback automático).
- * EN: Gets final rating directly from the DOM (with automatic fallback).
- */
+// PT: Obtém a nota final diretamente do DOM.
+// EN: Gets the final rating directly from the DOM.
 function getRatingFromDOM(options = {}) {
-  const sources = readRatingSourcesFromDOM(options);
-  return resolveRating(sources);
+  const ratingSources = readRatingSourcesFromDOM(options);
+
+  return resolveRating(ratingSources);
 }
 
-/**
- * PT: Utilitário opcional para debug (não altera UI).
- * EN: Optional debug helper (does not change UI).
- */
+// PT: Retorna um snapshot simples para inspeção da nota.
+// EN: Returns a simple snapshot for rating inspection.
 function getRatingDebugSnapshot(options = {}) {
-  const sources = readRatingSourcesFromDOM(options);
-  const finalRating = resolveRating(sources);
+  const ratingSources = readRatingSourcesFromDOM(options);
+  const finalRating = resolveRating(ratingSources);
 
   return {
-    hiddenValue: toInt(sources.hiddenValue),
-    radioValue: toInt(sources.radioValue),
+    hiddenValue: toInt(ratingSources.hiddenValue),
+    radioValue: toInt(ratingSources.radioValue),
     finalRating,
     isValid: isValidRating(finalRating),
   };
 }
+
+/* -----------------------------------------------------------------------------*/
+// Export
+/* -----------------------------------------------------------------------------*/
 
 export const ZayaRatingHelpers = {
   toInt,

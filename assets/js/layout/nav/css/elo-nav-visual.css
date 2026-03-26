@@ -1,56 +1,59 @@
-/* -------------------------------------------------
-  🎨 Elo — Navigation Visual Connector
+/* -----------------------------------------------------------------------------*/
+/* 🎨 Elo — Navigation Visuals
+ *
+ * Nível / Level: Adulta / Adult
+ *
+ * PT: Controla o estado visual da navegação.
+ * EN: Controls navigation visual state.
+ */
+/* -----------------------------------------------------------------------------*/
 
-  Nível: Adulta
+/* -----------------------------------------------------------------------------*/
+/* Active Navigation State
+ *
+ * PT: Exibe o estado ativo da navegação no desktop e mobile.
+ * EN: Displays active navigation state on desktop and mobile.
+ */
+/* -----------------------------------------------------------------------------*/
 
-  PT: Responsável por exibir visualmente
-    o estado ativo da navegação.
-  EN: Handles visual indication of
-    active navigation state.
------------------------------------------------- */
-/* ------------------------------
-   Desktop: active underline
-   - Reaproveita a linguagem do hover:underline
-   - Fica fixo quando a seção está ativa
-   ------------------------------ */
+/* PT: Sublinhado fixo no link ativo do desktop.
+ * EN: Fixed underline for active desktop link. */
 .nav-link.is-active {
   text-decoration-line: underline;
   text-underline-offset: 8px;
 }
 
-/* ------------------------------
-   Mobile menu: active row highlight
-   - Visual discreto para indicar "você está aqui"
-   - Mantém o look clean do menu
-   ------------------------------ */
+/* PT: Destaque discreto no link ativo do menu mobile.
+ * EN: Subtle highlight for active mobile menu link. */
 #mobile-menu .nav-link.is-active {
   background-color: rgb(243 244 246); /* gray-100 */
   border-radius: 0.375rem; /* rounded-md */
 }
 
-/* ------------------------------
-   Optional: smoother feel
-   - Apenas transições leves
-   - Não interfere no layout
-   ------------------------------ */
+/* PT: Transições leves para links de navegação.
+ * EN: Light transitions for navigation links. */
 .nav-link {
   transition:
     background-color 180ms ease,
     text-decoration-color 180ms ease;
 }
 
+/* PT: Sentinel auxiliar para detecção da seção de contato.
+ * EN: Helper sentinel for contact section detection. */
 #contact-sentinel {
   height: 1px;
 }
 
-/* -------------------------------------------------
-  🍔 Elo — Mobile Menu Drawer (CSS-only)
-  Atua diretamente sobre #menu existente
--------------------------------------------------- */
+/* -----------------------------------------------------------------------------*/
+/* Mobile Menu Drawer
+ *
+ * PT: Controla o drawer mobile e seu backdrop.
+ * EN: Controls the mobile drawer and its backdrop.
+ */
+/* -----------------------------------------------------------------------------*/
 
-/* ------------------------------
-   Backdrop (já existe no HTML)
------------------------------- */
+/* PT: Backdrop do menu mobile.
+ * EN: Mobile menu backdrop. */
 #mobile-menu-backdrop {
   background: rgba(0, 0, 0, 0.42);
   opacity: 0;
@@ -59,65 +62,62 @@
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
 
-  /* 🔒 evita scroll encadeado (mobile) */
   overscroll-behavior: contain;
-
-  /* 🔒 impede gesture de scroll no overlay (Android) */
   touch-action: none;
 }
 
+/* PT: Estado aberto do backdrop.
+ * EN: Open backdrop state. */
 #mobile-menu-backdrop.is-open {
   opacity: 1;
 }
 
-/* ------------------------------
-   Menu container (#menu)
-   - vira o drawer animado
-   - e vira scroll container (pra não vazar pro fundo)
------------------------------- */
+/* PT: Container base do drawer mobile.
+ * EN: Base mobile drawer container. */
 #mobile-menu {
-  /* PT: Evita clique “fantasma” quando fechado.
-     EN: Prevent pointer events when closed. */
   pointer-events: none;
 
-  /* PT: Menu vira container rolável (resolve o “vazamento” do scroll).
-     EN: Make menu a scroll container (prevents scroll leak). */
   height: 100vh;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
 
-  /* 🔒 evita scroll encadeado (mobile) */
   overscroll-behavior: contain;
 
-  /* animação base */
   transform: translateX(100%);
   will-change: transform;
-
   transition: transform 380ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-/* Estado aberto (JS adiciona .is-open) */
+/* PT: Estado aberto do drawer.
+ * EN: Open drawer state. */
 #mobile-menu.is-open {
   pointer-events: auto;
   transform: translateX(0);
+  opacity: 1;
 }
 
-/* Mobile real: drawer mais compacto */
+/* -----------------------------------------------------------------------------*/
+/* Mobile Drawer Sizing
+ *
+ * PT: Ajusta largura do drawer conforme viewport.
+ * EN: Adjusts drawer width based on viewport.
+ */
+/* -----------------------------------------------------------------------------*/
+
 @media (max-width: 420px) {
   #mobile-menu {
     width: min(78vw, 360px);
   }
 
   #mobile-menu nav {
-    padding-bottom: 16px !important; /* era pb-8 */
+    padding-bottom: 16px !important;
   }
 
   #mobile-menu .space-y-2 > * + * {
-    margin-top: 6px !important; /* era 8px */
+    margin-top: 6px !important;
   }
 }
 
-/* Tablet e acima: mantém como está hoje */
 @media (min-width: 421px) {
   #mobile-menu {
     width: 100%;
@@ -125,16 +125,14 @@
   }
 }
 
-/* Estado aberto */
-#mobile-menu.is-open {
-  pointer-events: auto;
-  transform: translateX(0);
-  opacity: 1;
-}
+/* -----------------------------------------------------------------------------*/
+/* Mobile Link Motion
+ *
+ * PT: Aplica micro animações nos links do drawer.
+ * EN: Applies micro animations to drawer links.
+ */
+/* -----------------------------------------------------------------------------*/
 
-/* ------------------------------
-   Links: micro motion elegante
------------------------------- */
 #mobile-menu .nav-link {
   opacity: 0;
   transform: translateY(6px);
@@ -144,40 +142,55 @@
     opacity 220ms cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
-/* Stagger leve (sem JS) */
+/* PT: Estado visível dos links ao abrir o menu.
+ * EN: Visible link state when menu opens. */
 #mobile-menu.is-open .nav-link {
   opacity: 1;
   transform: translateY(0);
 }
 
+/* PT: Stagger leve dos links sem JS.
+ * EN: Light stagger for links without JS. */
 #mobile-menu.is-open .nav-link:nth-child(1) {
   transition-delay: 40ms;
 }
+
 #mobile-menu.is-open .nav-link:nth-child(2) {
   transition-delay: 60ms;
 }
+
 #mobile-menu.is-open .nav-link:nth-child(3) {
   transition-delay: 80ms;
 }
+
 #mobile-menu.is-open .nav-link:nth-child(4) {
   transition-delay: 100ms;
 }
+
 #mobile-menu.is-open .nav-link:nth-child(5) {
   transition-delay: 120ms;
 }
+
 #mobile-menu.is-open .nav-link:nth-child(6) {
   transition-delay: 140ms;
 }
+
 #mobile-menu.is-open .nav-link:nth-child(7) {
   transition-delay: 160ms;
 }
+
 #mobile-menu.is-open .nav-link:nth-child(8) {
   transition-delay: 180ms;
 }
 
-/* ------------------------------
-   Reduced motion
------------------------------- */
+/* -----------------------------------------------------------------------------*/
+/* Reduced Motion
+ *
+ * PT: Remove animações quando o usuário prefere menos movimento.
+ * EN: Removes animations when user prefers reduced motion.
+ */
+/* -----------------------------------------------------------------------------*/
+
 @media (prefers-reduced-motion: reduce) {
   #mobile-menu,
   #mobile-menu-backdrop,

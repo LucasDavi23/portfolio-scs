@@ -1,96 +1,116 @@
-// /assets/js/system/utils/juniper-date-time.js
-// 🌿 Juniper — Date/Time Utilities
-// PT: Funções puras para interpretar e formatar data/hora com fallback seguro.
-// EN: Pure utilities to parse and format date/time with safe fallbacks.
+// 🌿 Juniper — Date Time Utils
+//
+// Nível / Level: Adulto / Adult
+//
+// PT: Interpreta e formata data/hora com fallback seguro.
+// EN: Parses and formats date/time with safe fallbacks.
 
-/* -------------------------------------------------- */
-/** PT: Retorna Date válido ou null. EN: Returns a valid Date or null. */
+/* -----------------------------------------------------------------------------*/
+// Parse Helpers
+//
+// PT: Converte valores em Date válido quando possível.
+// EN: Converts values into a valid Date when possible.
+/* -----------------------------------------------------------------------------*/
+
+// PT: Retorna um Date válido ou null.
+// EN: Returns a valid Date or null.
 function parseDateTime(input) {
   if (!input) return null;
 
-  // Direct Date
   if (input instanceof Date) {
     return Number.isNaN(input.getTime()) ? null : input;
   }
 
-  // Numbers: timestamps (ms) or numeric strings
   if (typeof input === 'number' || (typeof input === 'string' && /^\d+$/.test(input.trim()))) {
-    const n = Number(input);
-    const d = new Date(n);
-    return Number.isNaN(d.getTime()) ? null : d;
+    const numericValue = Number(input);
+    const date = new Date(numericValue);
+
+    return Number.isNaN(date.getTime()) ? null : date;
   }
 
-  const s = String(input).trim();
+  const source = String(input).trim();
 
-  // ✅ BR format: "dd/MM/yyyy" or "dd/MM/yyyy HH:mm" or "dd/MM/yyyy HH:mm:ss"
-  const m = s.match(/^(\d{2})\/(\d{2})\/(\d{4})(?:\s+(\d{2}):(\d{2})(?::(\d{2}))?)?$/);
-  if (m) {
-    const dd = Number(m[1]);
-    const MM = Number(m[2]);
-    const yyyy = Number(m[3]);
-    const hh = Number(m[4] || 0);
-    const mm = Number(m[5] || 0);
-    const ss = Number(m[6] || 0);
+  const brMatch = source.match(/^(\d{2})\/(\d{2})\/(\d{4})(?:\s+(\d{2}):(\d{2})(?::(\d{2}))?)?$/);
 
-    const d = new Date(yyyy, MM - 1, dd, hh, mm, ss);
-    return Number.isNaN(d.getTime()) ? null : d;
+  if (brMatch) {
+    const day = Number(brMatch[1]);
+    const month = Number(brMatch[2]);
+    const year = Number(brMatch[3]);
+    const hours = Number(brMatch[4] || 0);
+    const minutes = Number(brMatch[5] || 0);
+    const seconds = Number(brMatch[6] || 0);
+
+    const date = new Date(year, month - 1, day, hours, minutes, seconds);
+
+    return Number.isNaN(date.getTime()) ? null : date;
   }
 
-  // ISO or other safe formats
-  const d = new Date(s);
-  return Number.isNaN(d.getTime()) ? null : d;
+  const date = new Date(source);
+  return Number.isNaN(date.getTime()) ? null : date;
 }
 
-/** PT: Detecta se existe hora “real”. EN: Detects if there is meaningful time. */
+// PT: Detecta se existe hora relevante.
+// EN: Detects whether there is meaningful time.
 function hasMeaningfulTime(date) {
   if (!date) return false;
+
   return date.getHours() !== 0 || date.getMinutes() !== 0 || date.getSeconds() !== 0;
 }
 
-/** PT: Formata só a data. EN: Formats date only. */
+/* -----------------------------------------------------------------------------*/
+// Format Helpers
+//
+// PT: Formata data e hora separadamente.
+// EN: Formats date and time separately.
+/* -----------------------------------------------------------------------------*/
+
+// PT: Formata apenas a data.
+// EN: Formats date only.
 function formatDate(date, locale = 'pt-BR') {
   if (!date) return '';
   return date.toLocaleDateString(locale);
 }
 
-/** PT: Formata só a hora (HH:MM). EN: Formats time only (HH:MM). */
+// PT: Formata apenas a hora.
+// EN: Formats time only.
 function formatTime(date, locale = 'pt-BR') {
   if (!date) return '';
-  return date.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' });
+
+  return date.toLocaleTimeString(locale, {
+    hour: '2-digit',
+    minute: '2-digit',
+  });
 }
 
-/**
- * PT: Formata com fallback:
- * - se tiver data+hora → "DD/MM/AAAA · HH:MM"
- * - se tiver só data   → "DD/MM/AAAA"
- * - se inválido        → ""
- *
- * EN: Formats with fallback.
- */
+/* -----------------------------------------------------------------------------*/
+// Date Time Format
+//
+// PT: Formata data/hora com fallback seguro.
+// EN: Formats date/time with safe fallback.
+/* -----------------------------------------------------------------------------*/
+
+// PT: Formata data e hora conforme o conteúdo disponível.
+// EN: Formats date and time based on available content.
 function formatDateTime(input, { locale = 'pt-BR', separator = ' · ' } = {}) {
   const date = parseDateTime(input);
   if (!date) return '';
 
-  const d = formatDate(date, locale);
-  if (!hasMeaningfulTime(date)) return d;
+  const formattedDate = formatDate(date, locale);
+  if (!hasMeaningfulTime(date)) return formattedDate;
 
-  const t = formatTime(date, locale);
-  return `${d}${separator}${t}`;
+  const formattedTime = formatTime(date, locale);
+  return `${formattedDate}${separator}${formattedTime}`;
 }
 
-/* -------------------------------------------------- */
-/**
- * pickBestDateValue(item)
- * PT: Escolhe o melhor campo de data dentro do item (payload).
- * EN: Picks the best date field inside the item (payload).
- *
- * Ordem:
- * 1) date_ms (timestamp)
- * 2) date_br (string pronta)
- * 3) date_iso / dateIso
- * 4) date (legado)
- * 5) data / data_iso (legado PT)
- */
+/* -----------------------------------------------------------------------------*/
+// Item Date Helpers
+//
+// PT: Resolve o melhor campo de data dentro de um item.
+// EN: Resolves the best date field inside an item.
+/* -----------------------------------------------------------------------------*/
+
+// PT: Escolhe o melhor valor de data no payload.
+// EN: Picks the best date value from the payload.
 function pickBestDateValue(item) {
   if (!item || typeof item !== 'object') return null;
 
@@ -108,49 +128,41 @@ function pickBestDateValue(item) {
   return null;
 }
 
-/**
- * formatFromItem(item)
- * PT: Atalho para UI: resolve a melhor data do item e formata.
- * EN: UI shortcut: resolves the best item date and formats it.
- */
+// PT: Resolve e formata a melhor data do item.
+// EN: Resolves and formats the best item date.
 function formatFromItem(item, options) {
-  const v = pickBestDateValue(item);
-  return formatDateTime(v, options);
+  const value = pickBestDateValue(item);
+  return formatDateTime(value, options);
 }
 
-/**
- * formatDateFromItem(item)
- * PT: Retorna apenas a data (sem hora).
- * EN: Returns only the date (no time).
- */
+// PT: Retorna apenas a data do item.
+// EN: Returns only the item date.
 function formatDateFromItem(item, { locale = 'pt-BR' } = {}) {
-  const v = pickBestDateValue(item);
-  const d = parseDateTime(v);
-  return formatDate(d, locale);
+  const value = pickBestDateValue(item);
+  const date = parseDateTime(value);
+
+  return formatDate(date, locale);
 }
 
-/* -------------------------------------------------- */
-/** Export “facade” no padrão persona */
+/* -----------------------------------------------------------------------------*/
+// Export
+/* -----------------------------------------------------------------------------*/
+
 export const JuniperDateTime = {
   parseDateTime,
   hasMeaningfulTime,
   formatDate,
   formatTime,
   formatDateTime,
-
-  // ✅ Novos (migração da lógica da Elara)
   pickBestDateValue,
   formatFromItem,
   formatDateFromItem,
 
-  // alias amigável (pra usar mais rápido no UI)
-  format(input, option) {
-    return formatDateTime(input, option);
+  format(input, options) {
+    return formatDateTime(input, options);
   },
 
   isValid(input) {
     return !!parseDateTime(input);
   },
 };
-/* -------------------------------------------------- */
-// Fim de /assets/js/system/utils/juniper-date-time.js
