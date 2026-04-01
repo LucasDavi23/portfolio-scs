@@ -1,25 +1,42 @@
-/* ==================================================
-   Foundation — Global Layout Rules
-   --------------------------------------------------
-   PT: Regras estruturais globais (viewport, scroll, base)
-   EN: Global structural rules (viewport, scroll, base)
-================================================== */
+/* -----------------------------------------------------------------------------*/
+/* 🧱 Foundation — Global Layout Rules (CSS)
+ *
+ * Nível / Level: Base / Core
+ *
+ * PT: Define regras estruturais globais do sistema, incluindo
+ *     comportamento de viewport, scroll e estados globais.
+ *     Serve como base para todos os módulos visuais.
+ *
+ * EN: Defines global structural rules of the system, including
+ *     viewport behavior, scroll handling and global states.
+ *     Acts as the foundation for all visual modules.
+ */
+/* -----------------------------------------------------------------------------*/
 
-/* --------------------------------------------------
-   Global scroll lock (used by modals)
-   PT: Trava o scroll global quando modal está aberto
-   EN: Locks global scroll when modal is open
--------------------------------------------------- */
+/* -----------------------------------------------------------------------------*/
+/* 🔒 Global Scroll Lock (Modal State)
+ *
+ * PT: Trava o scroll da página quando um modal está aberto.
+ * EN: Locks page scrolling when a modal is open.
+ */
+/* -----------------------------------------------------------------------------*/
+
 html.no-scroll,
 html.no-scroll body {
   overflow: hidden !important;
 }
 
-/* ------------------------------------------------------------
-   Modal state — disable snap & smooth to avoid scroll jumps
-   PT: Durante modal aberto, desativa snap e smooth
-   EN: While modal is open, disable snap and smooth
------------------------------------------------------------- */
+/* -----------------------------------------------------------------------------*/
+/* 🧭 Modal Scroll Behavior Control
+ *
+ * PT: Durante o estado de modal aberto, desativa scroll suave
+ *     e scroll snap para evitar saltos visuais indesejados.
+ *
+ * EN: While modal is open, disables smooth scrolling and
+ *     scroll snap to prevent unwanted visual jumps.
+ */
+/* -----------------------------------------------------------------------------*/
+
 html.modal-open {
   scroll-snap-type: none !important;
   scroll-behavior: auto !important;

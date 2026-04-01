@@ -17,28 +17,9 @@
 /* -----------------------------------------------------------------------------*/
 
 /* -----------------------------------------------------------------------------*/
-// EndpointConfig — Feedback Endpoint Configuration
-// Fornece / Provides:
-// - set(url)
-// - get()
-// - isOffline()
-/* -----------------------------------------------------------------------------*/
-import { EndpointConfig } from '/assets/js/feedback/core/config/feedback-endpoint.js';
-
-/* -----------------------------------------------------------------------------*/
-// ImageEndpointConfig — Feedback Image Endpoint Configuration
-// Fornece / Provides:
-// - set(url)
-// - get()
-// - isOffline()
-/* -----------------------------------------------------------------------------*/
-import { ImageEndpointConfig } from '/assets/js/feedback/core/config/feedback-image-endpoint.js';
-
-/* -----------------------------------------------------------------------------*/
 // 🧬 Naomi — Card API Helpers
 // Fornece / Provides:
 // - list()
-// - listMeta()
 // - latest()
 // - setTimeoutMs()
 // - setRetries()
@@ -65,8 +46,6 @@ import { LiviaAvatarUI } from '/assets/js/feedback/board/avatar/livia-avatar-ui.
 // Fornece / Provides:
 // - preloadFirstPageToCache()
 // - warmOnce()
-// - startWarmLoop()
-// - ensureCache()
 /* -----------------------------------------------------------------------------*/
 import { LiaPreload } from '/assets/js/feedback/board/main/lia-board-preload-helpers.js';
 
@@ -74,9 +53,6 @@ import { LiaPreload } from '/assets/js/feedback/board/main/lia-board-preload-hel
 // 🪨 Petra — Image UI
 // Fornece / Provides:
 // - initThumbSystem()
-// - applyThumb()
-// - scanThumbs()
-// - observeThumbs()
 /* -----------------------------------------------------------------------------*/
 import { PetraImageUI } from '/assets/js/feedback/board/image/petra-image-ui.js';
 
@@ -115,41 +91,14 @@ function onDomReady(callback) {
 }
 
 /* -----------------------------------------------------------------------------*/
-// Endpoint Bootstrap
-/* -----------------------------------------------------------------------------*/
-
-// PT: Resolve o endpoint de dados do Board para dev/prod.
-// EN: Resolves the Board data endpoint for dev/prod.
-function resolveBoardEndpoint() {
-  return import.meta.env.DEV
-    ? '/gas'
-    : 'https://script.google.com/macros/s/AKfycbzzCFgGmXhIDc7xlaJa_XpacGMu3GBn7d0kg2ntRgUrpuisnV__AjF_8pJGXgG6NaMP0A/exec';
-}
-
-// PT: Resolve o endpoint de imagem do Board para dev/prod.
-// EN: Resolves the Board image endpoint for dev/prod.
-function resolveBoardImageEndpoint() {
-  return import.meta.env.DEV
-    ? '/gas-img'
-    : 'https://script.google.com/macros/s/AKfycbzzCFgGmXhIDc7xlaJa_XpacGMu3GBn7d0kg2ntRgUrpuisnV__AjF_8pJGXgG6NaMP0A/exec';
-}
-
-// PT: Configura os endpoints do Board antes da inicialização.
-// EN: Configures the Board endpoints before initialization.
-function initBoardEndpoints() {
-  EndpointConfig.set(resolveBoardEndpoint());
-  ImageEndpointConfig.set(resolveBoardImageEndpoint());
-}
-
-/* -----------------------------------------------------------------------------*/
 // Sector Initializers
 /* -----------------------------------------------------------------------------*/
 
 /* -----------------------------------------------------------------------------*/
 // Lia Preload Initialization
 //
-// PT: Inicializa o preload da Lia usando a Naomi como fonte da API.
-// EN: Initializes Lia preload using Naomi as the API source.
+// PT: Inicializa o preload da Lia usando a Naomi como fonte de dados (API).
+// EN: Initializes Lia preload using Naomi as the data source (API).
 /* -----------------------------------------------------------------------------*/
 function initLiaPreload() {
   const feedbackApi = NaomiFeedbackCardAPI;
@@ -230,8 +179,6 @@ function initMiraListModal() {
 // PT: Função principal da Kendra que amarra o setor de Feedback.
 // EN: Main Kendra function that wires the Feedback sector together.
 function bootstrapBoard() {
-  initBoardEndpoints();
-
   initLiaPreload();
   initAbigailSummary();
   initLiviaAvatar();

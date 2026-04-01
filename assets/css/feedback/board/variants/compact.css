@@ -1,23 +1,35 @@
-/* ==================================================
-   Seren — Board Variant: Compact
-   PT: Modo compacto do board de feedback. Reduz
-       espaçamentos e densidade dos cards para
-       otimizar leitura e uso de espaço vertical.
-   EN: Compact/dense mode for the feedback board,
-       reducing spacing and card density to optimize
-       readability and vertical space.
-   ================================================== */
+/* -----------------------------------------------------------------------------*/
+/* 🌿 Seren — Board Variant: Compact (CSS)
+ *
+ * Nível / Level: Adulta / Senior
+ *
+ * PT: Seren define o modo compacto do board de feedback.
+ *     Reduz espaçamentos e densidade dos elementos para
+ *     otimizar leitura e uso do espaço vertical, mantendo
+ *     a qualidade tipográfica.
+ *
+ * EN: Seren defines the compact mode for the feedback board.
+ *     Reduces spacing and element density to optimize
+ *     readability and vertical space while preserving typography.
+ */
+/* -----------------------------------------------------------------------------*/
 
-/* ==========================================================
-    === FEEDBACK: compacto com qualidade (preserva tipografia)
-    ========================================================== */
+/* -----------------------------------------------------------------------------*/
+/* Section Spacing
+ *
+ * PT: Ajusta espaçamentos verticais globais da seção de feedback,
+ *     sem interferir no conteúdo interno dos cards.
+ *
+ * EN: Adjusts global vertical spacing of the feedback section
+ *     without affecting internal card content.
+ */
+/* -----------------------------------------------------------------------------*/
 
-/* Espaços verticais globais da seção (sem tocar no conteúdo dos cards) */
 #feedback > .mx-auto.max-w-screen-2xl {
-  padding-block: 3rem !important; /* antes ~3rem */
+  padding-block: 3rem !important;
 }
 #feedback .rounded-2xl > div {
-  padding-block: 1rem !important; /* antes ~1.5rem */
+  padding-block: 1rem !important;
 }
 #feedback .feedback-topo {
   margin-top: 12px !important;
@@ -29,17 +41,34 @@
   margin-top: 10px !important;
 }
 
-/* Âncora/rolagem: compensa o header fixo e enquadra melhor o topo da seção */
+/* -----------------------------------------------------------------------------*/
+/* Scroll Offset
+ *
+ * PT: Compensa o header fixo ao navegar via âncora.
+ * EN: Offsets fixed header when navigating via anchor links.
+ */
+/* -----------------------------------------------------------------------------*/
+
 #feedback {
   scroll-margin-top: 72px;
-} /* ajuste se seu header mudar de altura */
+}
 
-/* Enquadrar um pouco melhor em telas baixas (ex.: 768p/800p) */
+/* -----------------------------------------------------------------------------*/
+/* Low Height Optimization
+ *
+ * PT: Ajustes para telas com pouca altura (ex: 768p/800p),
+ *     melhorando o encaixe visual do conteúdo.
+ *
+ * EN: Adjustments for low-height screens (e.g., 768p/800p),
+ *     improving visual fit and spacing.
+ */
+/* -----------------------------------------------------------------------------*/
+
 @media (max-height: 800px) and (min-width: 1024px) {
   #feedback > .mx-auto {
     padding-block: 10px;
-  } /* leve ajuste top/bottom */
+  }
   #feedback .feedback-topo {
     margin-top: 8px;
-  } /* aproxima resumo dos cards */
+  }
 }

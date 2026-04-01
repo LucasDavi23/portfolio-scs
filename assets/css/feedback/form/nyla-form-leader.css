@@ -1,6 +1,7 @@
-/* /assets/css/feedback/form/nyla-form-leader.css
- * 🌾 Nyla — Líder do Formulário de Feedback (CSS)
- * Nível: Adulta
+/* -----------------------------------------------------------------------------*/
+/* 🌾 Nyla — Feedback Form Leader (CSS)
+ *
+ * Nível / Level: Adulta / Senior
  *
  * PT: Nyla coordena o módulo do formulário de feedback.
  *     Ela organiza a camada de estilos do form e importa
@@ -9,22 +10,26 @@
  *
  * EN: Nyla coordinates the feedback form module. She
  *     organizes the form styling layer and imports
- *     specialists responsible for UI and details.
- * -----------------------------------------------------------------------------*/
+ *     specialists responsible for UI and visual details.
+ */
+/* -----------------------------------------------------------------------------*/
 
-/* ============================================================================
-   Imports / Dependências
-   ----------------------------------------------------------------------------
-   🌾 Nyla — Formulário de Feedback (Leader)
-   ============================================================================ */
+/* -----------------------------------------------------------------------------*/
+/* Imports / Dependencies
+ *
+ * PT: Arquivos responsáveis pelos componentes do formulário.
+ * EN: Files responsible for form components.
+ */
+/* -----------------------------------------------------------------------------*/
 
-/* ✍️ Elisa — UI do Formulário
-   EN: ✍️ Elisa — Form UI
-   Fornece:
-   - Campos, labels e mensagens
-   - Estados visuais
-   - Rating interativo
-   - Preview de imagem
-*/
-
+/* -----------------------------------------------------------------------------*/
+/* ✍️ Elisa — Form UI
+ *
+ * PT: Fornece campos, labels, mensagens, estados visuais,
+ *     rating interativo e preview de imagem.
+ *
+ * EN: Provides fields, labels, messages, visual states,
+ *     interactive rating and image preview.
+ */
+/* -----------------------------------------------------------------------------*/
 @import '/assets/css/feedback/form/elisa-form.css';

@@ -1,70 +1,68 @@
-/* /assets/css/feedback/board/seren-board-leader.css
- * 🌿 Seren — Líder do Board de Avaliações (CSS)
- * Nível: Adulta
+/* -----------------------------------------------------------------------------*/
+/* 🌿 Seren — Reviews Board Leader (CSS)
+ *
+ * Nível / Level: Adulta / Senior
  *
  * PT: Seren coordena visualmente o Board de Avaliações. Ela não estiliza
- *     componentes individuais, mas define o ritmo, o espaçamento e a
- *     organização geral do board, garantindo que as especialistas
+ *     componentes individuais, mas define o ritmo, espaçamento e
+ *     organização geral do board, garantindo que todas as especialistas
  *     trabalhem em harmonia.
  *
  * EN: Seren visually coordinates the Reviews Board. She does not style
  *     individual components, but defines rhythm, spacing and overall
- *     board structure, ensuring specialists work in harmony.
- * -----------------------------------------------------------------------------*/
-
-/* 
-   Imports / Dependências
+ *     board structure, ensuring all specialists work in harmony.
  */
-
 /* -----------------------------------------------------------------------------*/
 
-/* 🏷️ Marka — Badges de Plataforma
-   EN: 🏷️ Marka — Platform badges
-   Fornece:
-   - Chips de origem (SCS, Shopee, ML)
-*/
+/* -----------------------------------------------------------------------------*/
+/* Imports / Dependencies
+ *
+ * PT: Arquivos responsáveis pelos componentes do board.
+ * EN: Files responsible for board components.
+ */
+/* -----------------------------------------------------------------------------*/
 
+/* -----------------------------------------------------------------------------*/
+/* 🏷️ Marka — Platform Badges
+ *
+ * PT: Fornece chips de origem (SCS, Shopee, Mercado Livre).
+ * EN: Provides platform origin chips (SCS, Shopee, Mercado Livre).
+ */
+/* -----------------------------------------------------------------------------*/
 @import '/assets/css/feedback/board/badges/marka-badges.css';
 
 /* -----------------------------------------------------------------------------*/
-
-/* 🎴 Aline — Cards de Feedback (estrutura e layout)
-   EN: 🎴 Aline — Feedback cards (structure and layout)
-   Fornece:
-   - Estrutura base dos cards
-   - Layout interno (media / list)
-*/
+/* 🎴 Aline — Feedback Cards
+ *
+ * PT: Fornece estrutura base e layout dos cards (media / list).
+ * EN: Provides base structure and layout for cards (media / list).
+ */
+/* -----------------------------------------------------------------------------*/
 @import '/assets/css/feedback/board/cards/aline-cards.css';
 
 /* -----------------------------------------------------------------------------*/
-
-/* 🖼️ Tessa — Image Preview
-   EN: 🖼️ Tessa — Image Preview
-   Fornece:
-   - Preview visual de imagem (upload)
-   - Enquadramento e ajuste da imagem no container
-   - Estados visuais do preview (exibição / fallback)
-*/
+/* 🖼️ Tessa — Feedback Image
+ *
+ * PT: Controla preview, enquadramento e fallback da imagem.
+ * EN: Controls preview, framing and fallback behavior for images.
+ */
+/* -----------------------------------------------------------------------------*/
 @import '/assets/css/feedback/board/image/tessa-image.css';
 
 /* -----------------------------------------------------------------------------*/
-
 /* ⭐ Zara — Rating
-   EN: ⭐ Zara — Rating
-   Fornece:
-   - Exibição de avaliação (estrelas e nota)
-   - Alinhamento e proporção do rating
-   - Aparência consistente em cards e listas
-*/
+ *
+ * PT: Exibe avaliação com estrelas e nota, mantendo alinhamento e proporção.
+ * EN: Displays rating with stars and score, maintaining alignment and proportion.
+ */
+/* -----------------------------------------------------------------------------*/
 @import '/assets/css/feedback/board/rating/zara-rating.css';
 
 /* -----------------------------------------------------------------------------*/
-
-/* Variant: Compact
-   EN: Variant: Compact
-   Fornece:
-   - Modo compacto do board de feedback
-   - Redução de espaçamentos e densidade dos cards
-   - Melhor enquadramento vertical em telas menores
-*/
+/* 🌿 Seren — Variant: Compact
+ *
+ * PT: Modo compacto do board com redução de espaçamentos e densidade.
+ * EN: Compact board mode with reduced spacing and density.
+ */
+/* -----------------------------------------------------------------------------*/
 @import '/assets/css/feedback/board/variants/compact.css';

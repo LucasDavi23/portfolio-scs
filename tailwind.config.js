@@ -1,6 +1,30 @@
-// tailwind.config.js
+// /tailwind.config.js
 /** @type {import('tailwindcss').Config} */
+
+/* -----------------------------------------------------------------------------*/
+/* 🧩 Tailwind — System Config
+ *
+ * Nível / Level: Core / Foundation
+ *
+ * PT: Configuração central do Tailwind para o sistema.
+ *     Define fontes de conteúdo, extensões de tema,
+ *     safelist de classes dinâmicas e plugins.
+ *
+ * EN: Central Tailwind configuration for the system.
+ *     Defines content sources, theme extensions,
+ *     safelist for dynamic classes and plugins.
+ */
+/* -----------------------------------------------------------------------------*/
+
 module.exports = {
+  /* ---------------------------------------------------------------------------*/
+  /* Content Sources
+   *
+   * PT: Arquivos monitorados pelo Tailwind para geração das classes.
+   * EN: Files scanned by Tailwind to generate utility classes.
+   */
+  /* ---------------------------------------------------------------------------*/
+
   content: [
     './index.html',
     './src/**/*.{html,js,ts,jsx,tsx,vue,php}',
@@ -9,6 +33,13 @@ module.exports = {
     '!./dist/**',
   ],
 
+  /* ---------------------------------------------------------------------------*/
+  /* Theme Extensions
+   *
+   * PT: Extensões do tema padrão usadas pelo sistema.
+   * EN: Extensions to the default theme used by the system.
+   */
+  /* ---------------------------------------------------------------------------*/
   theme: {
     extend: {
       spacing: {
@@ -20,24 +51,34 @@ module.exports = {
         'screen-2xl-tight': '1320px',
         'screen-xl-tight': '1200px',
       },
-      // ⬇️ O breakpoint custom TEM que ficar dentro de extend.screens
+
       screens: {
-        nb: { max: '1440px' }, // tudo ≤ 1440px será "nb:"
+        nb: { max: '1440px' },
       },
     },
   },
 
+  /* ---------------------------------------------------------------------------*/
+  /* Safelist
+   *
+   * PT: Classes preservadas manualmente para casos dinâmicos
+   *     ou utilidades com valores arbitrários.
+   *
+   * EN: Classes manually preserved for dynamic cases
+   *     or utilities with arbitrary values.
+   */
+  /* ---------------------------------------------------------------------------*/
+
   safelist: [
-    // ====== CLASSES EXPLÍCITAS QUE VOCÊ USA NO TOPO ======
-    // grid 7/3/auto no topo
+    /* Top Layout */
     'md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto]',
-    // larguras máximas do 3º card (use a que ficar melhor)
+
     'md:max-w-[200px]',
     'md:max-w-[220px]',
     'md:max-w-[240px]',
     'md:justify-self-end',
 
-    // ====== MODAL & CONTAINERS USADOS ======
+    /* Modal & Containers */
     'w-[96vw]',
     'max-w-[1100px]',
     'xl:max-w-[1400px]',
@@ -58,7 +99,7 @@ module.exports = {
     '-translate-x-full',
     'resize-none',
 
-    // ====== THUMBNAIL PREVIEW ======
+    /* Thumbnail Preview */
     'w-20',
     'h-20',
     'w-24',
@@ -76,37 +117,42 @@ module.exports = {
     'items-center',
     'justify-center',
 
-    // ====== ALTURAS FIXAS QUE VOCÊ USOU ======
+    /* Fixed Heights */
     'h-[520px]',
     'h-[540px]',
     'h-[560px]',
     'max-h-[520px]',
     'max-h-[560px]',
 
-    // Classe usada para responsividade notebook
+    /* Scale Utilities */
     { pattern: /^(scale|scale-x|scale-y)-\[(.+)\]$/, variants: ['sm', 'md', 'lg', 'xl', '2xl'] },
 
-    // ====== PADRÕES (REGEX) — ARBITRARY VALUES + VARIANTES ======
-    // largura/altura/inset/translate com valores arbitrários, ex: w-[372px], h-[1px], top-[3.5rem], translate-x-[-50%], etc.
+    /* Arbitrary Size / Position Utilities */
     {
       pattern:
         /^(w|min-w|max-w|h|max-h|inset|top|left|right|bottom|translate-x|translate-y)-\[(.+)\]$/,
       variants: ['sm', 'md', 'lg', 'xl', '2xl'],
     },
 
-    // max-h com valores arbitrários e variantes (já coberto acima, mas mantemos específico p/ garantir)
+    /* Arbitrary Max Height */
     { pattern: /^max-h-\[(.+)\]$/, variants: ['sm', 'md', 'lg', 'xl', '2xl'] },
 
-    // grid com template arbitrário (ex.: grid-cols-[minmax(0,1fr)_auto], etc)
+    /* Arbitrary Grid Columns */
     {
       pattern: /^grid-cols-\[(.+)\]$/,
       variants: ['sm', 'md', 'lg', 'xl', '2xl'],
     },
 
-    // cores com opacidade custom via slash
+    /* Color Opacity Variants */
     { pattern: /^(bg|ring|text|border)-black\/(5|10|20|35|40|60)$/ },
     { pattern: /^(bg|ring|text|border)-white\/(40|50|60|90|95)$/ },
   ],
-
+  /* ---------------------------------------------------------------------------*/
+  /* Plugins
+   *
+   * PT: Plugins oficiais utilizados no sistema.
+   * EN: Official plugins used by the system.
+   */
+  /* ---------------------------------------------------------------------------*/
   plugins: [require('@tailwindcss/forms'), require('@tailwindcss/typography')],
 };

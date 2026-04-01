@@ -1,6 +1,7 @@
-/* /assets/css/system/layout/atlas-layout-leader.css
- * 🧭 Atlas — Líder de Layout do Sistema (CSS)
- * Nível: Adulta
+/* -----------------------------------------------------------------------------*/
+/* 🧭 Atlas — System Layout Leader (CSS)
+ *
+ * Nível / Level: Adulta / Senior
  *
  * PT: Atlas coordena a estrutura de layout do sistema. Ela não estiliza
  *     componentes ou features específicas, mas define containers, grids
@@ -9,30 +10,40 @@
  * EN: Atlas coordinates the system layout structure. She does not style
  *     individual components or specific features, but defines containers,
  *     grids and structural boundaries that support all pages and modules.
- * -----------------------------------------------------------------------------*/
+ */
+/* -----------------------------------------------------------------------------*/
 
-/* 
-   Imports / Dependências
-   🧭 Atlas — Layout Global / Portfolio (Leader)
+/* -----------------------------------------------------------------------------*/
+/* Imports / Dependencies
  *
+ * PT: Arquivos responsáveis pela estrutura e comportamento do layout.
+ * EN: Files responsible for layout structure and behavior.
+ */
+/* -----------------------------------------------------------------------------*/
 
- /* 📐 Notebook Scale
-   EN: 📐 Notebook Scale
-   Fornece:
-   - Ajuste de escala para notebooks (1280–1600)
-   - Enquadramento global sem width fixo
-   - Fallback com transform: scale quando zoom não existe
-*/
+/* -----------------------------------------------------------------------------*/
+/* 📐 Notebook Scale
+ *
+ * PT: Ajuste de escala para notebooks (1280–1600) com fallback.
+ * EN: Scaling adjustments for notebooks (1280–1600) with fallback.
+ */
+/* -----------------------------------------------------------------------------*/
 @import '/assets/css/system/layout/responsive/notebook-scale.css';
 
+/* -----------------------------------------------------------------------------*/
 /* 📱 Mobile Adjustments
-   EN: 📱 Mobile Adjustments
-   Fornece ajustes específicos para telas pequenas (≤ 640px)
-*/
-@import '/assets/css/system/layout//modal/modal-mobile.css';
+ *
+ * PT: Ajustes específicos para telas pequenas (≤ 640px).
+ * EN: Mobile-specific adjustments for small screens (≤ 640px).
+ */
+/* -----------------------------------------------------------------------------*/
+@import '/assets/css/system/layout/modal/modal-mobile.css';
 
-/* Elo — Navigation Visual Connector
-   EN: Elo — Navigation Visual Connector
-   Fornece estilos visuais para indicar o estado ativo da navegação
-*/
+/* -----------------------------------------------------------------------------*/
+/* 🔗 Elo — Navigation Visual
+ *
+ * PT: Indica visualmente o estado ativo da navegação.
+ * EN: Visually indicates active navigation state.
+ */
+/* -----------------------------------------------------------------------------*/
 @import '/assets/js/layout/nav/css/elo-nav-visual.css';

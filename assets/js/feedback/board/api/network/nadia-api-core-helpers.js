@@ -115,7 +115,9 @@ async function fetchWithTimeout(url, { timeoutMs, signal } = {}) {
 // EN: Adds an anti-cache parameter to avoid reusing intermediate responses.
 function addBustParam(url) {
   try {
-    const parsedUrl = new URL(url, location.origin);
+    const base = typeof location !== 'undefined' ? location.origin : 'http://localhost';
+
+    const parsedUrl = new URL(url, base);
     parsedUrl.searchParams.set('_bust', Date.now().toString());
     return parsedUrl.toString();
   } catch {
@@ -216,7 +218,7 @@ async function fetchJsonCached(
     retries = DEFAULT_RETRIES,
     nocache = false,
     force = false,
-    cb, // cache-buster param (?cb=timestamp) used to bypass cache
+    cb, // PT: parâmetro anti-cache usado para forçar resposta nova / EN: cache-buster parameter used to force a fresh response
   } = {}
 ) {
   const key = String(url);

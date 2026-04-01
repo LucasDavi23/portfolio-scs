@@ -2,11 +2,13 @@
 // 🖼️ Image Endpoint Config — System Tool
 //
 // PT: Centraliza a URL do endpoint de imagens do feedback.
-//     Atua como camada de configuração da infraestrutura,
+//     Atua como fonte única de configuração da infraestrutura,
+//     já inicializada com o endpoint principal de imagens do sistema,
 //     sem dependência de window e sem lógica de negócio.
 //
 // EN: Centralizes the feedback image endpoint URL.
-//     Acts as an infrastructure configuration layer,
+//     Acts as a single source of infrastructure configuration,
+//     already initialized with the system's primary image endpoint,
 //     with no window dependency and no business logic.
 //
 // Tipo / Type: Ferramenta (Tool)
@@ -16,17 +18,20 @@
 // Constants
 /* -----------------------------------------------------------------------------*/
 
-// PT: Endpoint padrão usado como fallback seguro.
-// EN: Default endpoint used as a safe fallback.
-const DEFAULT_IMAGE_ENDPOINT = '/offline-image-mode';
+// PT: Endpoint usado como fallback em modo offline.
+// EN: Endpoint used as fallback in offline mode.
+const OFFLINE_IMAGE_ENDPOINT = '/offline-image-mode';
 
 /* -----------------------------------------------------------------------------*/
 // Module State
 /* -----------------------------------------------------------------------------*/
 
 // PT: Mantém o endpoint atual de imagem em memória do módulo.
+// Inicializa em modo offline até ser definido.
+//
 // EN: Stores the current image endpoint in module memory.
-let currentImageEndpoint = DEFAULT_IMAGE_ENDPOINT;
+// Initializes in offline mode until set externally.
+let currentImageEndpoint = OFFLINE_IMAGE_ENDPOINT;
 
 /* -----------------------------------------------------------------------------*/
 // Validation
@@ -59,25 +64,20 @@ function set(url) {
   return true;
 }
 
-// PT: Retorna o endpoint atual de imagem com fallback seguro.
+// PT: Retorna o endpoint atual de imagem.
+// Caso não exista, utiliza o fallback offline.
 //
-// EN: Returns the current image endpoint with safe fallback.
+// EN: Returns the current image endpoint.
+// Falls back to offline endpoint if undefined.
 function get() {
-  return currentImageEndpoint || DEFAULT_IMAGE_ENDPOINT;
+  return currentImageEndpoint || OFFLINE_IMAGE_ENDPOINT;
 }
 
-// PT: Informa se o endpoint atual de imagem está em modo offline.
-// EN: Indicates whether the current image endpoint is in offline mode.
+// PT: Informa se o sistema está em modo offline para imagens.
+// EN: Indicates whether the system is in offline mode for images.
 function isOffline() {
-  return get() === DEFAULT_IMAGE_ENDPOINT;
+  return currentImageEndpoint === OFFLINE_IMAGE_ENDPOINT;
 }
-
-// PT: Restaura o endpoint de imagem padrão.
-// EN: Resets the image endpoint to the default value.
-function reset() {
-  currentImageEndpoint = DEFAULT_IMAGE_ENDPOINT;
-}
-
 /* -----------------------------------------------------------------------------*/
 // Export
 /* -----------------------------------------------------------------------------*/
@@ -85,6 +85,5 @@ function reset() {
 export const ImageEndpointConfig = {
   get,
   set,
-  reset,
   isOffline,
 };

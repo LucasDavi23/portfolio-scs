@@ -1,6 +1,7 @@
-/* /assets/css/feedback/form/elisa-feedback-form.css
- * 📝 Elisa — Form do Feedback (CSS)
- * Nível: Jovem
+/* -----------------------------------------------------------------------------*/
+/* 📝 Elisa — Feedback Form (CSS)
+ *
+ * Nível / Level: Jovem / Junior
  *
  * PT: Elisa é responsável pela interface do formulário de feedback.
  *     Ela cuida da apresentação dos campos, labels, mensagens de erro
@@ -11,11 +12,16 @@
  *     She handles field presentation, labels, error messages and
  *     visual states, ensuring a clear, accessible and welcoming
  *     experience for users submitting feedback.
- * -----------------------------------------------------------------------------*/
+ */
+/* -----------------------------------------------------------------------------*/
 
-/* ==================================================
-   Rating — estrelas interativas (form)
-   ================================================== */
+/* -----------------------------------------------------------------------------*/
+/* ⭐ Rating — Interactive Stars
+ *
+ * PT: Controle de estrelas interativas para avaliação do usuário.
+ * EN: Interactive star rating control for user evaluation.
+ */
+/* -----------------------------------------------------------------------------*/
 
 .star {
   position: relative;
@@ -27,8 +33,8 @@
   transition: transform 0.15s ease;
 }
 .star::before {
-  content: '☆'; /* estrela vazia */
-  color: #cbd5e1; /* slate-300 (cinza claro) */
+  content: '☆'; /* estrela vazia / empty star */
+  color: #cbd5e1;
   font-size: 1em;
   line-height: 1;
   display: block;
@@ -37,11 +43,18 @@
   transform: scale(1.1);
 }
 .star--ativa::before {
-  content: '★'; /* estrela cheia */
-  color: #f59e0b; /* amber-500 (igual aos cards) */
+  content: '★'; /* estrela cheia / filled star */
+  color: #f59e0b;
 }
 
-/* Badge da nota selecionada */
+/* -----------------------------------------------------------------------------*/
+/* 🏷️ Rating Badge
+ *
+ * PT: Badge que exibe a nota selecionada pelo usuário.
+ * EN: Badge displaying the selected rating value.
+ */
+/* -----------------------------------------------------------------------------*/
+
 #rating-badge {
   background: rgba(245, 158, 11, 0.12);
   color: #92400e;
@@ -51,13 +64,17 @@
   font-size: 0.75rem;
 }
 
-/* ==================================================
-   Image preview — formulário
-   ================================================== */
+/* -----------------------------------------------------------------------------*/
+/* 🖼️ Image Preview — Form
+ *
+ * PT: Define o comportamento da imagem enviada no formulário.
+ * EN: Defines how the uploaded image behaves in the form preview.
+ */
+/* -----------------------------------------------------------------------------*/
 
 #foto-preview img {
   width: 100%;
   height: 100%;
-  object-fit: cover; /* use object-fit: contain; se não quiser cortar */
+  object-fit: cover; /* use contain if no crop is desired */
   border-radius: 0.5rem;
 }

@@ -38,6 +38,13 @@ import filter from 'leo-profanity';
 import * as profs from 'profanities';
 
 /* -----------------------------------------------------------------------------*/
+// 📦 profanity-list
+// Fornece / Provides:
+// - PROFANITY_LIST
+/* -----------------------------------------------------------------------------*/
+import { PROFANITY_LIST } from '/assets/js/feedback/form/fields/name/profanity-list.js';
+
+/* -----------------------------------------------------------------------------*/
 // Helpers
 //
 // PT: Estado interno e funções auxiliares de normalização e filtro.
@@ -70,6 +77,7 @@ function initNameProfanityFilter() {
 
   filter.clearList();
   filter.loadDictionary('pt');
+  filter.add(PROFANITY_LIST.map(normalizeText));
 
   const extras = getExtraProfanityList();
 
@@ -87,7 +95,21 @@ function isNameAllowed(name = '') {
     initNameProfanityFilter();
   }
 
-  return !filter.check(normalizeText(name));
+  const normalized = normalizeText(name);
+
+  if (!normalized) {
+    return true;
+  }
+
+  if (filter.check(normalized)) {
+    return false;
+  }
+
+  const blockedWords = [...PROFANITY_LIST, ...getExtraProfanityList()]
+    .map(normalizeText)
+    .filter(Boolean);
+
+  return !blockedWords.some((word) => normalized.includes(word));
 }
 
 /* -----------------------------------------------------------------------------*/

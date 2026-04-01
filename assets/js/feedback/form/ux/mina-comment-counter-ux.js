@@ -66,6 +66,12 @@ function attachCommentCounterUX(options = {}) {
   updateCounterText();
 }
 
+// PT: Força a sincronização manual do contador
+// EN: Forces a manual counter sync.
+function syncCommentCounter() {
+  updateCounterText();
+}
+
 // PT: Remove a UX do contador e limpa referências.
 // EN: Detaches the counter UX and clears references.
 function detachCommentCounterUX() {
@@ -84,5 +90,6 @@ function detachCommentCounterUX() {
 
 export const MinaCommentCounterUX = {
   attachCommentCounterUX,
+  syncCommentCounter,
   detachCommentCounterUX,
 };

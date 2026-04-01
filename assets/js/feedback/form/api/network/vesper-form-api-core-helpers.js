@@ -13,21 +13,35 @@
 /* -----------------------------------------------------------------------------*/
 
 /* -----------------------------------------------------------------------------*/
+// Imports
+/* -----------------------------------------------------------------------------*/
+
+/* -----------------------------------------------------------------------------*/
+// EndpointConfig — Feedback Endpoint Configuration
+// Fornece / Provides:
+// - set(url)
+// - get()
+// - isOffline()
+/* -----------------------------------------------------------------------------*/
+import { EndpointConfig } from '/assets/js/feedback/core/config/feedback-data-endpoint.js';
+
+/* -----------------------------------------------------------------------------*/
 // Endpoint Resolver
 //
-// PT: Resolve o endpoint principal do Apps Script.
-//     Usa a configuração global quando disponível e aplica
-//     um fallback seguro para ambientes sem bootstrap prévio.
+// PT: Retorna o endpoint principal do feedback já registrado pela
+//     infraestrutura do sistema.
 //
-// EN: Resolves the main Apps Script endpoint.
-//     Uses the global configuration when available and applies
-//     a safe fallback for environments without prior bootstrap.
+// EN: Returns the main feedback endpoint already registered by the
+//     system infrastructure.
 /* -----------------------------------------------------------------------------*/
 function getFeedbackEndpoint() {
-  return (
-    window.FEEDBACK_ENDPOINT ||
-    'https://script.google.com/macros/s/AKfycbzzCFgGmXhIDc7xlaJa_XpacGMu3GBn7d0kg2ntRgUrpuisnV__AjF_8pJGXgG6NaMP0A/exec'
-  );
+  const endpoint = EndpointConfig.get();
+
+  if (EndpointConfig.isOffline()) {
+    throw new Error('Feedback endpoint is not configured (offline mode).');
+  }
+
+  return endpoint;
 }
 
 /* -----------------------------------------------------------------------------*/

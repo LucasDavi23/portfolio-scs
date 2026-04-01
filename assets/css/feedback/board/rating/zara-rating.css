@@ -1,26 +1,47 @@
-/* /assets/css/feedback/board/rating/zara-rating.css
- * ⭐ Zara — Rating do Feedback (CSS)
- * Nível: Aprendiz
+/* -----------------------------------------------------------------------------*/
+/* ⭐ Zara — Feedback Rating (CSS)
+ *
+ * Nível / Level: Aprendiz / Apprentice
  *
  * PT: Zara é responsável pela exibição do rating do feedback.
- *     Ela cuida das estrelas (cheias/vazias), alinhamento do rating
- *     com informações de apoio (data/origem) e da leitura rápida
+ *     Controla as estrelas (cheias/vazias), alinhamento com
+ *     informações auxiliares (data/origem) e a leitura rápida
  *     da nota visual.
  *
  * EN: Zara is responsible for displaying the feedback rating.
- *     She handles stars (filled/empty), rating alignment with
- *     supporting info (date/source) and quick visual score reading.
- * -----------------------------------------------------------------------------*/
+ *     Handles stars (filled/empty), alignment with supporting
+ *     information (date/source) and quick visual score reading.
+ */
+/* -----------------------------------------------------------------------------*/
 
-/* Rating (estrelinhas + nota) — não distorcer */
+/* -----------------------------------------------------------------------------*/
+/* Rating Display
+ *
+ * PT: Define o layout e estilo das estrelas e da nota.
+ *     Garante alinhamento consistente e evita distorção visual.
+ *
+ * EN: Defines layout and styling for stars and score.
+ *     Ensures consistent alignment and prevents visual distortion.
+ */
+/* -----------------------------------------------------------------------------*/
+
 [data-feedback-card] [data-c-rating] {
   font-size: 0.95rem; /* ~15px */
   font-weight: 600;
   display: flex;
   align-items: center;
   gap: 4px;
-  color: #fbbf24; /* amarelo das estrelas */
+  color: #fbbf24;
 }
+
+/* -----------------------------------------------------------------------------*/
+/* Rating Icons
+ *
+ * PT: Ajusta tamanho e alinhamento de ícones (font ou SVG).
+ * EN: Adjusts size and alignment for icons (font or SVG).
+ */
+/* -----------------------------------------------------------------------------*/
+
 [data-feedback-card] [data-c-rating] i,
 [data-feedback-card] [data-c-rating] svg {
   font-size: 1rem;

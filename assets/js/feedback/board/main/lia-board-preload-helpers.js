@@ -112,15 +112,17 @@ function makeCacheKey(platform, page = 1, perPage = 1) {
 /* -----------------------------------------------------------------------------*/
 // Shared Cache
 //
-// PT: Garante um Map compartilhado para preload/cache em globalObject.FeedbackCache.
-// EN: Ensures a shared Map for preload/cache at globalObject.FeedbackCache.
+// PT: Cache interno do módulo (não global)
+// EN: Internal module cache (not global)
 /* -----------------------------------------------------------------------------*/
-function ensureCache(globalObject = globalThis) {
-  if (!globalObject.FeedbackCache) {
-    globalObject.FeedbackCache = new Map();
+let internalCache = null;
+
+function ensureCache() {
+  if (!internalCache) {
+    internalCache = new Map();
   }
 
-  return globalObject.FeedbackCache;
+  return internalCache;
 }
 
 /* -----------------------------------------------------------------------------*/

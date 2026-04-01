@@ -1,29 +1,49 @@
+/* -----------------------------------------------------------------------------*/
+/* 🧩 Tailwind — Base Layers & Utilities (CSS)
+ *
+ * Nível / Level: Core / Foundation
+ *
+ * PT: Configuração base do Tailwind e utilidades customizadas
+ *     utilizadas no sistema.
+ *
+ * EN: Tailwind base setup and custom utilities used across
+ *     the system.
+ */
+/* -----------------------------------------------------------------------------*/
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* suas utilidades customizadas */
+/* -----------------------------------------------------------------------------*/
+/* Custom Utilities
+ *
+ * PT: Utilidades adicionais para comportamento e layout.
+ * EN: Additional utilities for behavior and layout control.
+ */
+/* -----------------------------------------------------------------------------*/
+
 @layer utilities {
+  /* Text Hyphenation */
   .hyphens-auto {
     hyphens: auto;
   }
-}
-@layer utilities {
-  /* quadrado fixo 96x96, nunca estica */
+
+  /* Thumbnail Container (96x96 fixed) */
   .thumb-24 {
     width: 6rem !important;
     height: 6rem !important;
     max-width: 6rem !important;
     max-height: 6rem !important;
     display: inline-block !important;
-    flex: 0 0 6rem !important; /* se estiver dentro de flex */
+    flex: 0 0 6rem !important;
   }
 
-  /* imagem dentro do quadrado */
+  /* Thumbnail Image */
   .thumb-img {
     width: 100% !important;
     height: 100% !important;
     object-fit: cover !important;
-    border-radius: 0.375rem; /* opcional, arredondar a thumb */
+    border-radius: 0.375rem;
   }
 }

@@ -1,27 +1,36 @@
-/* /assets/css/system/typography/lexa-typography.css
- * 🅰️ Lexa — Typography do Sistema (CSS)
- * Nível: Adulta
+/* -----------------------------------------------------------------------------*/
+/* 🅰️ Lexa — System Typography (CSS)
  *
- * PT: Lexa define a base tipográfica do sistema. Ela estabelece
- *     fontes, hierarquia textual, pesos e line-height, garantindo
- *     consistência, legibilidade e linguagem visual unificada
- *     em todas as seções e componentes.
+ * Nível / Level: Adulta / Senior
  *
- * EN: Lexa defines the system typography foundation. She establishes
- *     fonts, textual hierarchy, weights and line-height, ensuring
+ * PT: Lexa define a base tipográfica do sistema. Estabelece
+ *     fontes, hierarquia textual, pesos e line-height,
+ *     garantindo consistência, legibilidade e linguagem visual
+ *     unificada em todas as seções e componentes.
+ *
+ * EN: Lexa defines the system typography foundation. Establishes
+ *     fonts, text hierarchy, weights and line-height, ensuring
  *     consistency, readability and a unified visual language
  *     across all sections and components.
- * -----------------------------------------------------------------------------*/
-
-/* Helpers tipográficos
- * .custom-font-1 → títulos, destaques
- * .custom-font-2 → textos longos, UI
  */
+/* -----------------------------------------------------------------------------*/
 
+/* -----------------------------------------------------------------------------*/
+/* Typography Helpers
+ *
+ * PT: Classes utilitárias para aplicação rápida de fontes no sistema.
+ * EN: Utility classes for quick font application across the system.
+ */
+/* -----------------------------------------------------------------------------*/
+
+/* PT: Fonte para títulos e destaques.
+   EN: Font for headings and highlights. */
 .custom-font-1 {
   font-family: 'Raleway', sans-serif;
 }
 
+/* PT: Fonte para textos longos e interface.
+   EN: Font for long text and UI elements. */
 .custom-font-2 {
   font-family: 'Urbanist', sans-serif;
 }

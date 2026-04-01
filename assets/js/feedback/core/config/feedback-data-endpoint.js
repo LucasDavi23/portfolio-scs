@@ -2,11 +2,13 @@
 // 🌉 Ponteira — Endpoint Config (System Tool)
 //
 // PT: Ponteira centraliza a URL do endpoint do feedback.
-//     Atua como camada de configuração da infraestrutura,
+//     Atua como camada de armazenamento da configuração,
+//     sendo inicializada externamente (ex: via Kendra),
 //     sem dependência de window e sem lógica de negócio.
 //
 // EN: Ponteira centralizes the feedback endpoint URL.
-//     Acts as an infrastructure configuration layer,
+//     Acts as a configuration storage layer,
+//     initialized externally (e.g., via Kendra),
 //     with no window dependency and no business logic.
 //
 // Tipo / Type: Ferramenta (Tool)
@@ -16,26 +18,27 @@
 // Constants
 /* -----------------------------------------------------------------------------*/
 
-// PT: Endpoint padrão usado como fallback seguro.
-// EN: Default endpoint used as a safe fallback.
-const DEFAULT_ENDPOINT = '/offline-mode';
+// PT: Endpoint usado como fallback em modo offline.
+// EN: Endpoint used as fallback in offline mode.
+const OFFLINE_ENDPOINT = '/offline-mode';
 
 /* -----------------------------------------------------------------------------*/
 // Module State
 /* -----------------------------------------------------------------------------*/
 
 // PT: Mantém o endpoint atual em memória do módulo.
+// Inicializa em modo offline até ser definido.
+//
 // EN: Stores the current endpoint in module memory.
-let currentEndpoint = DEFAULT_ENDPOINT;
+// Initializes in offline mode until set externally.
+let currentEndpoint = OFFLINE_ENDPOINT;
 
 /* -----------------------------------------------------------------------------*/
 // Validation
 /* -----------------------------------------------------------------------------*/
 
-// PT: Valida se a URL é HTTP/HTTPS válida ou rota local.
-// EN: Validates whether the value is a valid HTTP/HTTPS URL or local route.
 function isValidEndpoint(url) {
-  if (typeof url !== 'string') return false;
+  if (typeof url !== 'string') return false; // invalid endpoint
 
   const value = url.trim();
   if (!value) return false;
@@ -46,12 +49,6 @@ function isValidEndpoint(url) {
 /* -----------------------------------------------------------------------------*/
 // API
 /* -----------------------------------------------------------------------------*/
-
-// PT: Define dinamicamente o endpoint.
-// Aceita URL HTTP/HTTPS válida ou rota local.
-//
-// EN: Dynamically sets the endpoint.
-// Accepts a valid HTTP/HTTPS URL or local route.
 function set(url) {
   if (!isValidEndpoint(url)) return false;
 
@@ -59,23 +56,12 @@ function set(url) {
   return true;
 }
 
-// PT: Retorna o endpoint atual com fallback seguro.
-//
-// EN: Returns the current endpoint with safe fallback.
 function get() {
-  return currentEndpoint || DEFAULT_ENDPOINT;
+  return currentEndpoint || OFFLINE_ENDPOINT;
 }
 
-// PT: Informa se o endpoint atual está em modo offline.
-// EN: Indicates whether the current endpoint is in offline mode.
 function isOffline() {
-  return get() === DEFAULT_ENDPOINT;
-}
-
-// PT: Restaura o endpoint padrão.
-// EN: Resets the endpoint to the default value.
-function reset() {
-  currentEndpoint = DEFAULT_ENDPOINT;
+  return currentEndpoint === OFFLINE_ENDPOINT;
 }
 
 /* -----------------------------------------------------------------------------*/
@@ -85,6 +71,5 @@ function reset() {
 export const EndpointConfig = {
   get,
   set,
-  reset,
   isOffline,
 };

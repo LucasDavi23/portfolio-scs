@@ -74,6 +74,20 @@ import { LumaLoading } from '/assets/js/system/ui/loading/luma-loading.js';
 import { StellaSubmitOverlay } from '/assets/js/system/ui/loading/stella-submit-overlay.js';
 
 /* -----------------------------------------------------------------------------*/
+// 🧮 Mina — Comment Counter UX
+// Fornece / Provides:
+// - syncCommentCounter()
+/* -----------------------------------------------------------------------------*/
+import { MinaCommentCounterUX } from '/assets/js/feedback/form/ux/mina-comment-counter-ux.js';
+
+/* -----------------------------------------------------------------------------*/
+// 📝 Nyx — Form Modal
+// Fornece / Provides:
+// - closeModal()
+/* -----------------------------------------------------------------------------*/
+import { NyxFormModal } from '/assets/js/layout/modal/nyx-form-modal.js';
+
+/* -----------------------------------------------------------------------------*/
 // 📘 Logger — System Observability Layer
 // Fornece / Provides:
 // - error()
@@ -164,7 +178,7 @@ function handleFailedSubmitResult(result, modalElement) {
   StellaSubmitOverlay.hide(modalElement);
 
   HaloMessageBox.show(message, 'error', {
-    duration: 0,
+    duration: 1400,
   });
 
   SofiaFormValidationUI.showFormStatus(message, 'error');
@@ -180,6 +194,8 @@ function handleSuccessfulSubmit(modalElement) {
   });
 
   SofiaFormValidationUI.showFormStatus('Feedback enviado com sucesso. Obrigado! ✨', 'success');
+
+  NyxFormModal.closeModal();
 }
 
 // PT: Executa a limpeza visual após envio bem-sucedido.
@@ -187,6 +203,7 @@ function handleSuccessfulSubmit(modalElement) {
 function scheduleSuccessCleanup() {
   setTimeout(() => {
     SofiaFormValidationUI.resetFormUI();
+    MinaCommentCounterUX.syncCommentCounter();
     AylaRatingStarsUI.clearStarsUI();
     SofiaFormValidationUI.clearRatingError();
 

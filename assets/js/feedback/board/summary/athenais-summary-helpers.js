@@ -27,8 +27,9 @@
 // Fornece / Provides:
 // - set(url)
 // - get()
+// - isOffline()
 /* -----------------------------------------------------------------------------*/
-import { EndpointConfig } from '/assets/js/feedback/core/config/feedback-endpoint.js';
+import { EndpointConfig } from '/assets/js/feedback/core/config/feedback-data-endpoint.js';
 
 /* -----------------------------------------------------------------------------*/
 // Helpers
@@ -40,9 +41,15 @@ import { EndpointConfig } from '/assets/js/feedback/core/config/feedback-endpoin
 // PT: Cria URL absoluta para endpoint local ou remoto.
 // EN: Creates absolute URL for local or remote endpoint.
 function createEndpointUrl(endpoint) {
-  return endpoint.startsWith('http')
-    ? new URL(endpoint)
-    : new URL(endpoint, window.location.origin);
+  const value = String(endpoint || '').trim();
+
+  if (!value) {
+    throw new Error('A valid endpoint is required.');
+  }
+
+  return /^https?:\/\//.test(value)
+    ? new URL(value)
+    : new URL(value, globalThis.location?.origin || 'http://localhost');
 }
 
 // PT: Garante que existe um endpoint válido (não offline).
@@ -93,7 +100,7 @@ const RETRY_DELAY_MS = 500;
 // Cache Helpers
 /* -----------------------------------------------------------------------------*/
 
-// PT: Valida se o objeto tem formato básico de summary.
+// PT: Valida se o objeto tem formato básico do summary.
 // EN: Validates whether the object has the basic summary shape.
 function isValidSummaryShape(summary) {
   return (

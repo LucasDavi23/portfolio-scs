@@ -1,14 +1,22 @@
-/* --------------------------------------------------
-   Notebook scale (faixas 1280–1440 e 1441–1600)
-   Sem width fixo. Zoom (preferencial) + fallback scale.
--------------------------------------------------- */
+/* -----------------------------------------------------------------------------*/
+/* 💻 Notebook — Layout Scaling (CSS)
+ *
+ * Nível / Level: Base / Core
+ *
+ * PT: Ajustes de escala para notebooks, mantendo layout fluido
+ *     sem uso de largura fixa.
+ *
+ * EN: Scaling adjustments for notebooks, keeping layout fluid
+ *     without fixed widths.
+ */
+/* -----------------------------------------------------------------------------*/
 
 :root {
   --nb-scale-1: 0.8; /* 1280–1440 */
   --nb-scale-2: 0.86; /* 1441–1600 */
 }
 
-/* Alvos (ajuste a lista se quiser incluir/retirar seções) */
+/* Target Base */
 .nb-target > .mx-auto {
   transform-origin: top center;
   transition: transform 0.2s ease;
@@ -16,7 +24,6 @@
 
 /* 1280–1440 */
 @media (min-width: 1280px) and (max-width: 1440px) {
-  /* Chrome/Edge: usa zoom (melhor, recalcula layout) */
   @supports (zoom: 0.8) {
     #about > .mx-auto,
     #production > .mx-auto,
@@ -29,7 +36,7 @@
       transform: none;
     }
   }
-  /* Firefox: fallback em scale */
+
   @supports not (zoom: 0.8) {
     #about > .mx-auto,
     #production > .mx-auto,
@@ -70,7 +77,7 @@
   }
 }
 
-/* ≥ 1601px: normal */
+/* ≥ 1601px */
 @media (min-width: 1601px) {
   #about > .mx-auto,
   #production > .mx-auto,
@@ -84,7 +91,7 @@
   }
 }
 
-/* Opcional: leve respiro ao usar fallback scale (só quando NÃO há zoom) */
+/* Fallback spacing */
 @supports not (zoom: 1) {
   #about,
   #production,
@@ -98,24 +105,24 @@
   }
 }
 
-/* --------------------------------------------------
-   Modal scale por altura (notebook)
-   PT: Evita cortar conteúdo em telas baixas sem criar scroll desnecessário
-   EN: Prevents content cut on short viewports without forcing inner scroll
--------------------------------------------------- */
+/* -----------------------------------------------------------------------------*/
+/* 💻 Notebook — Modal Scaling
+ *
+ * PT: Ajusta escala do modal para telas com pouca altura.
+ * EN: Adjusts modal scale for low-height screens.
+ */
+/* -----------------------------------------------------------------------------*/
 
 .nb-modal {
   transform-origin: top center;
 }
 
-/* notebooks / alturas menores */
 @media (max-height: 820px) {
   .nb-modal {
     transform: scale(0.88);
   }
 }
 
-/* ainda menor (alguns notes) */
 @media (max-height: 720px) and (min-width: 768px) {
   .nb-modal {
     transform: scale(0.78);

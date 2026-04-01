@@ -1,6 +1,7 @@
-/* /assets/css/system/coretta-system-leader.css
- * 🧩 Coretta — System Leader (CSS)
- * Nível: Adulta
+/* -----------------------------------------------------------------------------*/
+/* 🧩 Coretta — System Leader (CSS)
+ *
+ * Nível / Level: Adulta / Senior
  *
  * PT: Coretta coordena os imports base do sistema. Ela não define
  *     estilos visuais nem layout; apenas centraliza dependências e
@@ -11,31 +12,40 @@
  *     define visual styles or layout; she only centralizes
  *     dependencies and ensures correct load order for System
  *     specialists (e.g., typography and UI).
- * -----------------------------------------------------------------------------*/
+ */
+/* -----------------------------------------------------------------------------*/
 
+/* -----------------------------------------------------------------------------*/
+/* Imports / Dependencies
+ *
+ * PT: Arquivos responsáveis pela base visual do sistema.
+ * EN: Files responsible for the system visual foundation.
+ */
+/* -----------------------------------------------------------------------------*/
+
+/* -----------------------------------------------------------------------------*/
 /* 🅰️ Lexa — Typography
-   EN: 🅰️ Lexa — Typography
-   Fornece:
-   - Fontes e famílias tipográficas
-   - Base de leitura e hierarquia textual
-*/
+ *
+ * PT: Define fontes, famílias tipográficas e hierarquia textual.
+ * EN: Defines fonts, typography families and text hierarchy.
+ */
+/* -----------------------------------------------------------------------------*/
 @import '/assets/css/system/typography/lexa-typography.css';
 
 /* -----------------------------------------------------------------------------*/
-
 /* ⭐ Vega — UI
-   EN: ⭐ Vega — UI
-   Fornece:
-   - Padrões de UI reutilizáveis
-   - Microcomponentes e estados (hover/focus/disabled)
-*/
+ *
+ * PT: Define padrões reutilizáveis de UI e estados de interação.
+ * EN: Defines reusable UI patterns and interaction states.
+ */
+/* -----------------------------------------------------------------------------*/
 @import '/assets/css/system/ui/vega-ui.css';
 
 /* -----------------------------------------------------------------------------*/
-/* 🌫️ Veil — Message Box Skin (CSS)
-   EN: 🌫️ Veil — Message Box Skin (CSS)
-   Fornece:
-   - Camada visual da MessageBox
-   - Define cores, animações e suavidade
-*/
+/* 🌫️ Veil — Message Box Skin
+ *
+ * PT: Define a camada visual da MessageBox (cores, animações e feedback).
+ * EN: Defines the visual layer of MessageBox (colors, animations and feedback).
+ */
+/* -----------------------------------------------------------------------------*/
 @import '/assets/js/system/ui/notifications/messagebox/veil-message-box.css';

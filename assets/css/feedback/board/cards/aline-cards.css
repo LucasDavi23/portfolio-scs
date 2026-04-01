@@ -1,17 +1,25 @@
-/* /assets/css/feedback/board/cards/aline-cards.css
- * 🎴 Aline — Cards do Feedback (CSS)
- * Nível: Jovem
+/* -----------------------------------------------------------------------------*/
+/* 🎴 Aline — Feedback Cards (CSS)
+ *
+ * Nível / Level: Jovem / Young
  *
  * PT: Aline é responsável pela estrutura visual dos cards de feedback.
- *     Ela define contêineres, bordas, fundos, sombras e variações de layout
- *     (media, compacto, lista), garantindo consistência e legibilidade.
+ *     Define contêineres, bordas, fundos, sombras e variantes de layout
+ *     como media, compacto e lista, mantendo consistência e legibilidade.
  *
  * EN: Aline is responsible for the visual structure of feedback cards.
- *     She defines containers, borders, backgrounds, shadows and layout
- *     variants (media, compact, list), ensuring consistency and readability.
- * -----------------------------------------------------------------------------*/
+ *     Defines containers, borders, backgrounds, shadows and layout
+ *     variants such as media, compact and list, keeping consistency and readability.
+ */
+/* -----------------------------------------------------------------------------*/
 
-/* Clamp base */
+/* -----------------------------------------------------------------------------*/
+/* Clamp Utilities
+ *
+ * PT: Utilitários de clamp para limitar o número de linhas do texto.
+ * EN: Clamp utilities used to limit text to a fixed number of lines.
+ */
+/* -----------------------------------------------------------------------------*/
 .clamp-1,
 .clamp-2,
 .clamp-3,
@@ -21,7 +29,13 @@
   overflow: hidden;
 }
 
-/* Quantidade de linhas */
+/* -----------------------------------------------------------------------------*/
+/* Clamp Line Count
+ *
+ * PT: Define a quantidade máxima de linhas por variação.
+ * EN: Defines the maximum line count for each variation.
+ */
+/* -----------------------------------------------------------------------------*/
 .clamp-1 {
   -webkit-line-clamp: 1;
 }
@@ -35,36 +49,59 @@
   -webkit-line-clamp: 4;
 }
 
-/* ==========================================
-      0) BASE (comum a todos os cards) + CTA
-      ========================================== */
+/* -----------------------------------------------------------------------------*/
+/* Base Card Layout
+ *
+ * PT: Estrutura base compartilhada entre todos os cards.
+ * EN: Base structure shared by all cards.
+ */
+/* -----------------------------------------------------------------------------*/
 [data-feedback-card] {
-  display: block; /* permite alinhar CTA no rodapé */
-  flex: none; /* impede que o card cresça além do conteúdo */
+  display: block;
+  flex: none;
 }
 
-/* CTA no rodapé do card (só funciona se flex estiver ativo em outros layouts) */
+/* -----------------------------------------------------------------------------*/
+/* Card CTA Alignment
+ *
+ * PT: Mantém o CTA alinhado ao rodapé quando o layout usa flex.
+ * EN: Keeps the CTA aligned to the bottom when using flex layouts.
+ */
+/* -----------------------------------------------------------------------------*/
+
 [data-feedback-card][data-variant='media'] {
-  display: flex; /* modo “media” continua flex */
+  display: flex;
   flex-direction: column;
 }
 
-/* CTA no rodapé do card */
 [data-feedback-card] > a[data-action='ver-mais'] {
   margin-top: auto;
 }
 
-/* Fallback da thumb: mostra um OU outro (nunca os dois) */
-/* Segurança: thumb não ganha margens acidentais */
+/* -----------------------------------------------------------------------------*/
+/* Thumbnail Safety
+ *
+ * PT: Garante que thumb e fallback não recebam margens indevidas.
+ * EN: Ensures thumbnail and fallback do not receive unintended margins.
+ */
+/* -----------------------------------------------------------------------------*/
+
 [data-feedback-card] .thumb-container,
 [data-feedback-card] .thumb-fallback {
   margin: 0 !important;
 }
 
-/* ======================================================
-  1) LAYOUT PADRÃO (não-media: Shopee / Mercado Livre)
-  — Miniatura lateral
-====================================================== */
+/* -----------------------------------------------------------------------------*/
+/* Default Card Layout
+ *
+ * PT: Layout padrão dos cards não-media (Shopee / Mercado Livre).
+ *     Exibe miniatura lateral.
+ *
+ * EN: Default layout for non-media cards (Shopee / Mercado Livre),
+ *     with side thumbnail.
+ */
+/* -----------------------------------------------------------------------------*/
+
 [data-feedback-card]:not([data-variant='media']) [data-c-list] {
   display: flex;
   align-items: flex-start;
@@ -82,34 +119,55 @@
   }
 }
 
-/* ==========================================
-  2) VARIANTE "media" (SCS)
-  topo (autor+data) → texto → linha → foto
-========================================== */
+/* -----------------------------------------------------------------------------*/
+/* Media Variant Layout
+ *
+ * PT: Estrutura do card media (SCS): topo → texto → separador → foto.
+ * EN: Media card structure (SCS): header → text → separator → photo.
+ */
+/* -----------------------------------------------------------------------------*/
 
-/* 2.0 — KNOBS (tamanhos fáceis de ajustar) */
-/* KNOBS só do card media (não depende do :root global) */
+/* -----------------------------------------------------------------------------*/
+/* Media Size Knobs
+ *
+ * PT: Variáveis locais para ajuste rápido de tamanho no card media.
+ * EN: Local variables for quick size adjustments in media card.
+ */
+/* -----------------------------------------------------------------------------*/
+
 section[data-feedback-card][data-variant='media'] {
-  --media-photo: 84px; /* total */
-  --media-photo-md: 92px; /* >=640px */
-  --media-inset: 4px; /* 82 - (2*1 border) - (2*4 padding) = 72 úteis */
+  --media-photo: 84px;
+  --media-photo-md: 92px;
+  --media-inset: 4px;
 }
 
-/* 2.1 — Article cinza + respiro até o CTA (card enxuto) */
+/* -----------------------------------------------------------------------------*/
+/* Media Card Structure
+ *
+ * PT: Define comportamento do card e área interna (cinza).
+ * EN: Defines card behavior and inner content area.
+ */
+/* -----------------------------------------------------------------------------*/
+
 section[data-feedback-card][data-variant='media'] {
-  height: 100%; /* card ocupa a altura da coluna (grade uniforme) */
-  row-gap: 0.6rem; /* respiro entre cinza e CTA */
+  height: 100%;
+  row-gap: 0.6rem;
 }
 section[data-feedback-card][data-variant='media'] article[data-c-list] {
-  flex: 1; /* cinza ocupa todo o restante */
+  flex: 1;
   display: flex;
   flex-direction: column;
-  padding: 0.7rem 0.85rem 0.8rem; /* topo | laterais | base */
+  padding: 0.7rem 0.85rem 0.8rem;
 }
 
-/* 2.1b — Fixar foto no rodapé do cinza
-   PT: Texto curto ou longo = foto sempre no mesmo lugar (embaixo).
-   EN: Short or long text = thumb always anchored at the bottom. */
+/* -----------------------------------------------------------------------------*/
+/* Media Layout Flow
+ *
+ * PT: Mantém a foto fixada no rodapé independente do tamanho do texto.
+ * EN: Keeps the photo anchored at the bottom regardless of text size.
+ */
+/* -----------------------------------------------------------------------------*/
+
 section[data-feedback-card][data-variant='media'] article[data-c-list] .media-grid {
   display: flex;
   flex-direction: column;
@@ -120,15 +178,22 @@ section[data-feedback-card][data-variant='media'] article[data-c-list] .media-gr
 section[data-feedback-card][data-variant='media'] article[data-c-list] .text-wrap {
   flex: 1;
   min-height: 0;
-  padding-bottom: 0.65rem; /* dá o “ar” mesmo com texto grande */
+  padding-bottom: 0.65rem;
 }
 
 section[data-feedback-card][data-variant='media'] article[data-c-list] .photo-wrap {
   margin-top: auto;
-  margin: 0.9rem 0 0.75rem; /* mais acima, e um pouco abaixo */
+  margin: 0.9rem 0 0.75rem;
 }
 
-/* 2.2 — Meta (autor + data) */
+/* -----------------------------------------------------------------------------*/
+/* Header Meta
+ *
+ * PT: Estilo do autor e data.
+ * EN: Author and date styling.
+ */
+/* -----------------------------------------------------------------------------*/
+
 section[data-feedback-card][data-variant='media'] .header-author {
   font-size: 14px;
   font-weight: 600;
@@ -139,15 +204,19 @@ section[data-feedback-card][data-variant='media'] .header-date {
   color: #6b7280;
 }
 
-/* 2.3 — Texto do feedback (global para cards)
-   PT: tipografia confortável + quebra segura.
-   EN: comfortable typography + safe wrapping. */
+/* -----------------------------------------------------------------------------*/
+/* Feedback Text
+ *
+ * PT: Tipografia principal do texto do feedback.
+ * EN: Main typography for feedback text.
+ */
+/* -----------------------------------------------------------------------------*/
 
 [data-feedback-card] [data-c-text] {
-  font-size: 15.5px; /* tamanho confortável */
-  line-height: 1.75; /* altura ideal */
-  letter-spacing: 0.005em; /* leve espaçamento */
-  color: #1f2937; /* gray-800 */
+  font-size: 15.5px;
+  line-height: 1.75;
+  letter-spacing: 0.005em;
+  color: #1f2937;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
   hyphens: auto;
@@ -157,7 +226,7 @@ section[data-feedback-card][data-variant='media'] .header-date {
 [data-feedback-card] [data-c-text] + [data-c-text] {
   margin-top: 0.6rem;
 }
-/* Desktop levemente maior */
+
 @media (min-width: 768px) {
   [data-feedback-card] [data-c-text] {
     font-size: 16px;
@@ -165,7 +234,14 @@ section[data-feedback-card][data-variant='media'] .header-date {
   }
 }
 
-/* 2.3a — Respiro entre cabeçalho e o 1º parágrafo */
+/* -----------------------------------------------------------------------------*/
+/* Text Spacing Adjustment
+ *
+ * PT: Ajusta espaçamento entre header e primeiro parágrafo.
+ * EN: Adjusts spacing between header and first paragraph.
+ */
+/* -----------------------------------------------------------------------------*/
+
 section[data-feedback-card][data-variant='media']
   article[data-c-list]
   .media-grid
@@ -181,13 +257,27 @@ section[data-feedback-card][data-variant='media']
   }
 }
 
-/* 2.4 — Linha separadora (entre texto e foto) */
+/* -----------------------------------------------------------------------------*/
+/* Photo Separator
+ *
+ * PT: Linha entre texto e imagem.
+ * EN: Divider between text and image.
+ */
+/* -----------------------------------------------------------------------------*/
+
 section[data-feedback-card][data-variant='media'] .photo-sep {
   border-top: 1px solid #e5e7eb; /* gray-200 */
   margin: 0.75rem 0;
 }
 
-/* 2.5 — Foto (miniatura e estados) */
+/* -----------------------------------------------------------------------------*/
+/* Photo Area
+ *
+ * PT: Controle da miniatura e fallback.
+ * EN: Controls thumbnail and fallback.
+ */
+/* -----------------------------------------------------------------------------*/
+
 section[data-feedback-card][data-variant='media'] .photo-wrap {
   width: var(--media-photo) !important;
   margin: 0.9rem 0 0.75rem auto; /* ✅ zera left/right e joga pra direita */
@@ -209,15 +299,15 @@ section[data-feedback-card][data-variant='media'] .photo-wrap .thumb-container,
 section[data-feedback-card][data-variant='media'] .photo-wrap .thumb-fallback {
   width: 100%;
   aspect-ratio: 1 / 1;
-  height: auto; /* ok */
+  height: auto;
   border-radius: 5px;
   border: 1px solid #e5e7eb;
   background: #f9fafb;
   padding: 2px;
-  overflow: hidden; /* ✅ aqui sim corta badge/overlay */
-  position: relative; /* ✅ badge absolute fica preso aqui */
+  overflow: hidden;
+  position: relative;
   box-shadow: none;
-  box-sizing: border-box; /* 🔒 garante que padding + border não roubem área */
+  box-sizing: border-box;
 }
 
 section[data-feedback-card][data-variant='media'] .photo-wrap .thumb-container img {
@@ -238,8 +328,14 @@ section[data-feedback-card][data-variant='media'] .photo-wrap .thumb-fallback {
   border: 1px dashed #e5e7eb;
 }
 
-/* 2.6 — Esconder linha + foto quando NÃO houver imagem real */
-/* Petra state → visual (media) */
+/* -----------------------------------------------------------------------------*/
+/* Photo Visibility States
+ *
+ * PT: Exibe ou oculta a foto conforme estado.
+ * EN: Shows or hides photo depending on state.
+ */
+/* -----------------------------------------------------------------------------*/
+
 section[data-feedback-card][data-variant='media'].has-photo .photo-sep,
 section[data-feedback-card][data-variant='media'].has-photo .photo-wrap {
   display: block;
@@ -250,7 +346,14 @@ section[data-feedback-card][data-variant='media'].no-photo .photo-wrap {
   display: none;
 }
 
-/* 2.7 — Avatar com iniciais (ao lado do nome) */
+/* -----------------------------------------------------------------------------*/
+/* Author Avatar
+ *
+ * PT: Avatar com iniciais ao lado do nome.
+ * EN: Initials avatar next to author name.
+ */
+/* -----------------------------------------------------------------------------*/
+
 section[data-feedback-card][data-variant='media'] .author-wrap {
   display: flex;
   align-items: center;
@@ -277,34 +380,3 @@ section[data-feedback-card][data-variant='media'] .avatar-initials {
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6);
   flex-shrink: 0;
 }
-
-/* ==================================================
-   Aline — Utilidades & opcionais (documentação)
-   PT: Alternativas e dicas para manutenção/debug do layout.
-   EN: Alternatives and notes for maintenance/debug.
-   ================================================== */
-
-/* Exemplo (opcional)
-.photo-sep.light {
-  border-top: 1px solid rgba(0, 0, 0, .05);
-}
-*/
-
-/* Fallback sem :has() (opcional)
-section[data-feedback-card][data-variant="media"]:not(.has-photo) .photo-sep,
-section[data-feedback-card][data-variant="media"]:not(.has-photo) .photo-wrap {
-  display: none !important;
-}
-*/
-
-/* DEBUG (opcional)
-section[data-feedback-card][data-variant="media"] article[data-c-list] > .media-row {
-  outline: 2px dashed magenta;
-}
-*/
-
-/* ✅ TESTE NUCLEAR — se isso não aparecer, o CSS NÃO está carregando */
-/* section[data-feedback-card][data-variant='media'] .photo-wrap {
-  outline: 6px solid red !important;
-  width: 82px !important;
-} */

@@ -49,11 +49,11 @@ import { IrisImageViewer } from '/assets/js/layout/modal/iris-image-viewer.js';
 import { NamiCarouselLayout } from '/assets/js/layout/carousel/nami-carousel-layout.js';
 
 /* -----------------------------------------------------------------------------*/
-// 📝 Lyra — Form Modal
+// 📝 Nyx — Form Modal
 // Fornece / Provides:
-// - initLyraFormModal()
+// - initNyxFormModal()
 /* -----------------------------------------------------------------------------*/
-import { LyraFormModal } from '/assets/js/layout/modal/lyra-form-modal.js';
+import { NyxFormModal } from '/assets/js/layout/modal/nyx-form-modal.js';
 
 /* -----------------------------------------------------------------------------*/
 // Layout Initialization
@@ -75,7 +75,7 @@ function initLayout() {
 
   NamiCarouselLayout.initCarousel();
 
-  LyraFormModal.initLyraFormModal();
+  NyxFormModal.initNyxFormModal();
 }
 
 /* -----------------------------------------------------------------------------*/

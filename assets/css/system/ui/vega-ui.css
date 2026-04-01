@@ -1,6 +1,7 @@
-/* /assets/css/system/ui/vega-ui.css
- * ⭐ Vega — UI do Sistema (CSS)
- * Nível: Adulta
+/* -----------------------------------------------------------------------------*/
+/* ⭐ Vega — System UI (CSS)
+ *
+ * Nível / Level: Adulta / Senior
  *
  * PT: Vega define os componentes visuais base do sistema. Ela cuida
  *     de botões, links, estados de interação (hover, focus, disabled),
@@ -10,18 +11,31 @@
  * EN: Vega defines the system base UI components. She handles buttons,
  *     links, interaction states (hover, focus, disabled), reusable
  *     microcomponents and shared UI patterns across all sections.
- * -----------------------------------------------------------------------------*/
+ */
+/* -----------------------------------------------------------------------------*/
 
-/* Background helper */
+/* -----------------------------------------------------------------------------*/
+/* Background Helpers
+ *
+ * PT: Utilitários visuais para fundos com imagem.
+ * EN: Visual utilities for image-based backgrounds.
+ */
+/* -----------------------------------------------------------------------------*/
+
 .pattern {
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
 }
 
-/* ==================================================
-   Back to top — base
-   ================================================== */
+/* -----------------------------------------------------------------------------*/
+/* Back To Top Button
+ *
+ * PT: Botão flutuante de retorno ao topo.
+ * EN: Floating back-to-top button.
+ */
+/* -----------------------------------------------------------------------------*/
+
 #backToTopBtn {
   display: none;
   position: fixed;
@@ -37,7 +51,6 @@
   transition: opacity 0.3s;
   z-index: 30;
 
-  /* posição padrão */
   bottom: 20px;
   right: 20px;
 }
@@ -46,39 +59,43 @@
   opacity: 1;
 }
 
-/* ==================================================
-   Back to top — map safe area
-   Evita que a seta cubra o mapa
-   ================================================== */
+/* -----------------------------------------------------------------------------*/
+/* Back To Top — Map Safe Area
+ *
+ * PT: Reposiciona o botão quando o mapa está visível.
+ * EN: Repositions the button when the map is visible.
+ */
+/* -----------------------------------------------------------------------------*/
+
 body.has-map #backToTopBtn {
   bottom: 72px;
   right: 16px;
 }
 
-/* ==================================================
-   Global behaviors
-   ================================================== */
+/* -----------------------------------------------------------------------------*/
+/* Global Behaviors
+ *
+ * PT: Comportamentos globais compartilhados pelo sistema.
+ * EN: Global behaviors shared across the system.
+ */
+/* -----------------------------------------------------------------------------*/
 
-/* Scroll suave */
 html {
   scroll-behavior: smooth;
 }
 
-/* Evita que âncoras fiquem sob o header fixo */
-
-/* [id] {
-  scroll-margin-top: 80px;
-} */
-
-/* Evita rolagem lateral no mobile */
 html,
 body {
   overflow-x: hidden;
 }
 
-/* ==================================================
-   Media normalization
-   ================================================== */
+/* -----------------------------------------------------------------------------*/
+/* Media Normalization
+ *
+ * PT: Normaliza comportamento de mídia responsiva.
+ * EN: Normalizes responsive media behavior.
+ */
+/* -----------------------------------------------------------------------------*/
 
 img,
 video {
@@ -93,16 +110,26 @@ iframe {
   height: 100%;
 }
 
-/* Contextual override — map embed */
+/* -----------------------------------------------------------------------------*/
+/* Contextual Overrides
+ *
+ * PT: Ajustes específicos de contexto para componentes globais.
+ * EN: Context-specific adjustments for global components.
+ */
+/* -----------------------------------------------------------------------------*/
+
 #localizacao .map-card iframe {
   height: 100% !important;
 }
 
-/* ==================================================
-   Header interaction states
-   ================================================== */
+/* -----------------------------------------------------------------------------*/
+/* Header Interaction State
+ *
+ * PT: Desativa interações do header quando necessário.
+ * EN: Disables header interaction when needed.
+ */
+/* -----------------------------------------------------------------------------*/
 
-/* Desativa interações quando necessário (ex: mapa visível) */
 #siteHeader.pe-none {
   pointer-events: none;
 }

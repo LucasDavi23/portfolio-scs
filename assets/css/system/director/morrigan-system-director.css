@@ -1,43 +1,63 @@
-/* /assets/css/system/director/morrigan-system-director.css
- * 🜃 Morrigan — Diretora Geral do CSS
- * Nível: Adulta
+/* -----------------------------------------------------------------------------*/
+/* 🜃 Morrigan — System CSS Director (CSS)
+ *
+ * Nível / Level: Adulta / Senior
  *
  * PT: Morrigan coordena o CSS do sistema como um todo. Ela não estiliza
- *     componentes nem features, mas garante que cada líder visual
- *     seja carregado na ordem correta. Este arquivo é o ponto inicial
- *     do CSS do sistema.
+ *     componentes nem features diretamente, mas garante que cada líder
+ *     visual seja carregado na ordem correta. Este arquivo é o ponto
+ *     de entrada (entry point) do CSS do sistema.
  *
  * EN: Morrigan coordinates the system CSS as a whole. She does not style
- *     components or features, but ensures each visual leader is loaded
- *     in the correct order. This file is the CSS entry point.
- * -----------------------------------------------------------------------------*/
+ *     components or features directly, but ensures each visual leader
+ *     is loaded in the correct order. This file is the system CSS
+ *     entry point.
+ */
+/* -----------------------------------------------------------------------------*/
 
-/* ============================================================================
-   SYSTEM — Base
-   ============================================================================ */
+/* -----------------------------------------------------------------------------*/
+/* SYSTEM — Foundation
+ *
+ * PT: Base estrutural do sistema (reset, tokens, utilidades).
+ * EN: System structural foundation (reset, tokens, utilities).
+ */
+/* -----------------------------------------------------------------------------*/
 
-/* Base estrutural do sistema */
 @import '/assets/css/system/foundation/foundation.css';
 
+/* -----------------------------------------------------------------------------*/
 /* 🧩 Coretta — System Leader
-   - Tipografia
-   - UI base
-*/
+ *
+ * PT: Define tipografia, base visual e elementos globais do sistema.
+ * EN: Defines typography, visual base and global UI elements.
+ */
+/* -----------------------------------------------------------------------------*/
 @import '/assets/css/system/coretta-system-leader.css';
 
-/* ============================================================================
-   SYSTEM — Layout
-   ============================================================================ */
+/* -----------------------------------------------------------------------------*/
+/* SYSTEM — Layout
+ *
+ * PT: Estrutura visual e organização de layout do sistema.
+ * EN: Visual structure and layout organization.
+ */
+/* -----------------------------------------------------------------------------*/
 
-/* 🧭 Atlas — Layout Leader */
 @import '/assets/css/system/layout/atlas-layout-leader.css';
 
-/* ============================================================================
-   FEEDBACK
-   ============================================================================ */
-
-/* 🌿 Seren — Board Leader */
+/* -----------------------------------------------------------------------------*/
+/* 🌿 Seren — Feedback Board Leader
+ *
+ * PT: Coordena o board de avaliações (cards, rating, badges, etc.).
+ * EN: Coordinates the feedback board (cards, rating, badges, etc.).
+ */
+/* -----------------------------------------------------------------------------*/
 @import '/assets/css/feedback/board/seren-board-leader.css';
 
-/* ✍️ Nyla / Elisa — Form Leader */
+/* -----------------------------------------------------------------------------*/
+/* 🌾 Nyla — Feedback Form Leader
+ *
+ * PT: Coordena o formulário de feedback e seus componentes visuais.
+ * EN: Coordinates the feedback form and its visual components.
+ */
+/* -----------------------------------------------------------------------------*/
 @import '/assets/css/feedback/form/nyla-form-leader.css';

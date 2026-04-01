@@ -19,7 +19,7 @@
 // - set(url)
 // - get()
 // - isOffline()
-import { EndpointConfig } from '/assets/js/feedback/core/config/feedback-endpoint.js';
+import { EndpointConfig } from '/assets/js/feedback/core/config/feedback-data-endpoint.js';
 
 /* -----------------------------------------------------------------------------*/
 // 🧬 Dália — Image Helpers
@@ -52,9 +52,15 @@ import { Logger } from '/assets/js/system/core/logger.js';
 // PT: Cria URL absoluta para endpoint local ou remoto.
 // EN: Creates absolute URL for local or remote endpoint.
 function createEndpointUrl(endpoint) {
-  return endpoint.startsWith('http')
-    ? new URL(endpoint)
-    : new URL(endpoint, window.location.origin);
+  const value = String(endpoint || '').trim();
+
+  if (!value) {
+    throw new Error('A valid endpoint is required.');
+  }
+
+  return /^https?:\/\//.test(value)
+    ? new URL(value)
+    : new URL(value, globalThis.location?.origin || 'http://localhost');
 }
 
 // PT: Garante que existe um endpoint válido (não offline).

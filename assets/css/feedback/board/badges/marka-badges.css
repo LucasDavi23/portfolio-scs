@@ -1,31 +1,41 @@
-/* /assets/css/feedback/board/badges/marka-badges.css
- * 🏷️ Marka — Badges & Selos (CSS)
- * Nível: Aprendiz
+/* -----------------------------------------------------------------------------*/
+/* 🏷️ Marka — Badges & Chips (CSS)
  *
- * PT: Marka cuida dos badges e selos do feedback. Ela é responsável
- *     por identificar a origem do comentário (SCS, Google, Shopee),
- *     pequenos marcadores visuais e chips informativos de contexto.
+ * Nível / Level: Aprendiz / Apprentice
  *
- * EN: Marka handles feedback badges and seals. She is responsible
- *     for identifying the comment source (SCS, Google, Shopee),
- *     small visual markers and contextual info chips.
- * -----------------------------------------------------------------------------*/
+ * PT: Marka é responsável pelos badges e selos do feedback.
+ *     Identifica a origem do comentário (SCS, Google, Shopee, etc.)
+ *     e controla marcadores visuais e chips informativos de contexto.
+ *
+ * EN: Marka is responsible for feedback badges and chips.
+ *     Identifies the comment source (SCS, Google, Shopee, etc.)
+ *     and controls visual markers and contextual info chips.
+ */
+/* -----------------------------------------------------------------------------*/
 
-/* Chips de plataforma (SCS, Shopee, etc.) — APENAS o badge */
+/* -----------------------------------------------------------------------------*/
+/* Platform Badges
+ *
+ * PT: Define o estilo dos chips de plataforma exibidos no header do card.
+ * EN: Defines styling for platform chips displayed in the card header.
+ */
+/* -----------------------------------------------------------------------------*/
+
 [data-feedback-card] header > span.inline-flex.rounded-full {
-  font-size: 11px; /* antes ~10px */
+  font-size: 11px;
   font-weight: 600;
-  padding: 2px 6px; /* antes 1.5px 5px */
+  padding: 2px 6px;
   border-radius: 9999px;
   line-height: 1.3;
 }
 
-/* ==================================================
-Marka — Badges & Chips
-  PT: Badges de plataforma e selos visuais de origem
-    (SCS, Shopee, Mercado Livre, etc.).
-  EN: Platform badges and visual origin chips.
-================================================== */
+/* -----------------------------------------------------------------------------*/
+/* Badge Spacing
+ *
+ * PT: Ajusta espaçamento de badges específicos (ex: SCS).
+ * EN: Adjusts spacing for specific badges (e.g., SCS).
+ */
+/* -----------------------------------------------------------------------------*/
 
 .scs-chip {
   margin-bottom: 4px;

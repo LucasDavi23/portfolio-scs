@@ -136,25 +136,8 @@
     <!-- Scripts -->
     <!-- -------------------------------------------------- -->
 
-    <!-- Feedback Endpoint -->
-    <script>
-      window.FEEDBACK_ENDPOINT =
-        'https://script.google.com/macros/s/AKfycbzzCFgGmXhIDc7xlaJa_XpacGMu3GBn7d0kg2ntRgUrpuisnV__AjF_8pJGXgG6NaMP0A/exec';
-      console.log('[init] FEEDBACK_ENDPOINT =', window.FEEDBACK_ENDPOINT);
-    </script>
-
-    <!-- Rating Sync -->
-    <script>
-      document.addEventListener('change', (e) => {
-        if (e.target && e.target.name === 'rating_star') {
-          const hidden = document.getElementById('rating');
-          if (hidden) hidden.value = e.target.value;
-        }
-      });
-    </script>
-
     <!-- Feedback Config -->
-    <script type="module" src="/assets/js/feedback/core/config/feedback-endpoint.js"></script>
+    <script type="module" src="/assets/js/feedback/core/config/feedback-data-endpoint.js"></script>
 
     <!-- System Director -->
     <script type="module" src="/assets/js/system/director/morgana-system-director.js"></script>

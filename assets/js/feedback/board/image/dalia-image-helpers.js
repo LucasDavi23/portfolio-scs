@@ -16,6 +16,7 @@
 // Fornece / Provides:
 // - set(url)
 // - get()
+// - isOffline()
 /* -----------------------------------------------------------------------------*/
 import { ImageEndpointConfig } from '/assets/js/feedback/core/config/feedback-image-endpoint.js';
 
@@ -160,6 +161,9 @@ function DRIVE_FULL(idOrUrl, rkIgnored = '') {
 // EN: In the current model, thumb uses the same proxy URL.
 // If you want smaller real thumbnails, this should be handled in GAS.
 function DRIVE_THUMB(idOrUrl, rkIgnored = '', width = 256) {
+  // rkIgnored, width
+  // PT: Parâmetros mantidos para compatibilidade futura (não usados atualmente).
+  // EN: Parameters kept for future compatibility (currently unused).
   const driveId = extractDriveId(idOrUrl);
   if (!driveId) return '';
 

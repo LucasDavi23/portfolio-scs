@@ -1,23 +1,34 @@
-/* /assets/css/feedback/board/image/tessa-image.css
- * 🖼️ Tessa — Imagem do Feedback (CSS)
- * Nível: Jovem
+/* -----------------------------------------------------------------------------*/
+/* 🖼️ Tessa — Feedback Image (CSS)
  *
- * PT: Tessa cuida da imagem exibida dentro do card de feedback.
- *     Ela define o enquadramento do thumbnail, proporção (1:1),
- *     crop, object-fit, fallback visual e bordas da imagem,
- *     garantindo consistência e boa leitura visual.
+ * Nível / Level: Jovem / Young
  *
- * EN: Tessa handles the image displayed inside the feedback card.
- *     She defines thumbnail framing, aspect ratio (1:1), crop,
- *     object-fit, visual fallback and image borders, ensuring
- *     consistency and visual clarity.
- * -----------------------------------------------------------------------------*/
+ * PT: Tessa é responsável pela imagem exibida no card de feedback.
+ *     Define enquadramento do thumbnail, proporção (1:1), recorte,
+ *     object-fit, fallback visual e bordas, garantindo consistência
+ *     e boa leitura visual.
+ *
+ * EN: Tessa is responsible for the image displayed inside the
+ *     feedback card. Defines thumbnail framing, aspect ratio (1:1),
+ *     crop behavior, object-fit, visual fallback and borders,
+ *     ensuring consistency and visual clarity.
+ */
+/* -----------------------------------------------------------------------------*/
 
-/* css img form */
-/* Força a imagem a caber no quadrado do preview */
+/* -----------------------------------------------------------------------------*/
+/* Form Image Preview
+ *
+ * PT: Ajusta a imagem enviada no formulário para caber corretamente
+ *     dentro do preview, mantendo proporção e preenchimento.
+ *
+ * EN: Adjusts the uploaded image in the form preview to properly
+ *     fit within the container, preserving proportion and fill.
+ */
+/* -----------------------------------------------------------------------------*/
+
 #foto-preview img {
   width: 100%;
   height: 100%;
-  object-fit: cover; /* use object-fit: contain; se não quiser cortar */
+  object-fit: cover; /* PT: use contain se não quiser cortar | EN: use contain to avoid cropping */
   border-radius: 0.5rem;
 }

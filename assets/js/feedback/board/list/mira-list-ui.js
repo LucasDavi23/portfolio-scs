@@ -103,6 +103,10 @@ const qs = (selector, root = document) => root.querySelector(selector);
 // EN: Returns the default limit based on screen width.
 /* -----------------------------------------------------------------------------*/
 function getDefaultLimit() {
+  if (typeof window === 'undefined' || !window.matchMedia) {
+    return 12; // fallback seguro
+  }
+
   return window.matchMedia('(max-width: 639px)').matches ? 8 : 12;
 }
 

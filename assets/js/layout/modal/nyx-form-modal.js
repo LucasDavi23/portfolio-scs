@@ -1,4 +1,4 @@
-// 📝 Lyra — Form Modal
+// 📝 Nyx — Form Modal
 //
 // Nível / Level: Adulta / Adult
 //
@@ -113,7 +113,7 @@ async function closeModal() {
 
 // PT: Inicializa o modal de formulário.
 // EN: Initializes form modal.
-function initLyraFormModal() {
+function initNyxFormModal() {
   modal = document.getElementById(MODAL_ID);
   if (!modal) return;
 
@@ -155,6 +155,7 @@ function initLyraFormModal() {
 // Export
 /* -----------------------------------------------------------------------------*/
 
-export const LyraFormModal = {
-  initLyraFormModal,
+export const NyxFormModal = {
+  initNyxFormModal,
+  closeModal,
 };
