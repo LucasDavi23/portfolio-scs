@@ -8,30 +8,32 @@ function doGet(e) {
   const p = e?.parameter || {};
   const modeOrAction = String(p.mode || p.action || 'list').toLowerCase();
 
-  // NOVO: rota de imagem para proxy
+  // NEW: image proxy route
   if (modeOrAction === 'img') {
     return serveImage_(p);
   }
 
   if (modeOrAction !== 'list' && modeOrAction !== 'meta') {
-    return json({ error: 'mode/action inválido' });
+    return json({ ok: false, error: 'Invalid mode/action.' });
   }
 
-  const plat = String(p.plat || '').toLowerCase(); // scs|shopee|ml|google|''
+  // Params (compat: plat -> platform)
+  const platformParam = String(p.platform || p.plat || '').toLowerCase(); // scs|shopee|ml|google|''
   const page = Math.max(1, parseInt(p.page || '1', 10));
   const limit = Math.max(1, Math.min(50, parseInt(p.limit || '10', 10)));
   const fast = String(p.fast || '0') === '1';
 
-  // ✅ bypass do cache (nocache=1) — usado no refresh do committed
+  // Cache bypass (nocache=1) — used on committed refresh
   const nocache =
     String(p.nocache || '') === '1' || String(p.force || '') === '1' || String(p.cb || '') !== '';
 
-  // ⚡ cache 60s
+  // Cache (60s)
   const cache = CacheService.getScriptCache();
   const cacheKey =
     modeOrAction === 'meta'
-      ? `mural:meta:v4:${plat || 'all'}`
-      : `mural:v4:${plat || 'all'}:p${page}:l${limit}:f${fast ? 1 : 0}`;
+      ? `wall:meta:v4:${platformParam || 'all'}`
+      : `wall:v4:${platformParam || 'all'}:p${page}:l${limit}:f${fast ? 1 : 0}`;
+
   if (!nocache) {
     const hit = cache.get(cacheKey);
     if (hit) return json(JSON.parse(hit));
@@ -39,25 +41,53 @@ function doGet(e) {
 
   const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
   const sh = ss.getSheetByName(SHEET_MURAL);
-  if (!sh) return json({ v: 4, items: [], hasMore: false, total: fast ? undefined : 0 });
 
-  const values = sh.getDataRange().getValues(); // 1x leitura
-  if (!values || values.length <= 1)
+  if (!sh) {
     return json({ v: 4, items: [], hasMore: false, total: fast ? undefined : 0 });
+  }
 
-  const head = values[0].map((h) => String(h).toLowerCase());
-  const col = (name) => head.indexOf(name);
-  const cPlat = col('plataforma');
-  const cAprov = col('aprovado');
-  const cData = col('data');
-  const cAutor = col('autor');
-  const cTexto = col('texto');
-  const cStars = col('estrelas');
+  const values = sh.getDataRange().getValues(); // single read
+  if (!values || values.length <= 1) {
+    return json({ v: 4, items: [], hasMore: false, total: fast ? undefined : 0 });
+  }
+
+  const head = values[0].map((h) => String(h).trim().toLowerCase());
+
+  const col = (name) => head.indexOf(String(name).toLowerCase().trim());
+
+  // Columns (English headers expected in the sheet)
+  const cPlatform = col('platform'); // FIX: was 'plataform'
+  const cApproved = col('approved');
+  const cDate = col('date');
+  const cAuthor = col('author');
+  const cText = col('text');
+  const cRating = col('rating');
   const cUrl = col('url');
-  const wantPlat = plat && plat !== 'all' ? plat : null;
+
+  const required = {
+    platform: cPlatform,
+    approved: cApproved,
+    date: cDate,
+    author: cAuthor,
+    text: cText,
+    rating: cRating,
+    url: cUrl,
+  };
+
+  const missing = Object.keys(required).filter((k) => required[k] < 0);
+
+  if (missing.length) {
+    return json({
+      ok: false,
+      error: `Missing columns in SHEET_MURAL: ${missing.join(', ')}`,
+      head,
+    });
+  }
+
+  const wantPlatform = platformParam && platformParam !== 'all' ? platformParam : null;
 
   // ============================================================
-  // ✅ PREMIUM: META SUMMARY (total, avg, buckets) — sem paginação
+  // META SUMMARY (total, avg, buckets) — no pagination
   // ============================================================
   if (modeOrAction === 'meta') {
     const buckets = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
@@ -67,13 +97,17 @@ function doGet(e) {
     for (let i = values.length - 1; i >= 1; i--) {
       const row = values[i];
 
-      const aprovado = row[cAprov] === true || String(row[cAprov]).toUpperCase() === 'TRUE';
-      if (!aprovado) continue;
+      const approved =
+        row[cApproved] === true || String(row[cApproved]).trim().toUpperCase() === 'TRUE';
 
-      const plataforma = String(row[cPlat] || '').toLowerCase();
-      if (wantPlat && plataforma !== wantPlat) continue;
+      if (!approved) continue;
 
-      let star = Number(row[cStars] || 0);
+      const platform = String(row[cPlatform] || '')
+        .trim()
+        .toLowerCase();
+      if (wantPlatform && platform !== wantPlatform) continue;
+
+      let star = Number(row[cRating] || 0);
       if (!Number.isFinite(star)) star = 0;
 
       star = Math.round(star);
@@ -89,50 +123,61 @@ function doGet(e) {
 
     const payload = { v: 4, avg: avgMeta, total: totalMeta, buckets };
 
-    if (!nocache) {
-      cache.put(cacheKey, JSON.stringify(payload), 60);
-    }
-
+    if (!nocache) cache.put(cacheKey, JSON.stringify(payload), 60);
     return json(payload);
   }
 
+  // ============================================================
+  // LIST (paginated)
+  // ============================================================
   const skip = (page - 1) * limit;
   let skipped = 0;
+
   const items = [];
   let total = 0;
   let hasMore = false;
 
-  // percorre do fim pro começo (mais recentes primeiro)
+  // date
+  const TZ = 'America/Sao_Paulo';
+
+  // From newest to oldest
   for (let i = values.length - 1; i >= 1; i--) {
     const row = values[i];
-    const aprovado = row[cAprov] === true || String(row[cAprov]).toUpperCase() === 'TRUE';
-    if (!aprovado) continue;
-    const plataforma = String(row[cPlat] || '').toLowerCase();
-    if (wantPlat && plataforma !== wantPlat) continue;
 
-    if (!fast) total++; // conta total real apenas no modo completo
+    const approved = row[cApproved] === true || String(row[cApproved]).toUpperCase() === 'TRUE';
+    if (!approved) continue;
+
+    const platform = String(row[cPlatform] || '')
+      .trim()
+      .toLowerCase();
+
+    if (wantPlatform && platform !== wantPlatform) continue;
+
+    if (!fast) total++;
 
     if (skipped < skip) {
       skipped++;
       continue;
     }
 
+    const date = normalizeDate_(row[cDate]);
+
     if (items.length < limit) {
       items.push({
-        plataforma,
-        estrelas: Number(row[cStars] || 0),
-        data: toISO(parseDate(row[cData])),
-        autor: String(row[cAutor] || '').trim(),
-        texto: String(row[cTexto] || '').trim(),
+        platform,
+        rating: Number(row[cRating] || 0),
+        date_br: date ? Utilities.formatDate(date, TZ, 'dd/MM/yyyy HH:mm:ss') : '',
+        date_ms: date ? date.getTime() : null,
+        author: String(row[cAuthor] || '').trim(),
+        text: String(row[cText] || '').trim(),
         url: String(row[cUrl] || '').trim(),
       });
     } else {
-      // já coletou a página; se for fast, podemos sair com hasMore=true
       if (fast) {
         hasMore = true;
         break;
       }
-      // se não for fast, seguimos até o fim pra consolidar 'total'
+      // if not fast, continue scanning to compute total
     }
   }
 
@@ -141,9 +186,8 @@ function doGet(e) {
   }
 
   const payload = { v: 4, items, hasMore, total: fast ? undefined : total };
-  if (!nocache) {
-    cache.put(cacheKey, JSON.stringify(payload), 60);
-  }
+
+  if (!nocache) cache.put(cacheKey, JSON.stringify(payload), 60);
   return json(payload);
 }
 
@@ -191,60 +235,104 @@ function doPost(e) {
   }
 }
 
-// Cria feedback (escreve em Respostas + Mural) e devolve "item" pro Hero SCS
+// Create feedback (writes to Responses + Wall) and returns "item" to SCS Hero
 function createFeedback_(e) {
   const body = JSON.parse(e?.postData?.contents || '{}');
 
+  // EN contract + PT fallback
   const rating = Number(body.rating || 0);
-  const nome = String(body.nome || '').trim();
-  const comentario = String(body.comentario || '').trim();
-  const pedido = String(body.pedido || '').trim();
+
+  const name = String(body.name || body.nome || '').trim();
+  const comment = String(body.comment || body.comentario || '').trim();
+  const order = String(body.order || body.pedido || '').trim();
   const contact = String(body.contact || body.contato || '').trim();
-  const origem = String(body.origem || 'scs');
-  const tsClient = body.timestamp_cliente ? new Date(body.timestamp_cliente) : new Date();
+  const origin = String(body.origin || body.origem || 'scs').trim();
+
+  const tsClient = body.timestamp_client
+    ? new Date(body.timestamp_client)
+    : body.timestamp_cliente
+      ? new Date(body.timestamp_cliente)
+      : new Date();
+
   const tsServer = new Date();
 
-  if (!(rating >= 1 && rating <= 5)) return json({ ok: false, error: 'Rating inválido.' });
-  if (!comentario) return json({ ok: false, error: 'Comentário vazio.' });
+  if (!(rating >= 1 && rating <= 5)) return json({ ok: false, error: 'Invalid rating.' });
+  if (!comment) return json({ ok: false, error: 'Empty comment.' });
 
   const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+
+  // ✅ Private sheet (store contact here)
   const shResp = ensureSheet_(ss, SHEET_RESP, [
     'timestamp_server',
     'rating',
-    'nome',
-    'comentario',
-    'pedido',
-    'contato',
-    'origem',
-    'timestamp_cliente',
+    'name',
+    'comment',
+    'order',
+    'contact',
+    'origin',
+    'timestamp_client',
   ]);
+
+  // ✅ Public wall (NO contact)
   const shMural = ensureSheet_(ss, SHEET_MURAL, [
-    'plataforma',
-    'estrelas',
-    'data',
-    'autor',
-    'texto',
+    'platform',
+    'rating',
+    'date',
+    'author',
+    'text',
     'url',
-    'aprovado',
-    'destaque',
+    'approved',
+    'featured',
   ]);
 
-  shResp.appendRow([tsServer, rating, nome, comentario, pedido, contato, origem, tsClient]);
+  shResp.appendRow([tsServer, rating, name, comment, order, contact, origin, tsClient]);
 
-  // ✅ usa público se vier, senão viewer, senão vazio
+  // Photo URL (public if available)
   const photoUrl = String(body.photo_public_url || body.photo_url || '').trim();
 
-  shMural.appendRow(['scs', rating, tsServer, nome, comentario, photoUrl, true, false]);
+  // ============================================================
+  // ✅ NEW: appendRow por HEADER (não depende da ordem das colunas)
+  // ============================================================
+  const muralHead = shMural
+    .getRange(1, 1, 1, shMural.getLastColumn())
+    .getValues()[0]
+    .map((h) => String(h).trim().toLowerCase());
+
+  const idx = (colName) => muralHead.indexOf(String(colName).trim().toLowerCase());
+
+  const iPlatform = idx('platform');
+  const iRating = idx('rating');
+  const iDate = idx('date');
+  const iAuthor = idx('author');
+  const iText = idx('text');
+  const iUrl = idx('url');
+  const iApproved = idx('approved');
+  const iFeatured = idx('featured');
+
+  // cria uma linha do tamanho do header
+  const rowOut = new Array(muralHead.length).fill('');
+
+  if (iPlatform >= 0) rowOut[iPlatform] = 'scs';
+  if (iRating >= 0) rowOut[iRating] = rating;
+  if (iDate >= 0) rowOut[iDate] = tsServer; // ✅ data/hora real
+  if (iAuthor >= 0) rowOut[iAuthor] = name;
+  if (iText >= 0) rowOut[iText] = comment;
+  if (iUrl >= 0) rowOut[iUrl] = photoUrl;
+  if (iApproved >= 0) rowOut[iApproved] = true;
+  if (iFeatured >= 0) rowOut[iFeatured] = false;
+
+  shMural.appendRow(rowOut);
+  // ============================================================
 
   const tz = Session.getScriptTimeZone();
-  const dataBr = Utilities.formatDate(tsServer, tz, 'dd/MM/yyyy HH:mm');
+  const dateBr = Utilities.formatDate(tsServer, tz, 'dd/MM/yyyy HH:mm'); // sem segundos
 
   const item = {
     rating,
-    nome,
-    comentario,
-    data_iso: tsServer.toISOString(),
-    data_br: dataBr,
+    name,
+    comment,
+    date_iso: tsServer.toISOString(),
+    date_br: dateBr,
     photo_url: photoUrl || '',
   };
 
@@ -303,26 +391,67 @@ function json(obj) {
   );
 }
 
+function normKey(v) {
+  return String(v || '')
+    .trim()
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, ''); // remove acentos
+}
+
 function indexer(header) {
   const map = {};
-  header.forEach((h, i) => (map[String(h).toLowerCase()] = i));
-  // garantias de nomes
-  ['plataforma', 'estrelas', 'data', 'autor', 'texto', 'url', 'aprovado', 'destaque'].forEach(
-    (k) => {
-      if (map[k] === undefined) map[k] = -1;
+  header.forEach((h, i) => (map[normKey(h)] = i));
+
+  // Aliases PT/EN → index final “canônico”
+  const alias = {
+    platform: ['platform', 'plataforma', 'plataform'],
+    rating: ['rating', 'estrelas', 'stars'],
+    date: ['date', 'data'],
+    author: ['author', 'autor'],
+    text: ['text', 'texto', 'comment', 'comentario'],
+    url: ['url'],
+    approved: ['approved', 'aprovado'],
+    featured: ['featured', 'destaque'],
+    contact: ['contact', 'contato'],
+  };
+
+  const pick = (...keys) => {
+    for (const k of keys) {
+      const idx = map[normKey(k)];
+      if (Number.isInteger(idx) && idx >= 0) return idx;
     }
-  );
-  return map;
+    return -1;
+  };
+
+  // Índices finais usados pelo sistema (canônicos)
+  const idx = {
+    plataforma: pick(...alias.platform),
+    estrelas: pick(...alias.rating),
+    data: pick(...alias.date),
+    autor: pick(...alias.author),
+    texto: pick(...alias.text),
+    url: pick(...alias.url),
+    aprovado: pick(...alias.approved),
+    destaque: pick(...alias.featured),
+    contato: pick(...alias.contact), // opcional
+  };
+
+  return idx;
+}
+
+function safeCell(row, i) {
+  return i >= 0 ? row[i] : '';
 }
 
 function mapRow(row, idx, plataforma) {
   return {
-    plataforma: plataforma,
-    estrelas: Number(row[idx.estrelas] || 0),
-    data: toISO(parseDate(row[idx.data])),
-    autor: String(row[idx.autor] || '').trim(),
-    texto: String(row[idx.texto] || '').trim(),
-    url: String(row[idx.url] || '').trim(),
+    plataforma,
+    estrelas: Number(safeCell(row, idx.estrelas) || 0),
+    data: toISO(parseDate(safeCell(row, idx.data))),
+    autor: String(safeCell(row, idx.autor) || '').trim(),
+    texto: String(safeCell(row, idx.texto) || '').trim(),
+    url: String(safeCell(row, idx.url) || '').trim(),
   };
 }
 
@@ -571,4 +700,42 @@ function _debugOr1x1_(debug, info) {
     'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR4nGMAAQAABQABDQottAAAAABJRU5ErkJggg=='
   );
   return Utilities.newBlob(png, 'image/png', 'fallback.png');
+}
+
+/**
+ * Normalize date values coming from Google Sheets.
+ * Accepts Date, number (Sheets serial), or BR string.
+ * Always returns a JavaScript Date or null.
+ */
+function normalizeDate_(v) {
+  if (!v) return null;
+
+  // Case 1: already a Date object
+  if (v instanceof Date) return v;
+
+  // Case 2: Google Sheets serial number
+  if (typeof v === 'number' && isFinite(v)) {
+    const ms = Math.round((v - 25569) * 86400 * 1000);
+    return new Date(ms);
+  }
+
+  // Case 3: Brazilian string "dd/MM/yyyy HH:mm:ss"
+  const s = String(v).trim();
+
+  const match = s.match(/^(\d{2})\/(\d{2})\/(\d{4})(?:\s+(\d{2}):(\d{2})(?::(\d{2}))?)?$/);
+
+  if (match) {
+    const dd = Number(match[1]);
+    const MM = Number(match[2]);
+    const yyyy = Number(match[3]);
+
+    const hh = Number(match[4] || 0);
+    const mm = Number(match[5] || 0);
+    const ss = Number(match[6] || 0);
+
+    return new Date(yyyy, MM - 1, dd, hh, mm, ss);
+  }
+
+  // If nothing matches
+  return null;
 }

@@ -87,20 +87,19 @@ function runInitStep(stepName, callback) {
 //     considering environment (dev/prod).
 /* -----------------------------------------------------------------------------*/
 
+const GAS_ENDPOINT =
+  'https://script.google.com/macros/s/AKfycbzzCFgGmXhIDc7xlaJa_XpacGMu3GBn7d0kg2ntRgUrpuisnV__AjF_8pJGXgG6NaMP0A/exec';
+
 // PT: Resolve o endpoint principal de dados.
 // EN: Resolves the main data endpoint.
 function resolveFeedbackDataEndpoint() {
-  return import.meta.env.DEV
-    ? '/gas'
-    : 'https://script.google.com/macros/s/AKfycbzzCFgGmXhIDc7xlaJa_XpacGMu3GBn7d0kg2ntRgUrpuisnV__AjF_8pJGXgG6NaMP0A/exec';
+  return import.meta.env.DEV ? '/gas' : GAS_ENDPOINT;
 }
 
 // PT: Resolve o endpoint de imagens.
 // EN: Resolves the image endpoint.
 function resolveFeedbackImageEndpoint() {
-  return import.meta.env.DEV
-    ? '/gas-img'
-    : 'https://script.google.com/macros/s/AKfycbzzCFgGmXhIDc7xlaJa_XpacGMu3GBn7d0kg2ntRgUrpuisnV__AjF_8pJGXgG6NaMP0A/exec';
+  return import.meta.env.DEV ? '/gas-img' : GAS_ENDPOINT;
 }
 
 // PT: Inicializa a infraestrutura de endpoints do feedback.
