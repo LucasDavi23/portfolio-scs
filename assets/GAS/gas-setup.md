@@ -4,9 +4,10 @@
 
 Este projeto utiliza o Google Apps Script como backend para:
 
-- Envio de feedback
-- Listagem de avaliações
-- Upload de imagens
+- envio de feedback
+- listagem de avaliações
+- upload de imagens
+- leitura e normalização de imagens do Google Drive
 
 ---
 
@@ -18,7 +19,7 @@ https://script.google.com
 
 Clique em:
 
-- "Novo projeto"
+- **Novo projeto**
 
 ---
 
@@ -38,7 +39,112 @@ Dê um nome ao projeto e salve.
 
 ---
 
-## 🚀 Passo 4 — Implantar como Web App
+## 📊 Passo 4 — Criar e configurar a planilha
+
+Crie uma nova planilha no Google Sheets.
+
+Depois, configure as abas esperadas pelo sistema.
+
+### Aba pública de avaliações
+
+Nome da aba:
+
+```
+Reviews
+```
+
+Cabeçalhos esperados:
+
+```
+platform | approved | date | author | text | rating | url
+```
+
+---
+
+### Aba privada de respostas
+
+Nome da aba:
+
+```
+Responses
+```
+
+Essa aba será usada para armazenar os envios do formulário.
+
+---
+
+## 🔗 Passo 5 — Copiar o ID da planilha
+
+Abra a planilha no navegador.
+
+Exemplo de URL:
+
+```
+https://docs.google.com/spreadsheets/d/SEU_ID_AQUI/edit
+```
+
+O ID da planilha é a parte entre:
+
+```
+/d/ e /edit
+```
+
+Exemplo:
+
+```js
+const SPREADSHEET_ID = 'SEU_ID_AQUI';
+```
+
+Cole esse ID no código do Apps Script:
+
+```js
+const SPREADSHEET_ID = 'SEU_ID_AQUI';
+```
+
+---
+
+### ⚠️ Importante
+
+Se o `SPREADSHEET_ID` estiver incorreto:
+
+- a API pode puxar dados antigos
+- a API pode retornar vazio
+- o formulário pode salvar no lugar errado
+
+---
+
+## 🖼️ Passo 6 — Ativar o Google Drive (Obrigatório)
+
+Este projeto utiliza imagens armazenadas no Google Drive.
+
+Além do `DriveApp`, o código também utiliza recursos avançados como:
+
+- `Drive.Files.get(...)`
+- `Drive.Permissions.create(...)`
+
+Por isso, é necessário ativar o serviço avançado do Google Drive.
+
+### Como ativar
+
+1. No projeto do Apps Script, clique em **Serviços**
+2. Clique em **Adicionar serviço**
+3. Procure por **Drive API**
+4. Adicione o serviço
+
+---
+
+### ⚠️ Importante
+
+Sem essa configuração:
+
+- o upload de imagens pode falhar
+- o proxy de imagem pode falhar
+- links de imagem podem não funcionar corretamente
+- `resourceKey` pode não ser resolvido
+
+---
+
+## 🚀 Passo 7 — Implantar como Web App
 
 1. Clique em **Implantar**
 2. Clique em **Nova implantação**
@@ -51,76 +157,119 @@ Configuração:
 
 ---
 
-## 🔗 Passo 5 — Copiar URL
+## 🔗 Passo 8 — Copiar URL
 
 Após implantar, copie a URL gerada na seção **Aplicativo da Web**.
 
 Essa será a URL da sua API.
 
-Exemplo de URL:
+Exemplo:
 
+```
 https://script.google.com/macros/s/SEU_ID/exec
+```
 
 ---
 
 ### ⚠️ Atenção
 
 - Utilize apenas a URL do **Aplicativo da Web**
-- Não utilize URLs de biblioteca ou do editor do Google Apps Script
+- Não utilize URLs do editor ou biblioteca
 
 ---
 
-## 🧪 Teste rápido da API
+## 🧪 Passo 9 — Teste rápido da API
 
-Após copiar a URL, você pode testá-la abrindo diretamente no navegador.
+Abra no navegador:
 
-Se estiver tudo correto, a API deve responder sem erro.
+```
+https://script.google.com/macros/s/SEU_ID/exec?mode=list
+```
 
----
-
-### ⚠️ Se não funcionar
-
-- Verifique se a implantação foi feita como **Aplicativo da Web**
-- Verifique as permissões de acesso
-- Confirme se está usando a URL correta (terminada em `/exec`)
+Se estiver correto, retornará um JSON.
 
 ---
 
-## 🔧 Passo 6 — Configurar no projeto
+## ⚠️ Se não funcionar
 
-No frontend, localize a constante de configuração do endpoint:
+Verifique:
+
+- implantação como **Aplicativo da Web**
+- acesso como **Qualquer pessoa**
+- URL correta (`/exec`)
+- `SPREADSHEET_ID` correto
+- Drive API ativado
+
+---
+
+## 🔧 Passo 10 — Configurar no frontend
+
+No frontend, localize:
 
 ```js
 const GAS_ENDPOINT = 'SUA_URL_DO_GAS_AQUI';
 ```
 
-Substitua esse valor pela URL gerada no Google Apps Script.
+Substitua pela URL do seu Apps Script.
 
 ---
 
 ## 🔁 Atualizar o código da API (Importante)
 
-Sempre que fizer alterações no Google Apps Script:
+Sempre que alterar o GAS:
 
 1. Clique em **Implantar**
 2. Clique em **Gerenciar implantações**
-3. Selecione a implantação ativa
-4. Clique no ícone de edição (✏️)
-5. Selecione a versão mais recente
-6. Clique em **Atualizar**
+3. Edite a implantação atual
+4. Selecione a nova versão
+5. Clique em **Atualizar**
 
 ---
 
 ### ⚠️ Importante
 
-- Não utilize **"Nova implantação"** para atualizar o sistema
-- Isso criará uma nova URL e poderá quebrar a integração com o frontend
-- Sempre atualize a implantação existente para manter a mesma API
+- NÃO use “Nova implantação” para atualizar
+- Isso gera uma nova URL
+- Sempre atualize a implantação existente
 
 ---
 
-## ⚠️ Observações
+## ⚠️ Observações finais
 
-- Sem o GAS, o sistema funciona apenas parcialmente
-- O envio e leitura de feedback dependem da API
-- Se a URL da API mudar, será necessário atualizá-la manualmente no frontend
+- sem o GAS, o sistema funciona parcialmente
+- feedback e mural dependem da API
+- imagens dependem do Google Drive corretamente configurado
+- alterações na URL exigem atualização no frontend
+
+---
+
+## 🧩 Problemas comuns
+
+### ❌ Dados não atualizam
+
+- verifique o `SPREADSHEET_ID`
+- verifique se fez deploy novo
+
+---
+
+### ❌ "Invalid mode/action"
+
+- código do GAS incompleto
+- endpoint incorreto
+
+---
+
+### ❌ Imagens não carregam
+
+- Drive API não ativado
+- imagem não está pública
+- link não está normalizado
+
+---
+
+### ❌ Ainda mostra dados antigos
+
+- cache do navegador
+- cache interno (≈60 segundos)
+
+---

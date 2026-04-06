@@ -452,7 +452,53 @@ function renderCardFallback(root, items) {
   if (!listElement) return;
 
   if (!items?.length) {
-    listElement.innerHTML = `<div class="text-sm text-neutral-500">Ainda não há avaliações aprovadas aqui.</div>`;
+    const isMediaLayout = root.getAttribute('data-variant') === 'media';
+
+    if (isMediaLayout) {
+      listElement.innerHTML = `
+      <div class="media-grid">
+        <div class="meta-row flex items-center justify-between gap-2">
+          <span class="header-author truncate" data-c-author></span>
+          <time class="header-date" data-c-date></time>
+        </div>
+
+        <div class="text-wrap">
+          <p
+            class="text-gray-500 leading-5 break-words hyphens-auto line-clamp-none"
+            data-c-text
+          >Ainda não há avaliações aprovadas aqui.</p>
+        </div>
+
+        <div class="photo-sep"></div>
+
+        <figure class="photo-wrap">
+          <button
+            type="button"
+            class="thumb-container group relative rounded-xl overflow-hidden border border-gray-200 bg-white js-open-modal hidden"
+            aria-label="Ver foto em tela cheia"
+          >
+            <img
+              src=""
+              data-full=""
+              alt=""
+              class="transition duration-300 group-hover:scale-[1.03]"
+              loading="lazy"
+            />
+            <span class="badge-ghost">Ver foto</span>
+          </button>
+
+          <div
+            class="thumb-fallback hidden rounded-xl border border-dashed grid place-items-center bg-white text-[10px] text-gray-400"
+          >
+            sem foto
+          </div>
+        </figure>
+      </div>
+    `;
+    } else {
+      listElement.innerHTML = `<div class="text-sm text-neutral-500">Ainda não há avaliações aprovadas aqui.</div>`;
+    }
+
     return;
   }
 
@@ -643,7 +689,7 @@ async function loadPlatformCard(
         return {
           ok: true,
           plat: platform,
-          hasPhotoUrl: Boolean(item?.foto_url),
+          hasPhotoUrl: Boolean(item?.photo_url),
           signature,
           item,
         };
@@ -652,13 +698,21 @@ async function loadPlatformCard(
       await fillCardFixed(root, item);
       lastSignatureByPlat[platform] = signature;
     } else {
-      renderCardFallback(root, [item]);
+      const isMediaLayout = root.getAttribute('data-variant') === 'media';
+
+      if (isMediaLayout) {
+        await fillCardFixed(root, item);
+      } else {
+        renderCardFallback(root, [item]);
+      }
+
+      lastSignatureByPlat[platform] = signature;
     }
 
     return {
       ok: true,
       plat: platform,
-      hasPhotoUrl: Boolean(item?.foto_url),
+      hasPhotoUrl: Boolean(item?.photo_url),
       signature,
       topSigs: topSignatures,
       item,
@@ -715,6 +769,7 @@ function scheduleBoardRefreshFromCommitted(detail) {
 /* -----------------------------------------------------------------------------*/
 async function refreshSCSWithBackoff(seq, { expectPhoto = true, previousSig = '' } = {}) {
   const delaysMs = [0, 1200, 3200];
+  const isFirstEntry = !previousSig;
 
   for (let attemptIndex = 0; attemptIndex < delaysMs.length; attemptIndex++) {
     const delayMs = delaysMs[attemptIndex];
@@ -741,6 +796,15 @@ async function refreshSCSWithBackoff(seq, { expectPhoto = true, previousSig = ''
     const isNewItem = !!result.signature && result.signature !== previousSig;
 
     if (previousSig && !hasPreviousInList) continue;
+
+    // PT: Primeiro feedback saindo do estado vazio.
+    // EN: First feedback leaving the empty state.
+    if (isFirstEntry) {
+      if (!result.signature) continue;
+      if (!expectPhoto) return;
+      if (result.hasPhotoUrl) return;
+      continue;
+    }
 
     if (isNewItem) {
       if (!expectPhoto) return;
@@ -808,7 +872,7 @@ const SelahBoardUI = {
 // PT: Atualiza o Hero imediatamente quando um novo feedback é enviado.
 // EN: Updates the Hero immediately when a new feedback is submitted.
 /* -----------------------------------------------------------------------------*/
-AppEvents.onAppEvent('feedback:novo', (event) => {
+AppEvents.onAppEvent('feedback:new', (event) => {
   const detail = event?.detail || {};
   if (detail?.avaliacao?.plataforma !== 'scs') return;
 

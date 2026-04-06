@@ -25,7 +25,7 @@ import { resolve } from 'path';
 /* -----------------------------------------------------------------------------*/
 
 const GAS_EXEC =
-  'https://script.google.com/macros/s/AKfycbzzCFgGmXhIDc7xlaJa_XpacGMu3GBn7d0kg2ntRgUrpuisnV__AjF_8pJGXgG6NaMP0A/exec';
+  'https://script.google.com/macros/s/AKfycbxRWJ2dGkd_HjzMSARPxjml4oWiVF0pSsxoqJp6qLMvOslmw7WNhuWFywSnsNKwtN_ZpQ/exec';
 
 export default defineConfig({
   /* Root */
@@ -83,7 +83,7 @@ export default defineConfig({
         rewrite: (path) =>
           path.replace(
             /^\/gas-img/,
-            '/macros/s/AKfycbzzCFgGmXhIDc7xlaJa_XpacGMu3GBn7d0kg2ntRgUrpuisnV__AjF_8pJGXgG6NaMP0A/exec'
+            '/macros/s/AKfycbxRWJ2dGkd_HjzMSARPxjml4oWiVF0pSsxoqJp6qLMvOslmw7WNhuWFywSnsNKwtN_ZpQ/exec'
           ),
       },
 
@@ -95,7 +95,7 @@ export default defineConfig({
         rewrite: (path) =>
           path.replace(
             /^\/gas/,
-            '/macros/s/AKfycbzzCFgGmXhIDc7xlaJa_XpacGMu3GBn7d0kg2ntRgUrpuisnV__AjF_8pJGXgG6NaMP0A/exec'
+            '/macros/s/AKfycbxRWJ2dGkd_HjzMSARPxjml4oWiVF0pSsxoqJp6qLMvOslmw7WNhuWFywSnsNKwtN_ZpQ/exec'
           ),
       },
     },

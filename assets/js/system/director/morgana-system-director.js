@@ -88,7 +88,7 @@ function runInitStep(stepName, callback) {
 /* -----------------------------------------------------------------------------*/
 
 const GAS_ENDPOINT =
-  'https://script.google.com/macros/s/AKfycbzzCFgGmXhIDc7xlaJa_XpacGMu3GBn7d0kg2ntRgUrpuisnV__AjF_8pJGXgG6NaMP0A/exec';
+  'https://script.google.com/macros/s/AKfycbxRWJ2dGkd_HjzMSARPxjml4oWiVF0pSsxoqJp6qLMvOslmw7WNhuWFywSnsNKwtN_ZpQ/exec';
 
 // PT: Resolve o endpoint principal de dados.
 // EN: Resolves the main data endpoint.
